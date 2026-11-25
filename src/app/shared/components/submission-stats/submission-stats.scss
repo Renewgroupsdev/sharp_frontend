@@ -1,0 +1,38 @@
+:host { display: block; margin-bottom: 16px; }
+
+:host:empty { display: none; }
+
+.ss { padding: 0; background: none; }
+
+.ss-title { margin: 0 0 12px; font-size: 15px; font-weight: 600; color: var(--text-dark, #111827); }
+
+.ss-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+}
+
+.ss-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border-soft, #e5e7eb);
+  border-radius: 14px;
+  background: var(--app-surface-solid, #fff);
+
+  header { display: flex; align-items: center; gap: 10px; }
+  h3 { margin: 0; font-size: 14px; font-weight: 600; color: var(--text-dark, #111827); }
+}
+
+.ss-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--primary-soft, #f3f4f6);
+  color: var(--primary, #2563eb);
+  font-size: 16px;
+}

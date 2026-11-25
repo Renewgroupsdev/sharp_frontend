@@ -1,0 +1,10 @@
+@if (!classic()) {
+  <section class="dashboard-page">
+    <app-role-dashboard />
+    <app-submission-stats />
+  </section>
+} @else {
+  <section class="dashboard-page">
+    <app-analytics-dashboard />
+  </section>
+}

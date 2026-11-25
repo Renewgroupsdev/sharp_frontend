@@ -1,0 +1,13 @@
+<div class="app-layout">
+  <app-top-navbar></app-top-navbar>
+  <div class="layout-body">
+    <app-left-side-navbar></app-left-side-navbar>
+    <div class="content-shell">
+      <main class="layout-content">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+  </div>
+</div>
+<app-chat-dock />
+<app-notification-toasts />

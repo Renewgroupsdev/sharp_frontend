@@ -1,0 +1,46 @@
+<section class="purchase-page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title"><i class="bi bi-shield-lock"></i> Roles &amp; Permissions</h2>
+      <p class="page-subtitle">Choose what each role can see and do in every module. Changes apply immediately.</p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="ghost-btn" (click)="reset()"><i class="bi bi-arrow-counterclockwise"></i> Reset to defaults</button>
+    </div>
+  </div>
+
+  <div class="role-chips">
+    @for (r of roles; track r) {
+      <button type="button" class="role-chip" [class.active]="r === selected()" [attr.aria-pressed]="r === selected()" (click)="selected.set(r)">{{ r }}</button>
+    }
+  </div>
+
+  <div class="alert-banner info">
+    <i class="bi bi-info-circle"></i>
+    <div><strong>{{ selected() }}</strong>{{ description() }}@if (locked()) { Super Admin permissions are fixed. }</div>
+  </div>
+
+  <div class="matrix-wrap">
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th>Module</th>
+          @for (a of actions; track a.letter) { <th>{{ a.label }}</th> }
+        </tr>
+      </thead>
+      <tbody>
+        @for (m of modules; track m.key) {
+          <tr>
+            <td><i class="bi" [class]="m.icon"></i> <b>{{ m.label }}</b></td>
+            @for (a of actions; track a.letter) {
+              <td>
+                <input type="checkbox" [checked]="has(m.key, a.letter)" [disabled]="locked()"
+                  [attr.aria-label]="a.label + ' ' + m.label" (change)="toggle(m.key, a.label, a.letter)" />
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

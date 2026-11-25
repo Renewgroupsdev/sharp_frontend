@@ -1,0 +1,95 @@
+<div class="purchase-page container-fluid px-0">
+  @if (error(); as err) {
+    <div class="ed-error" role="alert">{{ err }}</div>
+    <button type="button" class="cancel-btn" (click)="back()"><i class="bi bi-arrow-left"></i> Back to enrollments</button>
+  } @else if (detail(); as d) {
+    <div class="page-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+      <div>
+        <button type="button" class="ed-back" (click)="back()"><i class="bi bi-arrow-left"></i> Enrollments</button>
+        <h6 class="page-title"><i class="bi bi-person-plus"></i> {{ d.enrollment.course }}</h6>
+        <p class="page-subtitle">
+          {{ d.enrollment.code }} · {{ d.enrollment.batch }} · {{ d.enrollment.start || '—' }} – {{ d.enrollment.end || '—' }} · {{ d.lessonsTotal }} lessons
+          <span class="ed-status" [ngClass]="'st-' + d.enrollment.status.toLowerCase()">{{ d.enrollment.status }}</span>
+        </p>
+      </div>
+      <div class="header-actions ed-actions">
+        <button type="button" class="cancel-btn" (click)="exportCsv()"><i class="bi bi-download"></i> Export CSV</button>
+        @if (canEdit) {
+          <button type="button" class="add-lead-btn" [disabled]="busy() || !awaitingCertificate()" (click)="generate()" [title]="awaitingCertificate() ? '' : 'Every finished student already has a certificate'">
+            <i class="bi bi-award"></i> Generate certificates ({{ awaitingCertificate() }})
+          </button>
+        }
+      </div>
+    </div>
+
+    <app-count-ribbon class="d-block mb-2" [items]="tiles()" />
+
+    <div class="ed-card">
+      <div class="ed-card-head">
+        <h3>Students <span class="muted">{{ students().length }}</span></h3>
+        <input class="ed-search" type="search" placeholder="Search name, ID or institute" aria-label="Search students" [value]="query()" (input)="query.set($any($event.target).value)" />
+      </div>
+      <div class="ed-scroll">
+        <table class="ed-table">
+          <thead>
+            <tr><th>Student</th><th>Institute</th><th class="w-prog">Progress</th><th>Attendance</th><th>Quiz avg</th><th>Last opened</th><th>Certificate</th></tr>
+          </thead>
+          <tbody>
+            @for (s of students(); track s.id) {
+              <tr>
+                <td><b>{{ s.name }}</b><small>{{ s.id }}</small></td>
+                <td>{{ s.org }}</td>
+                <td>
+                  <div class="prog" [ngClass]="s.progress >= 100 ? 'done' : s.progress >= 50 ? 'mid' : s.progress > 0 ? 'low' : 'none'">
+                    <div class="track" role="progressbar" [attr.aria-valuenow]="s.progress" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="s.name + ' progress'"><i [style.width.%]="s.progress"></i></div>
+                    <b>{{ s.progress }}%</b>
+                  </div>
+                  <small>{{ s.lessonsDone }} of {{ d.lessonsTotal }} lessons</small>
+                </td>
+                <td>{{ s.attendance === null ? '—' : s.attendance + '%' }}</td>
+                <td>{{ s.quiz === null ? '—' : s.quiz + '%' }}</td>
+                <td>{{ s.lastAccessed || '—' }}</td>
+                <td>
+                  @if (s.certificate; as c) {
+                    <span class="cert" [ngClass]="'c-' + c.status.toLowerCase()">{{ c.status }}</span>
+                    @if (c.number) { <small>{{ c.number }}</small> }
+                    @if (canEdit && c.status !== 'Issued') {
+                      <span class="cert-actions">
+                        <button type="button" [disabled]="busy()" (click)="decide(s, true)">Issue</button>
+                        @if (c.status === 'Pending') { <button type="button" class="no" [disabled]="busy()" (click)="decide(s, false)">Reject</button> }
+                      </span>
+                    }
+                  } @else if (s.progress >= 100) {
+                    <span class="muted">Not generated</span>
+                  } @else {
+                    <span class="muted">—</span>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="7" class="ed-empty">{{ query() ? 'Nobody matches the search.' : 'No students in this batch yet.' }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="ed-two">
+      <div class="ed-card">
+        <h3>Mentors <span class="muted">{{ d.mentors.length }}</span></h3>
+        @for (m of d.mentors; track m.id) {
+          <div class="ed-person"><b>{{ m.name }}</b><small>{{ m.id }}{{ m.specialist ? ' · ' + m.specialist : '' }}{{ m.mobile ? ' · ' + m.mobile : '' }}</small></div>
+        } @empty {
+          <p class="muted">No mentors assigned to this batch yet.</p>
+        }
+      </div>
+
+      <div class="ed-card">
+        <h3>History</h3>
+        <app-enrollment-timeline [events]="d.history" [showCourse]="false"></app-enrollment-timeline>
+      </div>
+    </div>
+  } @else {
+    <p class="muted">Loading…</p>
+  }
+</div>

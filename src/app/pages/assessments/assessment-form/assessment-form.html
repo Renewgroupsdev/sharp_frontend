@@ -1,0 +1,150 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi" [class]="typeIcon"></i></div>
+      <div class="title-content">
+        <h2>{{ isEdit ? 'Edit' : 'Create' }} {{ model.type.toLowerCase() }}</h2>
+        <p>{{ isEdit ? existing?.id + ' · ' + existing?.title : subtitle }}</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <form #f="ngForm" (ngSubmit)="save()" novalidate>
+    <div class="modal-body-custom">
+
+      <section class="as-sec">
+        <header class="as-sec-head"><i class="bi bi-info-circle"></i><div><h4>Details</h4><p>Name it and set its visibility</p></div></header>
+        <div class="form-grid">
+          <div class="form-field full-width">
+            <label for="as-title">Title <span>*</span></label>
+            <div class="input-wrap"><i class="bi bi-fonts"></i>
+              <input id="as-title" name="title" required maxlength="120" [(ngModel)]="model.title" [class.is-invalid]="submitted() && !model.title.trim()" [placeholder]="'e.g. Communication Skills — ' + model.type.toLowerCase() + ' 1'" />
+            </div>
+            @if (submitted() && !model.title.trim()) { <small class="error-text">Title is required.</small> }
+          </div>
+          <div class="form-field">
+            <label for="as-type">Type</label>
+            <div class="input-wrap"><i class="bi bi-tag"></i>
+              <select id="as-type" name="type" [(ngModel)]="model.type" [disabled]="typeLocked">
+                @for (t of types; track t) { <option [value]="t">{{ t }}</option> }
+              </select>
+              <i class="bi bi-chevron-down select-arrow"></i>
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="as-status">Status</label>
+            <div class="input-wrap"><i class="bi bi-toggle-on"></i>
+              <select id="as-status" name="status" [(ngModel)]="model.status">
+                @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
+              </select>
+              <i class="bi bi-chevron-down select-arrow"></i>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="as-sec">
+        <header class="as-sec-head"><i class="bi bi-diagram-3"></i><div><h4>Where it belongs</h4><p>Course, module and topic</p></div></header>
+        <div class="form-grid">
+          <div class="form-field full-width">
+            <label for="as-course">Course <span>*</span></label>
+            <div class="input-wrap"><i class="bi bi-journal-bookmark"></i>
+              <select id="as-course" name="course" [(ngModel)]="model.course" (ngModelChange)="onCourse()" [disabled]="locked">
+                @for (c of courses; track c) { <option [value]="c">{{ c }}</option> }
+              </select>
+              <i class="bi bi-chevron-down select-arrow"></i>
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="as-module">Module</label>
+            <div class="input-wrap"><i class="bi bi-collection"></i>
+              <select id="as-module" name="module" [(ngModel)]="model.module">
+                @for (m of modules; track m) { <option [value]="m">{{ m }}</option> }
+              </select>
+              <i class="bi bi-chevron-down select-arrow"></i>
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="as-topic">Topic / lesson</label>
+            <div class="input-wrap"><i class="bi bi-bookmark"></i>
+              <select id="as-topic" name="topic" [(ngModel)]="model.topic">
+                @for (t of topics; track t) { <option [value]="t">{{ t }}</option> }
+              </select>
+              <i class="bi bi-chevron-down select-arrow"></i>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      @if (!isQuiz) {
+        <section class="as-sec">
+          <header class="as-sec-head"><i class="bi bi-calendar-check"></i><div><h4>Submission &amp; marking</h4><p>Deadline, marks and pass mark</p></div></header>
+          <div class="form-grid three">
+            <div class="form-field">
+              <label for="as-due">Submit date <span>*</span></label>
+              <div class="input-wrap"><i class="bi bi-calendar3"></i>
+                <input id="as-due" type="date" name="dueIso" [(ngModel)]="model.dueIso" [class.is-invalid]="submitted() && !model.dueIso" />
+              </div>
+              @if (submitted() && !model.dueIso) { <small class="error-text">Submit date is required.</small> }
+            </div>
+            <div class="form-field">
+              <label for="as-max">Marks</label>
+              <div class="input-wrap"><i class="bi bi-123"></i><input id="as-max" type="number" min="1" name="max" [(ngModel)]="model.max" /></div>
+            </div>
+            <div class="form-field">
+              <label for="as-minp">Minimum %</label>
+              <div class="input-wrap"><i class="bi bi-percent"></i><input id="as-minp" type="number" min="0" max="100" name="minp" [(ngModel)]="model.minp" /></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="as-sec">
+          <header class="as-sec-head"><i class="bi bi-card-text"></i><div><h4>Instructions</h4><p>Description and the document students can view</p></div></header>
+          <div class="form-grid">
+            <div class="form-field full-width">
+              <label for="as-desc">Description</label>
+              <div class="input-wrap textarea-wrap"><i class="bi bi-text-paragraph"></i><textarea id="as-desc" name="desc" rows="3" [(ngModel)]="model.desc"></textarea></div>
+            </div>
+            <div class="form-field full-width">
+              <label for="as-attach">Assignment document</label>
+              <div class="file-drop">
+                <i class="bi bi-cloud-arrow-up"></i>
+                <div>
+                  <input id="as-attach" class="file-input" type="file" [accept]="accept" (change)="onFile($event)" />
+                  <small class="hint">PDF, Word, Excel, PowerPoint, TXT, ZIP, JPG or PNG, up to 20 MB.</small>
+                </div>
+              </div>
+              @if (!file && existing?.attach; as cur) {
+                <label class="check-row"><input type="checkbox" name="removeFile" [(ngModel)]="removeFile" />
+                  <span>Remove current document: {{ cur.name }} ({{ cur.size }})</span></label>
+              }
+            </div>
+          </div>
+        </section>
+      } @else {
+        <section class="as-sec">
+          <header class="as-sec-head"><i class="bi bi-collection"></i><div><h4>Question groups</h4><p>Marks come from the questions in the chosen groups</p></div></header>
+          @if (store.groupsOf(model.type).length) {
+            <div class="check-grid">
+              @for (g of store.groupsOf(model.type); track g.id) {
+                <label class="check-row as-pick" [class.on]="hasGroup(g.id)">
+                  <input type="checkbox" [checked]="hasGroup(g.id)" (change)="toggleGroup(g.id, $any($event.target).checked)" />
+                  <span>{{ g.title }} <small>{{ store.questionCount(g.id) }} questions</small></span>
+                </label>
+              }
+            </div>
+          } @else {
+            <span class="muted">No question groups yet — add them under {{ model.type }} → Question groups.</span>
+          }
+          <div class="note as-note">Timing, attempts, pass percentage and review options are under the <b>Settings</b> tab.</div>
+        </section>
+      }
+    </div>
+
+    <div class="modal-footer-custom">
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+      <button type="submit" class="save-btn" [disabled]="saving()"><i class="bi bi-floppy"></i> {{ saving() ? 'Saving...' : (isEdit ? 'Save changes' : 'Create ' + model.type.toLowerCase()) }}</button>
+    </div>
+  </form>
+</div>

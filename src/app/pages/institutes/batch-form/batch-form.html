@@ -1,0 +1,93 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-collection"></i></div>
+      <div class="title-content">
+        <h2>{{ isEdit ? 'Edit Batch' : 'Add Batch' }}</h2>
+        <p>{{ isEdit ? existing?.id + ' · ' + existing?.n : 'Schedule, seats, mentors and participating institutes' }}</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <form #f="ngForm" (ngSubmit)="save(f)" novalidate>
+    <div class="modal-body-custom">
+      @if (serverError(); as err) { <div class="error-text" role="alert">{{ err }}</div> }
+
+      <div class="section-title"><i class="bi bi-calendar-event"></i> Schedule</div>
+      <div class="form-grid cols-3">
+        <div class="form-field">
+          <label for="b-name">Batch name <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-collection"></i>
+            <input id="b-name" name="n" required maxlength="60" [(ngModel)]="model.n" #n="ngModel" [class.is-invalid]="submitted() && n.invalid" placeholder="SHARP Batch 09" />
+          </div>
+          @if (submitted() && n.invalid) { <small class="error-text">Name is required.</small> }
+        </div>
+        <div class="form-field">
+          <label for="b-start">Start date <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-calendar-check"></i>
+            <input id="b-start" type="date" name="start" required [(ngModel)]="startIso" #start="ngModel" [class.is-invalid]="submitted() && start.invalid" />
+          </div>
+          @if (submitted() && start.invalid) { <small class="error-text">Start date is required.</small> }
+        </div>
+        <div class="form-field">
+          <label for="b-end">End date <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-calendar-x"></i>
+            <input id="b-end" type="date" name="end" required [min]="startIso" [(ngModel)]="endIso" #end="ngModel" [class.is-invalid]="submitted() && (end.invalid || badRange)" />
+          </div>
+          @if (submitted() && end.invalid) { <small class="error-text">End date is required.</small> }
+          @else if (submitted() && badRange) { <small class="error-text">End date must be after the start date.</small> }
+        </div>
+      </div>
+
+      <div class="section-title"><i class="bi bi-people"></i> Capacity</div>
+      <div class="form-grid cols-3">
+        <div class="form-field">
+          <label for="b-seats">Seats <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-person-workspace"></i>
+            <input id="b-seats" type="number" name="seats" required [min]="minSeats" max="1000" [(ngModel)]="model.seats" #seats="ngModel" [class.is-invalid]="submitted() && seats.invalid" />
+          </div>
+          @if (submitted() && seats.invalid) { <small class="error-text">Enter at least {{ minSeats }} seat(s).</small> }
+        </div>
+        <div class="form-field">
+          <label for="b-mentors">Mentors</label>
+          <div class="input-wrap"><i class="bi bi-person-badge"></i>
+            <input id="b-mentors" type="number" name="mentors" min="0" max="100" [(ngModel)]="model.mentors" />
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="b-status">Status</label>
+          <div class="input-wrap"><i class="bi bi-toggle-on"></i>
+            <select id="b-status" name="st" [(ngModel)]="model.st">
+              @for (s of statuses; track s.value) { <option [value]="s.value">{{ s.label }}</option> }
+            </select>
+            <i class="bi bi-chevron-down select-arrow"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title"><i class="bi bi-bank"></i> Participating institutes</div>
+      <div class="muted">Leave all unticked to include every institute.</div>
+      <div class="chips">
+        @for (o of instituteNames(); track o) {
+          <label class="chip"><input type="checkbox" [checked]="isPicked(o)" (change)="toggleInstitute(o, $any($event.target).checked)" /> {{ o }}</label>
+        }
+      </div>
+
+      <div class="section-title"><i class="bi bi-journal-bookmark"></i> Courses</div>
+      <div class="muted">Every student in this batch is enrolled in the ticked courses automatically.</div>
+      <div class="chips">
+        @for (t of courseTitles(); track t) {
+          <label class="chip"><input type="checkbox" [checked]="model.courses.includes(t)" (change)="toggleCourse(t, $any($event.target).checked)" /> {{ t }}</label>
+        } @empty {
+          <span class="muted">No courses yet — add them under Course Management.</span>
+        }
+      </div>
+    </div>
+
+    <div class="modal-footer-custom">
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+      <button type="submit" class="save-btn" [disabled]="saving()"><i class="bi bi-floppy"></i> {{ isEdit ? 'Save changes' : 'Create batch' }}</button>
+    </div>
+  </form>
+</div>

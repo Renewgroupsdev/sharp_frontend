@@ -1,0 +1,59 @@
+// Unlike the list tabs there is no table to take the leftover height, so size to the content and scroll the tab itself.
+:host {
+  height: auto;
+  overflow-y: auto;
+}
+
+.purchase-page {
+  height: auto;
+  flex: 0 0 auto;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  padding: 5px 12px;
+  border: 1px solid var(--primary-border);
+  border-radius: 99px;
+  background: var(--app-surface-solid);
+  color: var(--text-dark);
+  font-size: 12px;
+  cursor: pointer;
+
+  b { margin-left: 4px; color: var(--text-muted); }
+  &.active { border-color: var(--primary); background: var(--primary-soft); color: var(--primary-dark); }
+}
+
+.setup-card {
+  padding: 12px;
+  border: 1px solid var(--primary-border);
+  border-radius: 10px;
+  background: var(--app-surface-solid);
+  flex: 0 0 auto;
+
+  &.empty { padding: 28px 12px; color: var(--text-muted); font-size: 13px; text-align: center; }
+}
+
+.setup-pick {
+  max-width: 420px;
+  margin-bottom: 10px;
+
+  label { display: block; margin-bottom: 3px; font-size: 11px; font-weight: 600; color: var(--text-muted); }
+}
+
+.setup-sh {
+  margin: 14px 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.setup-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}

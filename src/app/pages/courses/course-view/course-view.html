@@ -1,0 +1,104 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi" [class]="frontend ? 'bi-window-desktop' : 'bi-journal-bookmark'"></i></div>
+      <div class="title-content">
+        <h2>{{ frontend ? 'Frontend view' : 'Course details' }}</h2>
+        <p>{{ frontend ? 'How this course appears in the learner app' : course()?.id + ' · ' + course()?.title }}</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div class="modal-body-custom">
+    @if (course(); as c) {
+      @if (view(); as v) {
+        @if (v.notice) { <div class="notice">{{ v.notice }}</div> }
+        <div class="hero" [style.background-image]="c.thumb ? 'linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.65)), url(' + c.thumb + ')' : null">
+          <div class="hero-tags">
+            <span class="hero-pill">{{ c.category }}</span>
+            @if (!frontend) { <span class="hero-pill" [class.live]="c.status === 'Published'">{{ c.status }}</span> }
+          </div>
+          <h3>{{ c.title }}</h3>
+          <p>{{ c.level }} · {{ c.mode }} · {{ c.hours }} hours · Mentor: {{ v.mentors }}</p>
+        </div>
+
+        @if (!frontend) {
+          <div class="cd-stats">
+            <div><i class="bi bi-people-fill"></i><b>{{ v.students }}</b><span>Students</span></div>
+            <div><i class="bi bi-list-nested"></i><b>{{ c.chapters.length }}</b><span>Modules</span></div>
+            <div><i class="bi bi-play-circle-fill"></i><b>{{ v.lessons }}</b><span>Topics</span></div>
+            <div><i class="bi bi-clock-fill"></i><b>{{ c.hours }}h</b><span>Duration</span></div>
+          </div>
+          <div class="cd-card">
+            <h4><i class="bi bi-info-circle"></i> Course info</h4>
+            <dl class="cd-dl">
+              <div><dt>Code</dt><dd>{{ c.code ?? c.id }}</dd></div>
+              <div><dt>Scope</dt><dd>{{ c.scope }}</dd></div>
+              <div><dt>Delivery</dt><dd>{{ c.mode }} · {{ c.level }}</dd></div>
+              <div><dt>Mentors</dt><dd>{{ v.mentors }}</dd></div>
+              <div class="wide"><dt>Batches</dt><dd>{{ v.batches }}</dd></div>
+            </dl>
+          </div>
+        }
+
+        <div class="cd-card">
+          <h4><i class="bi bi-card-text"></i> About this course</h4>
+          <p class="cd-text" [class.muted]="!c.desc">{{ c.desc || 'No description yet.' }}</p>
+        </div>
+
+        @if (v.outcomes.length || v.reqs.length) {
+          <div class="cd-two">
+            @if (v.outcomes.length) {
+              <div class="cd-card">
+                <h4><i class="bi bi-trophy"></i> What you will learn</h4>
+                <ul class="cd-checks good">@for (o of v.outcomes; track $index) { <li><i class="bi bi-check-circle-fill"></i><span>{{ o }}</span></li> }</ul>
+              </div>
+            }
+            @if (v.reqs.length) {
+              <div class="cd-card">
+                <h4><i class="bi bi-clipboard-check"></i> Requirements</h4>
+                <ul class="cd-checks req">@for (r of v.reqs; track $index) { <li><i class="bi bi-dot"></i><span>{{ r }}</span></li> }</ul>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="cd-card">
+          <h4>
+            <i class="bi bi-diagram-3"></i> Curriculum
+            <span class="cd-count">{{ c.chapters.length }} chapters · {{ v.lessons }} lessons</span>
+          </h4>
+          @for (ch of c.chapters; track ch.id; let i = $index) {
+            <details class="cd-chapter" [open]="i === 0">
+              <summary>
+                <span class="cd-num">{{ i + 1 }}</span>
+                <b>{{ ch.name }}</b>
+                <em>{{ ch.lessons.length }} lessons</em>
+                <i class="bi bi-chevron-down cd-chev"></i>
+              </summary>
+              @for (l of ch.lessons; track l.id) {
+                <div class="cd-lesson">
+                  <i class="bi" [class]="hostIcon[l.host]"></i>
+                  <span>{{ l.name }}</span>
+                  <em>{{ l.dur || 0 }} min</em>
+                </div>
+              } @empty {
+                <div class="cd-lesson muted">No lessons yet.</div>
+              }
+            </details>
+          } @empty {
+            <p class="muted">Content coming soon.</p>
+          }
+        </div>
+      }
+    } @else {
+      <p class="muted">This course no longer exists.</p>
+    }
+  </div>
+
+  <div class="modal-footer-custom">
+    @if (frontend) { <button type="button" class="save-btn" disabled>Enrol in this course</button> }
+    <button type="button" class="cancel-btn" (click)="close()">{{ frontend ? 'Close preview' : 'Close' }}</button>
+  </div>
+</div>

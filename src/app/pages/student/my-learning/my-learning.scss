@@ -1,0 +1,14 @@
+.course-card { display: flex; flex-direction: column; gap: 6px; }
+.course-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.course-title { margin: 4px 0 0; font-size: 15px; }
+
+.bar {
+  height: 7px; margin-top: 8px; border-radius: 99px; background: var(--border-soft); overflow: hidden;
+  i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--primary), var(--primary-dark)); transition: width .3s; }
+}
+
+.course-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; }
+
+.empty { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 28px; text-align: center; grid-column: 1 / -1;
+  i { font-size: 28px; color: var(--text-muted); }
+}

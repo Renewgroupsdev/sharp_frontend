@@ -1,0 +1,30 @@
+<main class="vf">
+  <section class="vf-card">
+    <h1>Certificate verification</h1>
+    <p class="vf-no">Certificate no. <code>{{ number }}</code></p>
+
+    @if (error(); as err) {
+      <p class="vf-state warn" role="alert">{{ err }}</p>
+    } @else if (result(); as r) {
+      @if (r.valid) {
+        <p class="vf-state ok"><i class="bi bi-patch-check-fill"></i> This certificate is genuine and valid.</p>
+        <dl>
+          <div><dt>Awarded to</dt><dd>{{ r.name }}</dd></div>
+          <div><dt>Course</dt><dd>{{ r.course }}</dd></div>
+          <div><dt>Issued on</dt><dd>{{ day(r.issued_at) }}</dd></div>
+        </dl>
+      } @else if (r.status === 'Cancelled') {
+        <p class="vf-state bad"><i class="bi bi-slash-circle-fill"></i> This certificate was issued and later cancelled. It is no longer valid.</p>
+        <dl>
+          <div><dt>Course</dt><dd>{{ r.course }}</dd></div>
+          <div><dt>Cancelled on</dt><dd>{{ day(r.cancelled_at) }}</dd></div>
+        </dl>
+      } @else {
+        <p class="vf-state bad"><i class="bi bi-x-circle-fill"></i> No certificate with this number was issued by the programme.</p>
+      }
+    } @else {
+      <p class="vf-state">Checking…</p>
+    }
+    <p class="vf-foot">SHARP programme · TNCCI</p>
+  </section>
+</main>

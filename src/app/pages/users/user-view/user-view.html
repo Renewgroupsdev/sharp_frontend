@@ -1,0 +1,224 @@
+@if (user(); as u) {
+  <div class="pp">
+    <span class="pp-role-tag"><i [ngClass]="'role-' + u.r.toLowerCase().split(' ').join('-')">{{ u.r }}</i></span>
+    <div class="pp-bar">
+      <div class="pp-bar-group">
+        <button *appCan="'a_users.edit'" type="button" class="pp-icon-btn" title="Edit user" aria-label="Edit user" (click)="edit()"><i class="bi bi-pencil"></i></button>
+        <button *appCan="'a_users.delete'" type="button" class="pp-icon-btn danger" title="Delete user" aria-label="Delete user" (click)="remove()"><i class="bi bi-trash3"></i></button>
+      </div>
+      <button type="button" class="pp-icon-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <div class="pp-head">
+      @if (u.pic) { <img class="pp-avatar" [src]="u.pic" [alt]="u.n" /> } @else { <span class="pp-avatar" [style.background]="u.col">{{ u.i }}</span> }
+      <div class="pp-who">
+        <div>
+          <h2 class="pp-title">{{ u.n }}</h2>
+          <div class="pp-sub">
+            <span class="pp-badge" [ngClass]="u.st === 'Suspended' ? 'bad' : u.st === 'Invited' ? 'wait' : 'ok'">{{ u.st || 'Active' }}</span>
+            <span>· {{ u.r }}</span><span>· {{ u.id }}</span>
+          </div>
+        </div>
+        <div class="pp-meta">
+          <div><span>Institute</span><b [title]="u.org">{{ u.org || '—' }}</b></div>
+          <div class="with-icon"><i class="bi bi-envelope"></i><b [title]="u.email || ''">{{ u.email || '—' }}</b></div>
+          <div><span>Batch</span><b>{{ u.b || '—' }}</b></div>
+          <div class="with-icon"><i class="bi bi-telephone"></i><b>{{ u.ph || '—' }}</b></div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="pp-ribbon" role="tablist" aria-label="User details sections">
+      @for (t of tabs(); track t.key) {
+        <button type="button" role="tab" class="ribbon-tab" [class.on]="tab() === t.key" [attr.aria-selected]="tab() === t.key" (click)="tab.set(t.key)"><i class="bi" [class]="t.icon"></i>{{ t.label }}</button>
+      }
+      <button *appCan="'a_users.edit'" type="button" role="tab" class="ribbon-tab" [class.on]="tab() === 'account'" [attr.aria-selected]="tab() === 'account'" (click)="tab.set('account')"><i class="bi bi-sliders"></i>Account</button>
+    </nav>
+
+    <div class="pp-body">
+      @if (tab() === 'details') {
+
+        <section class="pp-card">
+          <h3>Professional Information</h3>
+          <dl class="pp-grid">
+            <div><dt>User ID</dt><dd>{{ u.id }}</dd></div>
+            <div><dt>Username</dt><dd>{{ u.username || '—' }}</dd></div>
+            <div><dt>Role</dt><dd>{{ u.r }}</dd></div>
+            <div><dt>Institute / organization</dt><dd>{{ u.org || '—' }}</dd></div>
+            <div><dt>Batch</dt><dd>{{ u.b || '—' }}</dd></div>
+            <div><dt>Status</dt><dd>{{ u.st || 'Active' }}</dd></div>
+            <div><dt>Last sign-in</dt><dd>{{ u.last || '—' }}</dd></div>
+            <div class="wide"><dt>Access</dt><dd class="rich">{{ access() }}</dd></div>
+          </dl>
+        </section>
+      }
+
+      @if (tab() === 'biography') {
+        <section class="pp-card">
+          <h3>Biography</h3>
+          <dl class="pp-grid">
+            <div><dt>Specialist</dt><dd>{{ u.spec || '—' }}</dd></div>
+            <div><dt>Short description</dt><dd>{{ u.sd || '—' }}</dd></div>
+            <div class="wide"><dt>About {{ u.n }}</dt>@if (u.bio) { <dd class="rich" [innerHTML]="u.bio"></dd> } @else { <dd class="rich">No biography added yet.</dd> }</div>
+          </dl>
+        </section>
+      }
+
+      @if (tab() === 'learning') {
+        <div class="pp-stats three">
+          <div><b>{{ courses().length }}</b><span>Courses</span></div>
+          <div class="ok"><b>{{ learningAvg() }}%</b><span>Average progress</span></div>
+          <div><b>{{ courseDone() }}</b><span>Completed</span></div>
+        </div>
+        @if (busy()['learning']) { <p class="pp-note">Loading learning progress…</p> }
+        @for (c of courses(); track c.course_id) {
+          <section class="pp-card pp-course">
+            <div class="pp-course-head">
+              <div><b>{{ c.course }}</b><small>{{ c.materials }} material{{ c.materials === 1 ? '' : 's' }} completed · last accessed {{ c.last_accessed ? ago(c.last_accessed) : 'never' }}</small></div>
+              <span class="pp-pill" [ngClass]="c.status === 'Completed' ? 'ok' : c.status === 'In progress' ? 'info' : 'wait'">{{ c.status }}</span>
+            </div>
+            <div class="pp-prog"><i [style.width.%]="c.progress"></i><b>{{ c.progress }}%</b></div>
+            <button type="button" class="pp-link" (click)="toggleModules(c)"><i class="bi" [class]="openCourse() === c.course_id ? 'bi-chevron-up' : 'bi-chevron-down'"></i> {{ openCourse() === c.course_id ? 'Hide modules' : 'Show modules' }}</button>
+            @if (openCourse() === c.course_id) {
+              @let mods = modulesOf(c.course_id);
+              <div class="pp-list">
+                @if (mods === 'loading' || !mods) {
+                  <p class="pp-note">Loading modules…</p>
+                } @else {
+                  @for (m of mods; track m.name) {
+                    <div class="pp-row">
+                      <span class="pp-row-main">{{ m.name }}</span>
+                      <span class="pp-note">{{ m.done }} / {{ m.total }} lessons</span>
+                      <span class="pp-mini"><i [style.width.%]="m.pct"></i></span>
+                      <b>{{ m.pct }}%</b>
+                    </div>
+                  } @empty { <p class="pp-note">No modules in this course yet.</p> }
+                }
+              </div>
+            }
+          </section>
+        } @empty {
+          @if (!busy()['learning']) { <p class="pp-note">This student is not enrolled in any course yet.</p> }
+        }
+      }
+
+      @if (tab() === 'attendance') {
+        <div class="pp-stats">
+          <div><b>{{ attendanceStats().total }}</b><span>Days recorded</span></div>
+          <div class="ok"><b>{{ attendanceStats().present }}</b><span>Present</span></div>
+          <div class="bad"><b>{{ attendanceStats().absent }}</b><span>Absent</span></div>
+          <div><b>{{ attendanceStats().rate }}%</b><span>Attendance</span></div>
+        </div>
+        <section class="pp-card">
+          <h3>Attendance list <small>last 6 months</small></h3>
+          <div class="pp-list pad">
+            @if (busy()['attendance']) { <p class="pp-note">Loading…</p> }
+            @for (r of records(); track r.id) {
+              <div class="pp-row">
+                <span class="pp-date">{{ r.date }}</span>
+                <span class="pp-pill" [ngClass]="r.status === 'Present' ? 'ok' : 'bad'">{{ r.status }}</span>
+                <span class="pp-note">{{ r.mode }}@if (r.by) { · {{ r.by }} }</span>
+                @if (r.remarks) { <small class="pp-row-note">{{ r.remarks }}</small> }
+              </div>
+            } @empty {
+              @if (!busy()['attendance']) { <p class="pp-note">No attendance recorded yet.</p> }
+            }
+          </div>
+        </section>
+      }
+
+      @if (tab() === 'certificates') {
+        @if (busy()['certificates']) { <p class="pp-note">Loading certificates…</p> }
+        @for (c of certs(); track c.id) {
+          <section class="pp-card pp-course">
+            <div class="pp-course-head">
+              <div><b>{{ c.course }}</b><small>{{ c.number || 'Number assigned when issued' }}</small></div>
+              <span class="pp-pill" [ngClass]="c.status === 'Issued' ? 'ok' : c.status === 'Pending' ? 'wait' : 'bad'">{{ c.status }}</span>
+            </div>
+            <dl class="pp-grid compact">
+              <div><dt>Issued on</dt><dd>{{ c.issued_at ? ago(c.issued_at) : '—' }}</dd></div>
+              <div><dt>Score</dt><dd>{{ c.score !== null ? c.score + '%' : '—' }}</dd></div>
+              <div><dt>Attendance</dt><dd>{{ c.attendance !== null ? c.attendance + '%' : '—' }}</dd></div>
+              @if (c.cancel_reason) { <div><dt>Cancelled because</dt><dd>{{ c.cancel_reason }}</dd></div> }
+            </dl>
+          </section>
+        } @empty {
+          @if (!busy()['certificates']) { <p class="pp-note">No certificates for this student yet.</p> }
+        }
+
+        @if (!busy()['certificates']) {
+          <section class="pp-card">
+            <h3><i class="bi bi-qr-code"></i> Certificate QR codes</h3>
+            <p class="pp-note">One per enrolled course. Scanning a code shows the certificate once the course is 100% complete, and otherwise says the course is not completed.</p>
+            <div class="qr-grid">
+              @for (q of qrCards(); track q.course_id) {
+                <div class="qr-item">
+                  <img [src]="q.image" [alt]="'QR code for ' + q.course" width="132" height="132" />
+                  <b>{{ q.course }}</b>
+                  <span class="pp-pill" [ngClass]="qrTone(q)">{{ qrLabel(q) }}</span>
+                  <button type="button" class="qr-btn" (click)="saveQr(q)"><i class="bi bi-download"></i> Download</button>
+                </div>
+              } @empty {
+                <p class="pp-note">This student is not enrolled in a course yet, so there is no QR code.</p>
+              }
+            </div>
+          </section>
+        }
+      }
+
+      @if (tab() === 'logs') {
+        <section class="pp-card">
+          <h3>Activity logs <small>what {{ u.n }} did, and what was done to this account</small></h3>
+          <div class="pp-timeline">
+            @if (busy()['logs']) { <p class="pp-note">Loading…</p> }
+            @for (l of logs(); track l.id) {
+              <div class="pp-event">
+                <i class="pp-dot"></i>
+                <div>
+                  <b>{{ l.action }}</b>
+                  <small>{{ l.actor_name || 'System' }} · {{ ago(l.created_at) }}@if (l.details) { · {{ l.details }} }</small>
+                </div>
+              </div>
+            } @empty {
+              @if (!busy()['logs']) { <p class="pp-note">No activity logged yet.</p> }
+            }
+          </div>
+        </section>
+      }
+
+      @if (tab() === 'account') {
+        <section class="pp-card">
+          <h3>Account actions</h3>
+          <div class="actions">
+            @if (u.st === 'Invited') {
+              <div class="action-row">
+                <span><strong>Resend invite</strong><small>Sends a fresh sign-in code to {{ u.ph }}</small></span>
+                <button type="button" class="act-btn" (click)="resendInvite()">Send</button>
+              </div>
+            }
+            @if (canChangeBatch()) {
+              <div class="action-row">
+                <span><strong>Change batch</strong><small>Moves the account and keeps its history</small></span>
+                <select class="act-select" aria-label="Batch" [value]="u.b" (change)="changeBatch($any($event.target).value)">
+                  @for (b of batchNames(); track b) { <option [value]="b" [selected]="b === u.b">{{ b }}</option> }
+                </select>
+              </div>
+            }
+            <div class="action-row">
+              <span><strong>Reset password</strong><small>Issues a one-time temporary password and signs them out</small></span>
+              <button type="button" class="act-btn" (click)="resetPassword()">Reset</button>
+            </div>
+            <div class="action-row">
+              <span>
+                <strong>{{ u.st === 'Suspended' ? 'Reinstate account' : 'Suspend account' }}</strong>
+                <small>{{ u.st === 'Suspended' ? 'Restores sign-in and LMS access' : 'Blocks sign-in, keeps all records' }}</small>
+              </span>
+              <button type="button" class="act-btn" [class.danger]="u.st !== 'Suspended'" (click)="toggleStatus()">{{ u.st === 'Suspended' ? 'Reinstate' : 'Suspend' }}</button>
+            </div>
+          </div>
+        </section>
+        <p class="pp-note">Every action is written to the activity log with your admin ID and a timestamp.</p>
+      }
+    </div>
+  </div>
+}

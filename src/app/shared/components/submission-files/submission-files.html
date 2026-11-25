@@ -1,0 +1,13 @@
+@if (files().length) {
+  <ul class="sf">
+    @for (f of files(); track f.id) {
+      <li>
+        <span class="sf-name"><i class="bi bi-paperclip"></i> {{ f.name }} <small>({{ sizeOf(f) }})</small></span>
+        <span class="sf-actions">
+          <button type="button" (click)="view(f)"><i class="bi bi-eye"></i> View</button>
+        </span>
+      </li>
+    }
+  </ul>
+  @if (error(); as err) { <p class="sf-error" role="alert">{{ err }}</p> }
+}

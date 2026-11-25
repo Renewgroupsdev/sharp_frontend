@@ -1,0 +1,56 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-file-earmark-arrow-up"></i></div>
+      <div class="title-content">
+        <h2>Import enrollments</h2>
+        <p>A CSV with two columns: course (title or code) and batch (name)</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div class="modal-body-custom">
+    <div class="imp-pick">
+      <label class="imp-file">
+        <i class="bi bi-upload"></i>
+        <span>{{ fileName() || 'Choose a CSV file' }}</span>
+        <input type="file" accept=".csv,text/csv" (change)="onFile($event)" />
+      </label>
+      <button type="button" class="cancel-btn" (click)="template()"><i class="bi bi-download"></i> Template</button>
+    </div>
+
+    @if (error(); as err) { <div class="error-text" role="alert">{{ err }}</div> }
+    @if (busy() && !preview()) { <p class="muted">Checking the file…</p> }
+
+    @if (preview(); as p) {
+      <div class="imp-summary">
+        <span class="s ok"><b>{{ p.summary.ok }}</b> will be enrolled</span>
+        <span class="s ex"><b>{{ p.summary.exists }}</b> already enrolled</span>
+        <span class="s er"><b>{{ p.summary.error }}</b> with a problem</span>
+        <button type="button" class="link" (click)="exportPreview()"><i class="bi bi-download"></i> Download result</button>
+      </div>
+
+      <div class="imp-scroll">
+        <table class="imp-table">
+          <thead><tr><th>#</th><th>Course</th><th>Batch</th><th>Result</th></tr></thead>
+          <tbody>
+            @for (r of p.rows; track r.line) {
+              <tr>
+                <td>{{ r.line }}</td>
+                <td>{{ r.course || '—' }}</td>
+                <td>{{ r.batch || '—' }}</td>
+                <td><span class="pill" [ngClass]="r.status">{{ r.message }}</span></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <div class="modal-footer-custom">
+    <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+    <button type="button" class="save-btn" [disabled]="!canImport()" (click)="confirm()"><i class="bi bi-check-lg"></i> Import {{ preview()?.summary?.ok ?? 0 }} enrollment(s)</button>
+  </div>
+</div>

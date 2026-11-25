@@ -1,0 +1,57 @@
+<div class="viewer" (contextmenu)="block($event)" (copy)="block($event)" (cut)="block($event)" (dragstart)="block($event)">
+  <div class="vbar">
+    <button type="button" class="back-link vback" (click)="closed.emit()"><i class="bi bi-arrow-left"></i> Back to module</button>
+    <h3>{{ mat().t }}</h3>
+    <span class="pill d">View only</span>
+  </div>
+
+  <div class="vbody noselect">
+    @if (mat().k === 'video') {
+      <div class="player">
+        <div class="screen">
+          <i class="bi" [class.bi-play-circle]="!playing()" [class.bi-pause-circle]="playing()"></i>
+          <span>{{ mat().t }}</span>
+          <small>Placeholder player. Real lesson files (protected HLS stream, key {{ mat().src }}) go here.</small>
+          <div class="wm"><span>{{ watermark }}</span><span>{{ watermark }}</span><span>{{ watermark }}</span><span>{{ watermark }}</span></div>
+        </div>
+        <div class="controls">
+          <button type="button" (click)="playing.set(!playing())"><i class="bi" [class.bi-play-fill]="!playing()" [class.bi-pause-fill]="playing()"></i></button>
+          <div class="seek"><i [style.width.%]="playing() ? 35 : 0"></i></div>
+          <span>0:00 / {{ mat().len }}</span>
+        </div>
+      </div>
+      <div class="st-card gray" style="margin-top:12px">
+        <span class="t1">{{ mat().t }}</span>
+        <span class="t2">Module {{ mod().id }} · {{ mod().title }} · {{ mat().len }}</span>
+        <span class="t2" style="margin-top:6px">Dummy lesson clip for the prototype. In the live app this streams from the LMS as protected HLS with a signed, expiring link, never a file the device can keep.</span>
+      </div>
+    } @else {
+      @for (sec of sections(); track $index) {
+        <div class="doc">
+          <div class="wm dark">@for (n of marks; track n) { <span>{{ watermark }}</span> }</div>
+          <div class="doc-in">
+            @if ($first) {
+              <h4>{{ mat().t }}</h4>
+              <p class="meta">SHARP · Module {{ mod().id }} · {{ mod().title }}</p>
+            }
+            <h5>{{ sec.h }}</h5>
+            @for (p of sec.p ?? []; track $index) { <p>{{ p }}</p> }
+            @if (sec.l) { <ul>@for (li of sec.l; track $index) { <li>{{ li }}</li> }</ul> }
+            <div class="pg"><span>SHARP training material, not for circulation</span><span>{{ $index + 1 }} / {{ sections().length }}</span></div>
+          </div>
+        </div>
+      }
+    }
+  </div>
+
+  <div class="guard"><i class="bi bi-shield-lock"></i> Download, copy and screen capture are blocked · watermarked to {{ student.id }}</div>
+
+  @if (blanked()) {
+    <div class="blackout">
+      <i class="bi bi-exclamation-triangle"></i>
+      <b>Content hidden</b>
+      <p>The material is blanked because the window lost focus or a capture was attempted. This event is logged against your account.</p>
+      <button type="button" class="st-btn" (click)="blanked.set(false)">Show content</button>
+    </div>
+  }
+</div>

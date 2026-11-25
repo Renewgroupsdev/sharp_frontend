@@ -1,0 +1,25 @@
+<section class="purchase-page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title"><i class="bi" [class]="info.icon"></i> {{ info.title }}</h2>
+      <p class="page-subtitle">This module is on its way.</p>
+    </div>
+  </div>
+
+  <div class="cs-card">
+    <span class="cs-badge">Coming soon</span>
+    <span class="cs-icon" aria-hidden="true"><i class="bi" [class]="info.icon"></i></span>
+    <h3>{{ info.title }}</h3>
+    <p class="cs-summary">{{ info.summary }}</p>
+
+    @if (info.features.length) {
+      <ul class="cs-features" aria-label="Planned features">
+        @for (f of info.features; track f) {
+          <li><i class="bi bi-check2-circle" aria-hidden="true"></i>{{ f }}</li>
+        }
+      </ul>
+    }
+
+    <a class="cs-back" [routerLink]="homeUrl"><i class="bi bi-arrow-left" aria-hidden="true"></i> Back to dashboard</a>
+  </div>
+</section>

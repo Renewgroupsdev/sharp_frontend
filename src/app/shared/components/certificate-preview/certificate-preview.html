@@ -1,0 +1,29 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-award"></i></div>
+      <div class="title-content">
+        <h2>{{ cert.course }}</h2>
+        <p>{{ cert.name }} · {{ cert.status }}{{ cert.number ? ' · ' + cert.number : '' }}</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div class="modal-body-custom">
+    @if (cert.status === 'Cancelled') {
+      <p class="cancelled"><b>Cancelled</b>{{ cert.cancelled_at ? ' on ' + day(cert.cancelled_at) : '' }}.
+        @if (cert.cancel_reason) { Reason: {{ reason }}. } This certificate no longer verifies as valid.</p>
+    } @else if (!issued) { <p class="draft">Preview only: the number and date are assigned when the certificate is issued.</p> }
+    <app-certificate-view [cert]="cert" />
+    @if (issued && link) { <p class="verify">Anyone can check this certificate at <a [href]="link" target="_blank" rel="noopener">{{ link }}</a></p> }
+  </div>
+
+  <div class="modal-footer-custom">
+    <button type="button" class="cancel-btn" (click)="close()">Close</button>
+    @if (issued) {
+      <button type="button" class="save-btn alt" (click)="print()"><i class="bi bi-printer"></i> Print / PDF</button>
+      <button type="button" class="save-btn" (click)="download()"><i class="bi bi-download"></i> Download</button>
+    }
+  </div>
+</div>

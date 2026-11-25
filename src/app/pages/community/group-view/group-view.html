@@ -1,0 +1,61 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi" [class.bi-people]="group()?.kind === 'Chat'" [class.bi-megaphone]="group()?.kind === 'Announcement'" [class.bi-envelope]="group()?.source === 'dm'"></i></div>
+      <div class="title-content">
+        <h2>{{ group()?.title || 'Group' }}</h2>
+        @if (group(); as g) { <p>{{ kindLabel() }} · {{ g.members_total }} members{{ g.source === 'floor' ? '' : ' · ' + online() + ' online' }}</p> }
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div class="modal-body-custom">
+    @if (error(); as err) {
+      <p class="error-text" role="alert">{{ err }}</p>
+    } @else if (group(); as g) {
+      <details class="acc" [open]="showMembers()" (toggle)="showMembers.set($any($event.target).open)">
+        <summary><b>Members</b><span>{{ g.members_total }}</span></summary>
+        <div class="acc-body">
+          @if (g.source !== 'floor') {
+            <div class="chips">
+              @for (m of members(); track m.user_id) {
+                <span class="chip-wrap">
+                  <span class="chip" [title]="m.name + ' · ' + m.role">
+                    <i class="dot" [class.off]="!m.online" [title]="presence(m)"></i>{{ m.name }} <em>{{ m.role }}</em>
+                  </span>
+                  @if (g.source !== 'dm') {
+                    <button type="button" class="chip-btn" [title]="'Send ' + m.name + ' a personal message'" [attr.aria-label]="'Message ' + m.name" (click)="message(m)"><i class="bi bi-envelope"></i></button>
+                  }
+                  @if (m.removable && canManage()) {
+                    <button type="button" class="chip-btn x" [title]="'Remove ' + m.name" [attr.aria-label]="'Remove ' + m.name" (click)="remove(m)"><i class="bi bi-x-lg"></i></button>
+                  }
+                </span>
+              }
+            </div>
+          }
+          <p class="acc-note">
+            @if (canAdd()) { <button type="button" class="add-btn" (click)="addMembers()"><i class="bi bi-person-plus"></i> Add members</button> }
+            <small>{{ sourceNote() }}</small>
+          </p>
+        </div>
+      </details>
+
+      <h4 class="conv">Conversation</h4>
+      <app-group-chat
+        [groupId]="g.id"
+        [canPost]="g.can_post"
+        [canRemove]="isStaff()"
+        [announcement]="g.kind === 'Announcement'"
+        [placeholder]="g.kind === 'Announcement' ? 'Post an announcement…' : 'Write a message…'"
+        [readOnlyNote]="g.source === 'dm' ? 'Read-only review: you are not part of this personal conversation.' : g.kind === 'Announcement' ? 'Only staff and the group creator can post announcements.' : 'You can read this conversation but not write in it.'"
+      />
+    } @else {
+      <p class="muted">Loading…</p>
+    }
+  </div>
+
+  <div class="modal-footer-custom">
+    <button type="button" class="cancel-btn" (click)="close()">Close</button>
+  </div>
+</div>

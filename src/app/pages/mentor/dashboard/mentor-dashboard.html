@@ -1,0 +1,48 @@
+<div class="m-page">
+  <div class="m-head">
+    <div>
+      <h1 class="page-title"><i class="bi bi-grid-fill"></i> Welcome, {{ me().n }}</h1>
+      <p class="m-sub">{{ mentor.id }} · {{ mentor.role }} · {{ mentor.org }}</p>
+    </div>
+  </div>
+
+  <app-role-dashboard [heading]="false" />
+
+  <app-submission-stats />
+
+  <div class="m-two">
+    <div class="m-card">
+      <h3>{{ group.teamName }} <span class="pill n">{{ group.members().length }} members</span></h3>
+      <div class="m-scroll">
+        <table class="m-table">
+          <thead><tr><th>Student</th><th>Institute</th><th>Role</th><th>Progress</th></tr></thead>
+          <tbody>
+            @for (m of group.members(); track m.id) {
+              <tr>
+                <td><div class="m-who"><span class="m-av" [style.background]="m.col">{{ m.i }}</span><div><b>{{ m.n }}</b><small>{{ m.id }}</small></div></div></td>
+                <td>{{ m.c }}</td>
+                <td>{{ m.r }}</td>
+                <td><div class="m-inline"><div class="m-bar" style="flex:1"><i [style.width.%]="m.p" [style.background]="m.col"></i></div><b>{{ m.p }}%</b></div></td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="m-empty">No students assigned to your batch.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="m-card">
+      <h3>Mentor actions</h3>
+      <div class="m-grid one">
+        @for (a of actions; track a.link) {
+          <a class="m-tile" [routerLink]="a.link">
+            <span class="ic"><i class="bi" [class]="a.icon"></i></span>
+            <span><b>{{ a.title }}</b><small>{{ a.sub }}</small></span>
+            <i class="bi bi-chevron-right go"></i>
+          </a>
+        }
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,89 @@
+<div class="purchase-page container-fluid px-0">
+  @if (!fixedType()) {
+    <div class="chip-row">
+      @for (t of types; track t) {
+        <button type="button" class="chip" [class.active]="type() === t" (click)="setType(t)">{{ t }} <b>{{ count(t) }}</b></button>
+      }
+    </div>
+  }
+
+  @if (selected(); as it) {
+    <div class="setup-card">
+      <div class="setup-pick">
+        <label for="qs-item">Configure</label>
+        <div class="input-wrap"><i class="bi bi-list-check"></i>
+          <select id="qs-item" [ngModel]="it.id" (ngModelChange)="pick($event)">
+            @for (a of items(); track a.id) { <option [value]="a.id">{{ a.title }}</option> }
+          </select>
+          <i class="bi bi-chevron-down select-arrow"></i>
+        </div>
+      </div>
+
+      <form (ngSubmit)="save()" novalidate>
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="qs-perq">Time per question (minutes)</label>
+            <div class="input-wrap"><i class="bi bi-stopwatch"></i>
+              <input id="qs-perq" type="number" min="0" name="perQ" [(ngModel)]="model.perQ" />
+            </div>
+          </div>
+          @if (isQuiz()) {
+            <div class="form-field">
+              <label for="qs-minp">Pass percentage</label>
+              <div class="input-wrap"><i class="bi bi-percent"></i>
+                <input id="qs-minp" type="number" min="0" max="100" name="minp" [(ngModel)]="model.minp" />
+              </div>
+              <small class="hint">{{ store.quizTotal(it) }} marks in total</small>
+            </div>
+          }
+          @if (isQuiz() && model.random) {
+            <div class="form-field">
+              <label for="qs-count">Questions per student</label>
+              <div class="input-wrap"><i class="bi bi-shuffle"></i>
+                <input id="qs-count" type="number" min="0" name="count" [(ngModel)]="model.count" />
+              </div>
+              <small class="hint">0 gives everyone all questions. Otherwise each student gets a different random list of this many, spread across the question groups.</small>
+            </div>
+          }
+        </div>
+
+        <h4 class="setup-sh">Options</h4>
+        <div class="check-grid">
+          @for (f of flags; track f.key) {
+            <label class="check-row"><input type="checkbox" [name]="f.key" [(ngModel)]="model[f.key]" /><span>{{ f.label }}</span></label>
+          }
+        </div>
+
+        <h4 class="setup-sh">In the answer sheet</h4>
+        <div class="check-grid">
+          @for (m of sheetModes; track m.value) {
+            <label class="check-row"><input type="radio" name="answerSheet" [value]="m.value" [(ngModel)]="model.answerSheet" /><span>{{ m.label }}</span></label>
+          }
+        </div>
+
+        @if (isQuiz()) {
+          <h4 class="setup-sh">Question groups used by this {{ type().toLowerCase() }}</h4>
+          @if (store.groupsOf(type()).length) {
+            <div class="check-grid">
+              @for (g of store.groupsOf(type()); track g.id) {
+                <label class="check-row">
+                  <input type="checkbox" [checked]="hasGroup(g.id)" (change)="toggleGroup(g.id, $any($event.target).checked)" />
+                  <span>{{ g.title }} <small>{{ store.questionCount(g.id) }} questions</small></span>
+                </label>
+              }
+            </div>
+          } @else {
+            <span class="hint">Add question groups first.</span>
+          }
+        }
+
+        <div class="setup-foot"><button type="submit" class="save-btn"><i class="bi bi-floppy"></i> Save setup</button></div>
+      </form>
+    </div>
+  } @else {
+    <div class="setup-card empty">
+      <i class="bi bi-sliders"></i>
+      No {{ type().toLowerCase() }}s yet — create one in the {{ type() }} list tab, then set it up here.
+    </div>
+  }
+</div>

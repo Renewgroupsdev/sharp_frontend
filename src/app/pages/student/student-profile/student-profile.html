@@ -1,0 +1,37 @@
+<section class="st-page">
+  <div class="st-head">
+    <div>
+      <h2 class="page-title"><i class="bi bi-person-circle"></i> My Profile</h2>
+      <p class="st-sub">{{ student.id }} · {{ student.batch }}</p>
+    </div>
+    <button type="button" class="st-btn alt" (click)="requestChange()"><i class="bi bi-pencil-square"></i> Request a change</button>
+  </div>
+
+  <div class="st-grid side">
+    <div class="st-card">
+      <div class="st-row">
+        <span class="st-ico solid" style="width:56px;height:56px;flex-basis:56px;font-size:20px;font-weight:800;border-radius:16px">{{ student.init }}</span>
+        <span class="grow">
+          <span class="t1" style="font-size:17px">{{ student.name }}</span>
+          <span class="t2">{{ student.course }}</span>
+          <span style="display:flex;gap:6px;margin-top:6px"><span class="pill g">Active</span><span class="pill b">{{ student.batch }}</span></span>
+        </span>
+      </div>
+      <h3 style="margin-top:12px">Details</h3>
+      @for (r of rows; track r[0]) {
+        <div class="kv"><span>{{ r[0] }}</span><span>{{ r[1] }}</span></div>
+      }
+    </div>
+
+    <div class="st-card">
+      <h3>Skill progress <span class="mut">{{ progress.progress() }}%</span></h3>
+      <div class="st-bar"><i [style.width.%]="progress.progress()"></i></div>
+      <div style="display:flex;gap:5px;margin-top:12px">
+        @for (m of modules; track m.id) {
+          <span class="pill" [class.g]="progress.score(m.id) !== undefined" style="flex:1;justify-content:center;border-radius:6px" [title]="m.title">{{ m.id }}</span>
+        }
+      </div>
+      <p class="t2" style="margin-top:10px">{{ progress.passedCount() }} of {{ modules.length }} modules passed · attendance {{ progress.attendancePct() }}%</p>
+    </div>
+  </div>
+</section>

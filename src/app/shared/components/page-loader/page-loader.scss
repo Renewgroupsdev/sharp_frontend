@@ -1,0 +1,85 @@
+.page-loader-backdrop {
+  position: fixed;
+  inset: 0;
+  // Above header/sidebar/dialogs (1000), below SweetAlert modals (1060) so their OK stays clickable.
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--app-surface-solid) 35%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: page-loader-fade-in 0.15s ease-out;
+
+  // Covers its own (position: relative) parent - e.g. just a table's rows - instead of
+  // the whole viewport, so filters/pagination/header outside it stay usable.
+  &.contained {
+    position: absolute;
+    z-index: 5;
+  }
+
+  // Sits in the normal flow in place of the content that is loading - no blur, no overlay.
+  &.inline {
+    position: relative;
+    inset: auto;
+    z-index: auto;
+    width: 100%;
+    min-height: var(--page-loader-min-height, 120px);
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+// Covers only the layout's content area (right of the sidebar, below the top navbar).
+:host(.in-content) .page-loader-backdrop {
+  position: absolute;
+  z-index: 20;
+}
+
+// Renew Group logo breathing inside a spinning green / gold ring (the logo's own colours).
+.logo-loader {
+  --logo-loader-size: 64px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--logo-loader-size);
+  height: var(--logo-loader-size);
+}
+
+.logo-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid color-mix(in srgb, var(--primary, #0b6e4f) 15%, transparent);
+  border-top-color: var(--primary, #0b6e4f);
+  border-right-color: #c9a24d;
+  animation: logo-loader-spin 0.9s linear infinite;
+}
+
+.logo-mark {
+  width: 62%;
+  height: 62%;
+  object-fit: contain;
+  user-select: none;
+  animation: logo-loader-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes logo-loader-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes logo-loader-pulse {
+  0%, 100% { transform: scale(0.9); opacity: 0.75; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-ring { animation-duration: 2.4s; }
+  .logo-mark { animation: none; }
+}
+
+@keyframes page-loader-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

@@ -1,0 +1,59 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi" [class]="tab() === 'students' ? 'bi-mortarboard-fill' : 'bi-person-workspace'"></i></div>
+      <div class="title-content">
+        <h2>{{ tab() === 'students' ? 'Students' : 'Mentors' }}</h2>
+        <p>{{ enrollment?.course }} · {{ enrollment?.batch }}{{ enrollment?.start ? ' · ' + enrollment?.start + ' – ' + enrollment?.end : '' }}</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div class="modal-body-custom">
+    <div class="mem-bar">
+      <div class="segment" role="tablist">
+        <button type="button" role="tab" [class.active]="tab() === 'students'" (click)="select('students')">Students ({{ members().students.length }})</button>
+        <button type="button" role="tab" [class.active]="tab() === 'mentors'" (click)="select('mentors')">Mentors ({{ members().mentors.length }})</button>
+      </div>
+      <input class="mem-search" type="search" placeholder="Search name, ID, institute…" aria-label="Search" [value]="query()" (input)="query.set($any($event.target).value)" />
+    </div>
+
+    @if (error(); as err) { <div class="error-text" role="alert">{{ err }}</div> }
+
+    <div class="mem-scroll">
+      <table class="mem-table">
+        <thead>
+          <tr>
+            <th>{{ tab() === 'students' ? 'Student' : 'Mentor' }}</th>
+            <th>Institute</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>{{ tab() === 'students' ? 'Status' : 'Speciality' }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of list(); track p.id) {
+            <tr>
+              <td><b>{{ p.name }}</b><small>{{ p.id }}</small></td>
+              <td>{{ p.org || '—' }}</td>
+              <td>{{ p.mobile || '—' }}</td>
+              <td>{{ p.email || '—' }}</td>
+              <td>
+                @if (tab() === 'students') { <span class="mem-pill" [class.off]="p.status !== 'Active'">{{ p.status }}</span> }
+                @else { {{ p.specialist || '—' }} }
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="mem-empty">{{ loading() ? 'Loading…' : query() ? 'Nobody matches the search.' : tab() === 'students' ? 'No students in this batch yet.' : 'No mentors assigned to this batch yet.' }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="modal-footer-custom">
+    <button type="button" class="cancel-btn" [disabled]="!list().length" (click)="exportList()"><i class="bi bi-download"></i> Export CSV</button>
+    <button type="button" class="save-btn" (click)="close()">Close</button>
+  </div>
+</div>

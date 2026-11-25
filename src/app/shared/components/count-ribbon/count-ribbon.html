@@ -1,0 +1,37 @@
+<div class="ribbon" [attr.aria-label]="ariaLabel">
+  @for (it of view(); track it.k) {
+    <div
+      class="tab"
+      [class.clickable]="it.clickable"
+      [class.active]="activeKeys.includes(it.k)"
+      [style.--c]="it.c"
+      [attr.role]="it.clickable ? 'button' : null"
+      [attr.tabindex]="it.clickable || it.hoverItems ? 0 : null"
+      [attr.aria-pressed]="it.clickable ? activeKeys.includes(it.k) : null"
+      (click)="pick(it)"
+      (keydown.enter)="pick(it)"
+      (mouseenter)="show($event, it)"
+      (focus)="show($event, it)"
+      (mouseleave)="hide()"
+      (blur)="hide()">
+      <span class="label">{{ it.label }}</span>
+      <b class="count">{{ it.value }}</b>
+    </div>
+  }
+</div>
+
+@if (pop(); as p) {
+  <div class="pop" role="tooltip" [style.left.px]="p.left" [style.top.px]="p.top">
+    <div class="pop-title">{{ p.item.label }} · {{ p.item.hoverItems!.length }}</div>
+    @if (p.item.hoverItems!.length) {
+      <ul>
+        @for (h of p.item.hoverItems!.slice(0, popLimit); track $index) {
+          <li><span>{{ h.name }}</span>@if (h.sub) { <small>{{ h.sub }}</small> }</li>
+        }
+        @if (p.item.hoverItems!.length > popLimit) { <li><small>+{{ p.item.hoverItems!.length - popLimit }} more</small></li> }
+      </ul>
+    } @else {
+      <div class="pop-empty">None</div>
+    }
+  </div>
+}

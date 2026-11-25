@@ -1,0 +1,120 @@
+<section class="ac card" aria-label="Activity across the programme">
+  <header class="ac-head">
+    <div>
+      <h2>Programme activity</h2>
+      <p>Every action people took: {{ report()?.total ?? 0 }} in the last {{ range() }} days</p>
+    </div>
+    <div class="ac-tools">
+      <div class="ac-range" role="group" aria-label="Time range">
+        @for (r of ranges; track r) {
+          <button type="button" [class.on]="range() === r" (click)="pick(r)">{{ r }}d</button>
+        }
+      </div>
+      <button type="button" class="ac-view" [class.on]="table()" (click)="table.set(!table())"><i class="bi" [class]="table() ? 'bi-bar-chart' : 'bi-table'"></i> {{ table() ? 'Charts' : 'Table' }}</button>
+    </div>
+  </header>
+
+  @if (error(); as err) {
+    <p class="ac-note" role="alert">{{ err }}</p>
+  } @else if (loading() && !report()) {
+    <p class="ac-note">Loading activity…</p>
+  } @else if (report(); as r) {
+    @if (r.total === 0) {
+      <p class="ac-note">No activity in this period yet.</p>
+    } @else if (table()) {
+      <div class="ac-table-wrap">
+        <table class="ac-table">
+          <thead>
+            <tr><th>Day</th>@for (k of kinds(); track k.name) { <th>{{ k.name }}</th> }<th>Total</th></tr>
+          </thead>
+          <tbody>
+            @for (d of r.by_day; track d.date) {
+              <tr><td>{{ dayLabel(d) }}</td>@for (k of kinds(); track k.name) { <td>{{ d.by[k.name] || '–' }}</td> }<th>{{ d.total }}</th></tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr><th>All days</th>@for (k of kinds(); track k.name) { <th>{{ k.count }}</th> }<th>{{ r.total }}</th></tr>
+          </tfoot>
+        </table>
+      </div>
+    } @else {
+      <div class="ac-grid">
+        <!-- Actions per day, stacked by kind -->
+        <figure class="ac-fig ac-wide">
+          <figcaption>Actions per day</figcaption>
+          <div class="ac-plot">
+            <svg [attr.viewBox]="'0 0 ' + w + ' ' + h" role="img" [attr.aria-label]="'Actions per day over the last ' + range() + ' days, ' + r.total + ' in total'">
+              @for (t of ticks(); track t.value) {
+                <line class="ac-grid-line" [attr.x1]="plot.x0" [attr.x2]="plot.x1" [attr.y1]="t.y" [attr.y2]="t.y" />
+                <text class="ac-axis" [attr.x]="plot.x0 - 6" [attr.y]="t.y + 3" text-anchor="end">{{ t.value }}</text>
+              }
+              @for (c of columns(); track c.index) {
+                <g (mouseenter)="hover.set(c.index)" (mouseleave)="hover.set(null)">
+                  <rect class="ac-hit" [attr.x]="c.cx - (plot.x1 - plot.x0) / columns().length / 2" [attr.y]="plot.y1" [attr.width]="(plot.x1 - plot.x0) / columns().length" [attr.height]="plot.y0 - plot.y1" />
+                  @for (s of c.segments; track s.kind) {
+                    <rect class="ac-seg" [class.dim]="hover() !== null && hover() !== c.index" [attr.x]="c.x" [attr.y]="s.y" [attr.width]="c.width" [attr.height]="s.height" [style.fill]="s.color" />
+                  }
+                </g>
+              }
+              @for (c of dateLabels(); track c.index) {
+                <text class="ac-axis" [attr.x]="c.cx" [attr.y]="h - 8" text-anchor="middle">{{ c.label }}</text>
+              }
+            </svg>
+            @if (tip(); as t) {
+              <div class="ac-tip" [style.left.%]="t.leftPct">
+                <b>{{ t.col.label }} · {{ t.col.day.total }} actions</b>
+                @for (k of t.rows; track k.name) { <span><i [style.background]="color(k.name)"></i>{{ k.name }} <em>{{ t.col.day.by[k.name] }}</em></span> }
+                @if (!t.rows.length) { <span>No activity</span> }
+              </div>
+            }
+          </div>
+        </figure>
+
+        <!-- Share of each kind -->
+        <figure class="ac-fig">
+          <figcaption>What people did</figcaption>
+          <div class="ac-donut-wrap">
+            <svg viewBox="0 0 180 180" class="ac-donut" role="img" [attr.aria-label]="'Share of each kind of action, ' + r.total + ' in total'">
+              <circle cx="90" cy="90" [attr.r]="radius" class="ac-ring" />
+              @for (s of slices(); track s.name) {
+                <circle cx="90" cy="90" [attr.r]="radius" class="ac-slice" [style.stroke]="s.color"
+                  [attr.stroke-dasharray]="(s.length > 2 ? s.length - 2 : s.length) + ' ' + 1000" [attr.stroke-dashoffset]="-s.offset" transform="rotate(-90 90 90)" />
+              }
+              <text x="90" y="88" text-anchor="middle" class="ac-total">{{ r.total }}</text>
+              <text x="90" y="106" text-anchor="middle" class="ac-total-label">actions</text>
+            </svg>
+            <ul class="ac-legend">
+              @for (s of slices(); track s.name) {
+                <li><i [style.background]="s.color"></i><span>{{ s.name }}</span><b>{{ s.count }}</b><small>{{ s.percent }}%</small></li>
+              }
+            </ul>
+          </div>
+        </figure>
+
+        <!-- Busiest people -->
+        <figure class="ac-fig">
+          <figcaption>Most active people</figcaption>
+          <ul class="ac-bars">
+            @for (p of r.people; track p.name) {
+              <li>
+                <span class="ac-bar-name">{{ p.name }}<small>{{ p.role }}</small></span>
+                <span class="ac-bar-track"><span class="ac-bar" [style.width.%]="(p.count / peopleMax()) * 100"></span></span>
+                <b>{{ p.count }}</b>
+              </li>
+            }
+          </ul>
+        </figure>
+
+        <!-- Latest actions -->
+        <figure class="ac-fig ac-wide">
+          <figcaption>Latest actions</figcaption>
+          <ul class="ac-feed">
+            @for (a of r.recent; track $index) {
+              <li><i [style.background]="color(a.kind)"></i><span class="ac-feed-text"><b>{{ a.by || 'System' }}</b> {{ a.action }}</span><small>{{ a.kind }} · {{ ago(a.at) }}</small></li>
+            }
+          </ul>
+        </figure>
+      </div>
+    }
+  }
+</section>

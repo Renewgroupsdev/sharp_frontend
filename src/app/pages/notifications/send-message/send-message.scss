@@ -1,0 +1,4 @@
+.role-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.role-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border: 1px solid var(--border-soft-strong, #d1d5db); border-radius: 999px; font-size: 12.5px; cursor: pointer; user-select: none; }
+.role-chip input { accent-color: var(--primary, #0e7a4e); }
+.role-chip.on { border-color: var(--primary, #0e7a4e); background: var(--primary-soft, #e6f4ec); color: var(--primary-dark, #0b5d49); font-weight: 600; }

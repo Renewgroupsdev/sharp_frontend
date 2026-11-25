@@ -1,0 +1,22 @@
+<div class="picker">
+  <input class="picker-search" type="search" placeholder="Search by name, role, ID or institute" [value]="query()" (input)="query.set($any($event.target).value)" aria-label="Search people" />
+  <div class="picker-chips">
+    @for (r of roles(); track r) {
+      <button type="button" class="picker-chip" (click)="addRole(r)">+ All {{ r }}s</button>
+    }
+    @if (selected().length) {
+      <button type="button" class="picker-chip clear" (click)="clear()">Clear ({{ selected().length }})</button>
+    }
+  </div>
+  <div class="picker-list">
+    @for (u of shown(); track u.id) {
+      <label class="picker-row">
+        <input type="checkbox" [checked]="selected().includes(u.id)" (change)="toggle(u.id)" />
+        <span class="picker-name">{{ u.n }}</span>
+        <small>{{ u.r }} · {{ u.id }}@if (u.org) { · {{ u.org }} }</small>
+      </label>
+    } @empty {
+      <div class="picker-empty">No people match.</div>
+    }
+  </div>
+</div>

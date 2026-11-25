@@ -1,0 +1,62 @@
+@if (error(); as err) {
+  <p class="rd-note" role="alert">{{ err }}</p>
+} @else if (loading() && !data()) {
+  <p class="rd-note">Loading your dashboard…</p>
+} @else if (data(); as d) {
+  @if (hasContent()) {
+    <section class="rd" aria-label="Dashboard">
+      @if (heading()) {
+        <header class="rd-head">
+          <h2>{{ d.title }}</h2>
+          @if (d.note) { <p>{{ d.note }}</p> }
+        </header>
+      }
+
+      @if (d.kpis.length) {
+        <div class="rd-kpis">
+          @for (k of d.kpis; track k[0]) {
+            <div class="rd-kpi"><span>{{ k[0] }}</span><b>{{ k[1] }}</b>@if (k[2]) { <small>{{ k[2] }}</small> }</div>
+          }
+        </div>
+      }
+
+      <div class="rd-grid">
+        @for (b of d.blocks; track b.title) {
+          <article class="rd-card">
+            <h3>{{ b.title }}</h3>
+            @switch (b.type) {
+              @case ('pie') { <app-pie-chart [slices]="asPie(b).slices" unit="total" emptyText="Nothing yet" /> }
+
+              @case ('bars') {
+                @if (asBars(b).items.length) {
+                  <div class="rd-bars">
+                    @for (i of asBars(b).items; track i.label) {
+                      <div class="rd-bar"><b>{{ i.value }}{{ asBars(b).unit }}</b><span [style.height.px]="4 + (i.value / maxOf(asBars(b))) * 96"></span><small [title]="i.label">{{ i.label }}</small></div>
+                    }
+                  </div>
+                } @else { <p class="rd-empty">Nothing to show yet.</p> }
+              }
+
+              @case ('progress') {
+                @for (i of asProgress(b).items; track i.label) {
+                  <div class="rd-pr"><span [title]="i.label">{{ i.label }}</span><div class="rd-meter"><i [style.width.%]="i.value"></i></div><b>{{ i.value }}%</b></div>
+                } @empty { <p class="rd-empty">Nothing to show yet.</p> }
+              }
+
+              @case ('list') {
+                <ul class="rd-rows">
+                  @for (i of asList(b).items; track $index) {
+                    <li>
+                      @if (i.url) { <a [routerLink]="i.url">{{ i.text }}</a> } @else { <span>{{ i.text }}</span> }
+                      @if (i.badge) { <em [class]="i.tone">{{ i.badge }}</em> }
+                    </li>
+                  }
+                </ul>
+              }
+            }
+          </article>
+        }
+      </div>
+    </section>
+  }
+}

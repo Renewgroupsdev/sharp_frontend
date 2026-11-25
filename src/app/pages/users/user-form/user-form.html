@@ -1,0 +1,207 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-person-gear"></i></div>
+      <div class="title-content">
+        <h2>{{ isEdit ? 'Edit User' : 'Add User' }}</h2>
+        <p>{{ isEdit ? existing?.id + ' · ' + existing?.n : 'Create a user with a role and access' }}</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <form #f="ngForm" (ngSubmit)="save(f)" novalidate>
+    <div class="modal-body-custom">
+      @if (serverError(); as err) { <div class="error-text" role="alert">{{ err }}</div> }
+      @if (!isEdit) { <div class="muted" id="user-id-note"><i class="bi bi-info-circle"></i> {{ idNote() }}</div> }
+
+      <div class="section-title"><i class="bi bi-shield-check"></i> Role &amp; Placement</div>
+      <div class="form-grid cols-3">
+        <div class="form-field">
+          <label for="u-role">Role <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-person-badge"></i>
+            <select id="u-role" name="r" required [(ngModel)]="model.r" [disabled]="isEdit">
+              @for (r of roles(); track r) { <option [value]="r">{{ r }}</option> }
+            </select>
+            <i class="bi bi-chevron-down select-arrow"></i>
+          </div>
+        </div>
+        @if (showInstitute) {
+          <div class="form-field">
+            <label for="u-inst">College / institute</label>
+            <div class="input-wrap"><i class="bi bi-bank"></i>
+              <select id="u-inst" name="org" [(ngModel)]="model.org">
+                @for (o of instituteNames(); track o) { <option [value]="o">{{ o }}</option> }
+              </select>
+              <i class="bi bi-chevron-down select-arrow"></i>
+            </div>
+          </div>
+        }
+        @if (showOrganization) {
+          <div class="form-field">
+            <label for="u-org2">Organization / company</label>
+            <div class="input-wrap"><i class="bi bi-building"></i>
+              <input id="u-org2" name="org2" maxlength="80" [(ngModel)]="model.org2" placeholder="e.g. Sundaram Textiles Pvt Ltd" />
+            </div>
+          </div>
+        }
+        @if (showBatch) {
+          <div class="form-field">
+            <label for="u-batch">Batch</label>
+            <div class="input-wrap"><i class="bi bi-collection"></i>
+              <select id="u-batch" name="b" [(ngModel)]="model.b">
+                <option value="All batches">All batches</option>
+                @for (b of batchNames(); track b) { <option [value]="b">{{ b }}</option> }
+              </select>
+              <i class="bi bi-chevron-down select-arrow"></i>
+            </div>
+          </div>
+        }
+        @if (isEdit) {
+        <div class="form-field">
+          <label for="u-status">Status</label>
+          <div class="input-wrap"><i class="bi bi-toggle-on"></i>
+            <select id="u-status" name="st" [(ngModel)]="model.st">
+              @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
+            </select>
+            <i class="bi bi-chevron-down select-arrow"></i>
+          </div>
+        </div>
+        }
+      </div>
+
+      <div class="section-title"><i class="bi bi-person"></i> {{ isSpoke ? (extras.length ? "SPOC details · SPOC 1" : "SPOC details") : "Account Details" }}</div>
+      <div class="form-grid cols-3">
+        <div class="form-field">
+          <label for="u-name">Full name <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-person"></i>
+            <input id="u-name" name="n" required maxlength="80" [(ngModel)]="model.n" #name="ngModel" [class.is-invalid]="submitted() && name.invalid" />
+          </div>
+          @if (submitted() && name.invalid) { <small class="error-text">Full name is required.</small> }
+        </div>
+        <div class="form-field">
+          <label for="u-user">Username <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-at"></i>
+            <input id="u-user" name="username" required maxlength="40" [(ngModel)]="model.username" #un="ngModel" [class.is-invalid]="submitted() && un.invalid" placeholder="letters, numbers, dot" />
+          </div>
+          @if (submitted() && un.invalid) { <small class="error-text">Username is required.</small> }
+        </div>
+        @if (!isEdit) {
+          <div class="form-field">
+            <label for="u-pw">Temporary password <span>*</span></label>
+            <div class="input-wrap"><i class="bi bi-key"></i>
+              <input id="u-pw" name="pw" required maxlength="40" [(ngModel)]="model.pw" #pw="ngModel" [class.is-invalid]="submitted() && pw.invalid" placeholder="min 6 characters" />
+            </div>
+            @if (submitted() && pw.invalid) { <small class="error-text">Temporary password is required.</small> }
+            <small><a href="javascript:void(0)" class="link-btn" (click)="generatePassword()">Generate one</a></small>
+          </div>
+        }
+        <div class="form-field">
+          <label for="u-ph">Mobile number <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-telephone"></i>
+            <input id="u-ph" name="ph" required maxlength="10" inputmode="numeric" [(ngModel)]="model.ph" #ph="ngModel" [class.is-invalid]="submitted() && ph.invalid" placeholder="10 digits" />
+          </div>
+          @if (submitted() && ph.invalid) { <small class="error-text">Mobile number is required.</small> }
+        </div>
+        <div class="form-field">
+          <label for="u-email">Email address <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-envelope"></i>
+            <input id="u-email" type="email" name="email" required email [(ngModel)]="model.email" #email="ngModel" [class.is-invalid]="submitted() && email.invalid" />
+          </div>
+          @if (submitted() && email.invalid) { <small class="error-text">Enter a valid email.</small> }
+        </div>
+        <div class="form-field">
+          <label for="u-pic">Profile picture</label>
+          <div class="photo-upload">
+            <div class="photo-preview" aria-hidden="true">
+              @if (model.pic) { <img [src]="model.pic" alt="" /> } @else { {{ initials }} }
+            </div>
+            <div class="photo-actions">
+              <input id="u-pic" type="file" accept="image/*" (change)="onPic($event)" />
+              @if (model.pic) { <button type="button" class="cancel-btn" (click)="removePic()">Remove</button> }
+            </div>
+          </div>
+          <small>Optional · max 300 KB</small>
+        </div>
+      </div>
+
+      @if (canAddSpokes) {
+        @for (s of extras; track s.id; let i = $index) {
+          <div class="section-title">
+            <i class="bi bi-person-plus"></i> SPOC details · SPOC {{ i + 2 }}
+            <span class="spacer"></span>
+            @if (!s.uid) { <button type="button" class="cancel-btn" (click)="removeSpoke(i)"><i class="bi bi-x-lg"></i> Remove</button> }
+          </div>
+          <div class="form-grid cols-3">
+            <div class="form-field">
+              <label [for]="'sp-n' + s.id">Full name <span>*</span></label>
+              <div class="input-wrap"><i class="bi bi-person"></i>
+                <input [id]="'sp-n' + s.id" [name]="'sp-n' + s.id" maxlength="80" [(ngModel)]="s.n" [class.is-invalid]="submitted() && !s.n.trim()" />
+              </div>
+              @if (submitted() && !s.n.trim()) { <small class="error-text">Full name is required.</small> }
+            </div>
+            <div class="form-field">
+              <label [for]="'sp-u' + s.id">Username <span>*</span></label>
+              <div class="input-wrap"><i class="bi bi-at"></i>
+                <input [id]="'sp-u' + s.id" [name]="'sp-u' + s.id" maxlength="40" [(ngModel)]="s.username" [class.is-invalid]="submitted() && !s.username.trim()" placeholder="letters, numbers, dot" />
+              </div>
+              @if (submitted() && !s.username.trim()) { <small class="error-text">Username is required.</small> }
+            </div>
+            <div class="form-field">
+              @if (!s.uid) {
+                <label [for]="'sp-p' + s.id">Temporary password <span>*</span></label>
+                <div class="input-wrap"><i class="bi bi-key"></i>
+                  <input [id]="'sp-p' + s.id" [name]="'sp-p' + s.id" maxlength="40" [(ngModel)]="s.pw" [class.is-invalid]="submitted() && s.pw.trim().length < 6" placeholder="min 6 characters" />
+                </div>
+                @if (submitted() && s.pw.trim().length < 6) { <small class="error-text">Min 6 characters.</small> }
+                <small><a href="javascript:void(0)" class="link-btn" (click)="generateSpokePassword(s)">Generate one</a></small>
+              }
+            </div>
+            <div class="form-field">
+              <label [for]="'sp-m' + s.id">Mobile number <span>*</span></label>
+              <div class="input-wrap"><i class="bi bi-telephone"></i>
+                <input [id]="'sp-m' + s.id" [name]="'sp-m' + s.id" maxlength="10" inputmode="numeric" [(ngModel)]="s.ph" [class.is-invalid]="submitted() && !s.ph.trim()" placeholder="10 digits" />
+              </div>
+              @if (submitted() && !s.ph.trim()) { <small class="error-text">Mobile number is required.</small> }
+            </div>
+            <div class="form-field">
+              <label [for]="'sp-e' + s.id">Email address <span>*</span></label>
+              <div class="input-wrap"><i class="bi bi-envelope"></i>
+                <input [id]="'sp-e' + s.id" [name]="'sp-e' + s.id" type="email" [(ngModel)]="s.email" [class.is-invalid]="submitted() && !s.email.trim()" />
+              </div>
+              @if (submitted() && !s.email.trim()) { <small class="error-text">Email is required.</small> }
+            </div>
+          </div>
+        }
+        <div class="section-title">
+          <button type="button" class="link-btn" (click)="addSpoke()"><i class="bi bi-plus-lg"></i> Add more</button>
+        </div>
+      }
+
+      @if (showProfile) {
+        <div class="section-title"><i class="bi bi-card-text"></i> Profile</div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="u-spec">Specialist</label>
+            <app-multi-select inputId="u-spec" placeholder="Select specialist(s)" [options]="specialistOptions()" [selected]="specialists()" (selectedChange)="onSpecialists($event)" />
+          </div>
+          <div class="form-field">
+            <label for="u-sd">Short description</label>
+            <div class="input-wrap"><i class="bi bi-chat-square-text"></i>
+              <input id="u-sd" name="sd" maxlength="140" [(ngModel)]="model.sd" />
+            </div>
+          </div>
+          <div class="form-field full-width">
+            <label for="u-bio">Biography</label>
+            <app-rich-text-editor inputId="u-bio" name="bio" [minHeight]="120" placeholder="A few lines about their background and experience…" [(ngModel)]="model.bio"></app-rich-text-editor>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="modal-footer-custom">
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+      <button type="submit" class="save-btn"><i class="bi bi-floppy"></i> {{ isEdit ? 'Save changes' : 'Create user' }}</button>
+    </div>
+  </form>
+</div>

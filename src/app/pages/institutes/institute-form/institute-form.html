@@ -1,0 +1,107 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-bank"></i></div>
+      <div class="title-content">
+        <h2>{{ isEdit ? 'Edit College / Institute' : 'Create College / Institute' }}</h2>
+        <p>{{ isEdit ? existing?.id + ' · ' + existing?.code : 'Add a college that takes part in the programme' }}</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <form #f="ngForm" (ngSubmit)="save(f)" novalidate>
+    <div class="modal-body-custom">
+      @if (serverError(); as err) { <div class="error-text" role="alert">{{ err }}</div> }
+      <div class="muted"><i class="bi bi-info-circle"></i> Institute code <strong>{{ codePreview }}</strong> is used to build student IDs{{ isEdit ? ' and cannot change.' : '.' }}</div>
+
+      <div class="section-title"><i class="bi bi-building"></i> Institute</div>
+      <div class="form-grid">
+        <div class="form-field full-width">
+          <label for="o-name">Name <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-bank"></i>
+            <input id="o-name" name="n" required maxlength="80" [(ngModel)]="model.n" #n="ngModel" [class.is-invalid]="submitted() && n.invalid" />
+          </div>
+          @if (submitted() && n.invalid) { <small class="error-text">Name is required.</small> }
+        </div>
+        <div class="form-field">
+          <label for="o-city">City <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-geo-alt"></i>
+            <input id="o-city" name="city" required maxlength="40" [(ngModel)]="model.city" #city="ngModel" [class.is-invalid]="submitted() && city.invalid" />
+          </div>
+          @if (submitted() && city.invalid) { <small class="error-text">City is required.</small> }
+        </div>
+        <div class="form-field">
+          <label for="o-status">Status</label>
+          <label class="status-switch" for="o-status">
+            <input id="o-status" type="checkbox" role="switch" name="st" [checked]="model.st === 'Active'" (change)="model.st = $any($event.target).checked ? 'Active' : 'Inactive'" />
+            <span class="track"><span class="thumb"></span></span>
+            <span class="status-text">{{ model.st }}</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="section-title"><i class="bi bi-person-lines-fill"></i> Contact</div>
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="o-pr">Principal / point of contact <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-person"></i>
+            <input id="o-pr" name="pr" required maxlength="60" [(ngModel)]="model.pr" #pr="ngModel" [class.is-invalid]="submitted() && pr.invalid" />
+          </div>
+          @if (submitted() && pr.invalid) { <small class="error-text">Contact name is required.</small> }
+        </div>
+        <div class="form-field">
+          <label for="o-ph">Phone <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-telephone"></i>
+            <input id="o-ph" name="ph" required [pattern]="phonePattern" [(ngModel)]="model.ph" #ph="ngModel" [class.is-invalid]="submitted() && ph.invalid" placeholder="+91 452 2300000" />
+          </div>
+          @if (submitted() && ph.invalid) { <small class="error-text">Enter a valid phone number.</small> }
+        </div>
+        <div class="form-field full-width">
+          <label for="o-email">Email address <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-envelope"></i>
+            <input id="o-email" type="email" name="email" required email [(ngModel)]="model.email" #email="ngModel" [class.is-invalid]="submitted() && email.invalid" />
+          </div>
+          @if (submitted() && email.invalid) { <small class="error-text">Enter a valid email.</small> }
+        </div>
+      </div>
+
+      <div class="section-title"><i class="bi bi-geo"></i> Attendance geofence</div>
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="o-lat">Latitude</label>
+          <div class="input-wrap"><i class="bi bi-crosshair"></i>
+            <input id="o-lat" type="number" name="lat" min="-90" max="90" step="0.0000001" [(ngModel)]="model.lat" #lat="ngModel" [class.is-invalid]="submitted() && lat.invalid" />
+          </div>
+          @if (submitted() && lat.invalid) { <small class="error-text">Latitude must be between -90 and 90.</small> }
+        </div>
+        <div class="form-field">
+          <label for="o-lng">Longitude</label>
+          <div class="input-wrap"><i class="bi bi-crosshair"></i>
+            <input id="o-lng" type="number" name="lng" min="-180" max="180" step="0.0000001" [(ngModel)]="model.lng" #lng="ngModel" [class.is-invalid]="submitted() && lng.invalid" />
+          </div>
+          @if (submitted() && lng.invalid) { <small class="error-text">Longitude must be between -180 and 180.</small> }
+        </div>
+        <div class="form-field">
+          <label for="o-radius">Geofence radius (metres)</label>
+          <div class="input-wrap"><i class="bi bi-broadcast-pin"></i>
+            <input id="o-radius" type="number" name="geofenceRadiusM" min="1" max="65535" step="1" [(ngModel)]="model.geofenceRadiusM" #radius="ngModel" [class.is-invalid]="submitted() && radius.invalid" />
+          </div>
+          @if (submitted() && radius.invalid) { <small class="error-text">Enter a radius between 1 and 65535 metres.</small> }
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer-custom">
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+      <button
+        type="submit"
+        class="save-btn"
+        [disabled]="saving()"
+      >
+        <i [class]="saving() ? 'bi bi-arrow-repeat' : 'bi bi-floppy'"></i>
+        {{ saving() ? 'Saving...' : (isEdit ? 'Save changes' : 'Create institute') }}
+      </button>
+    </div>
+  </form>
+</div>

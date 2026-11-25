@@ -1,0 +1,37 @@
+.sf {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 6px 0;
+    border-top: 1px solid var(--border-soft, #e5e7eb);
+    font-size: 13px;
+  }
+
+  small { color: var(--text-muted, #6b7280); }
+}
+
+.sf-name { min-width: 0; overflow-wrap: anywhere; }
+
+.sf-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+
+  button {
+    border: 1px solid var(--primary-border, #d8dee8);
+    border-radius: 8px;
+    background: var(--primary-soft, transparent);
+    color: var(--primary-dark, #2563eb);
+    padding: 3px 9px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+}
+
+.sf-error { margin: 6px 0 0; font-size: 12px; color: #b42318; }

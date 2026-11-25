@@ -1,0 +1,11 @@
+:host { overflow: auto; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 6px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
+.card { padding: 12px; border: 1px solid var(--border-soft); border-radius: 12px; background: var(--app-surface-solid); h4 { margin: 0 0 8px; font-size: 13px; color: var(--text-dark); } }
+.section-title { margin: 8px 0 0; font-size: 13px; color: var(--text-dark); }
+.muted { color: var(--text-muted); font-size: 11px; }
+.bar-row { display: grid; grid-template-columns: 110px 1fr 28px; align-items: center; gap: 8px; margin: 5px 0; font-size: 12px; color: var(--text-dark); }
+.bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-track { height: 8px; border-radius: 99px; background: var(--primary-soft); overflow: hidden; i { display: block; height: 100%; background: var(--primary); border-radius: 99px; } }
+.bar-row em { font-style: normal; font-weight: 600; text-align: right; }
+.download { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; > div { display: flex; flex-direction: column; gap: 2px; } }

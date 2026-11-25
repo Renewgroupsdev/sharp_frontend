@@ -1,0 +1,19 @@
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--border-soft);
+  border-radius: 99px;
+  background: var(--app-surface-bg);
+  font-size: 12px;
+  cursor: pointer;
+
+  input { width: auto; margin: 0; }
+}

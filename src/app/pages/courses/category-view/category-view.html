@@ -1,0 +1,54 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-tags"></i></div>
+      <div class="title-content">
+        <h2>Category details</h2>
+        <p>{{ category()?.id }}</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div class="modal-body-custom">
+    @if (category(); as k) {
+      <div class="cv-hero">
+        <span class="cv-badge"><i class="bi bi-tag-fill"></i></span>
+        <div class="cv-hero-text">
+          <h3>{{ k.n }}</h3>
+          <span class="cv-pill" [class.off]="k.st !== 'Active'">{{ k.st }}</span>
+        </div>
+      </div>
+
+      <div class="cv-stats">
+        <div><b>{{ courses().length }}</b><span>Courses</span></div>
+        <div><b>{{ publishedCount() }}</b><span>Published</span></div>
+        <div><b>{{ courses().length - publishedCount() }}</b><span>Not published</span></div>
+      </div>
+
+      <div class="cv-card">
+        <h4><i class="bi bi-card-text"></i> Description</h4>
+        <p [class.muted]="!k.desc">{{ k.desc || 'No description yet.' }}</p>
+      </div>
+
+      <div class="cv-card">
+        <h4><i class="bi bi-journal-bookmark"></i> Courses in this category</h4>
+        @for (c of courses(); track c.id) {
+          <div class="cv-course">
+            <span class="cv-course-name">{{ c.title }}</span>
+            <span class="cv-course-meta">{{ c.code ?? c.id }}</span>
+            <span class="cv-pill small" [class.off]="c.status !== 'Published'">{{ c.status }}</span>
+          </div>
+        } @empty {
+          <p class="muted">No courses use this category yet.</p>
+        }
+      </div>
+    } @else {
+      <p class="muted">This category no longer exists.</p>
+    }
+  </div>
+
+  <div class="modal-footer-custom">
+    <button type="button" class="cancel-btn" (click)="close()">Close</button>
+  </div>
+</div>

@@ -1,0 +1,141 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-pencil-square"></i></div>
+      <div class="title-content">
+        <h2>Edit certificate</h2>
+        <p>{{ cert.name }} · {{ cert.course }}</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <form (ngSubmit)="save()" (input)="touch()" (change)="touch()" novalidate>
+    <div class="modal-body-custom">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="ce-template">Certificate template</label>
+          <div class="input-wrap"><i class="bi bi-layout-text-window"></i>
+            <select id="ce-template" name="template" [(ngModel)]="model.template">@for (t of templates; track t) { <option [value]="t">{{ t }}</option> }</select>
+            <i class="bi bi-chevron-down select-arrow"></i>
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="ce-type">Certificate type</label>
+          <div class="input-wrap"><i class="bi bi-tag"></i>
+            <select id="ce-type" name="type" [(ngModel)]="model.type">@for (t of types; track t) { <option [value]="t">{{ t }}</option> }</select>
+            <i class="bi bi-chevron-down select-arrow"></i>
+          </div>
+        </div>
+
+        <div class="form-field full-width">
+          <label for="ce-title">Title <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-fonts"></i><input id="ce-title" name="title" maxlength="120" [(ngModel)]="model.title" /></div>
+        </div>
+        <div class="form-field full-width">
+          <label for="ce-body">Certificate body</label>
+          <div class="input-wrap textarea-wrap"><i class="bi bi-text-paragraph"></i><textarea id="ce-body" name="body" rows="3" maxlength="1000" [(ngModel)]="model.body"></textarea></div>
+          <small class="hint">Placeholders: {{ '{student} {course} {score} {date} {no}' }}</small>
+        </div>
+
+        <div class="form-field">
+          <label for="ce-student">Student <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-person"></i>
+            <select id="ce-student" name="student" disabled><option>{{ cert.name }} ({{ cert.student_id }})</option></select>
+            <i class="bi bi-chevron-down select-arrow"></i>
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="ce-name">Student name</label>
+          <div class="input-wrap"><i class="bi bi-person-vcard"></i><input id="ce-name" name="studentName" readonly [value]="cert.name" /></div>
+        </div>
+
+        <div class="form-field">
+          <label for="ce-course">Course <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-journal-bookmark"></i>
+            <select id="ce-course" name="course" disabled><option>{{ cert.course }}</option></select>
+            <i class="bi bi-chevron-down select-arrow"></i>
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="ce-score">Score (%) <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-percent"></i><input id="ce-score" type="number" name="score" min="0" max="100" [(ngModel)]="model.score" /></div>
+          <small class="hint">Computed from quiz results: {{ cert.score_live ?? '—' }}{{ cert.score_live === null || cert.score_live === undefined ? '' : '%' }}</small>
+        </div>
+
+        <div class="form-field">
+          <label for="ce-number">Certificate number</label>
+          <div class="input-wrap"><i class="bi bi-hash"></i><input id="ce-number" name="number" readonly class="mono" [value]="cert.number ?? numberPreview" /></div>
+          <small class="hint">Assigned when the certificate is issued.</small>
+        </div>
+        <div class="form-field">
+          <label for="ce-minatt">Minimum attendance %</label>
+          <div class="input-wrap"><i class="bi bi-calendar-check"></i><input id="ce-minatt" type="number" name="minAttendance" min="0" max="100" [(ngModel)]="model.minAttendance" /></div>
+        </div>
+
+        <div class="form-field">
+          <label for="ce-signame">Signature name</label>
+          <div class="input-wrap"><i class="bi bi-pen"></i><input id="ce-signame" name="signatureName" maxlength="80" [(ngModel)]="model.signatureName" /></div>
+        </div>
+        <div class="form-field">
+          <label for="ce-sigrole">Signature designation</label>
+          <div class="input-wrap"><i class="bi bi-person-badge"></i><input id="ce-sigrole" name="signatureRole" maxlength="80" [(ngModel)]="model.signatureRole" /></div>
+        </div>
+
+        <div class="form-field full-width">
+          <label for="ce-sigimg">Signature image</label>
+          @if (model.signatureImage) { <img class="sig-img" [src]="model.signatureImage" alt="Current signature" /> }
+          <input id="ce-sigimg" class="file-input" type="file" accept="image/png,image/jpeg" (change)="onSignature($event)" />
+          <small class="hint">Leave empty to use the default from settings. PNG or JPEG, 150 KB or smaller.</small>
+        </div>
+
+        <div class="form-field full-width checks">
+          <label class="check-row"><input type="checkbox" name="showProfile" [(ngModel)]="model.showProfile" /> <span>Show student profile</span></label>
+          <label class="check-row"><input type="checkbox" name="showQr" [(ngModel)]="model.showQr" /> <span>Show verification QR code</span></label>
+          <label class="check-row"><input type="checkbox" name="override" [(ngModel)]="model.override" /> <span>Override attendance requirement</span></label>
+        </div>
+
+        <div class="form-field">
+          <label for="ce-status">Status</label>
+          <div class="input-wrap"><i class="bi bi-toggle-on"></i>
+            <select id="ce-status" name="status" [(ngModel)]="model.status">@for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }</select>
+            <i class="bi bi-chevron-down select-arrow"></i>
+          </div>
+          <small class="hint">Choose Issued to issue it when you save.</small>
+        </div>
+        <div class="form-field">
+          <label>Attendance</label>
+          <div class="att-box" [class.bad]="!attendanceNote().ok">
+            <b>{{ attendanceNote().text }}</b>
+            @if (cert.attendance !== null) { <span class="pill-mini" [class.ok]="attendanceNote().ok">{{ attendanceNote().ok ? 'Eligible' : 'Below minimum' }}</span> }
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label for="ce-date">Issue date</label>
+          <div class="input-wrap"><i class="bi bi-calendar3"></i><input id="ce-date" type="date" name="issueDate" [max]="maxDate" [(ngModel)]="model.issueDate" /></div>
+          <small class="hint">Leave empty to use the day it is issued.</small>
+        </div>
+      </div>
+
+      <button type="button" class="link-btn" (click)="useDefaults()">Use the programme settings and computed score</button>
+
+      <h4 class="preview-title">Preview</h4>
+      <app-certificate-view [cert]="preview()" />
+
+      @if (cert.mentor?.decision; as decision) {
+        <p class="note mentor">
+          <b>Mentor review:</b> {{ decision === 'approved' ? 'Approved' : 'Returned' }}{{ cert.mentor?.by ? ' by ' + cert.mentor?.by : '' }}.
+          @if (cert.mentor?.note) { <span>“{{ cert.mentor?.note }}”</span> }
+        </p>
+      }
+      <p class="note">Once issued, a certificate is locked. To correct an issued certificate, cancel it (with a reason) and create a new one.</p>
+      @if (serverError(); as err) { <p class="error-text" role="alert">{{ err }}</p> }
+    </div>
+
+    <div class="modal-footer-custom">
+      <button type="submit" class="save-btn" [disabled]="saving()"><i class="bi bi-floppy"></i> {{ saving() ? 'Saving…' : 'Save changes' }}</button>
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+    </div>
+  </form>
+</div>

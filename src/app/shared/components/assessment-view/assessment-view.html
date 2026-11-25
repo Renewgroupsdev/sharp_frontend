@@ -1,0 +1,56 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi" [class]="icon"></i></div>
+      <div class="title-content">
+        <h2>{{ data.type }} details</h2>
+        <p>{{ data.id ? data.id + ' · ' : '' }}{{ data.course }}</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div class="modal-body-custom">
+    <div class="av-hero">
+      <span class="av-badge"><i class="bi" [class]="icon"></i></span>
+      <div class="av-hero-text">
+        <h3>{{ data.title }}</h3>
+        <div class="av-tags">
+          <span class="av-pill">{{ data.type }}</span>
+          @if (data.status) { <span class="av-pill" [class.live]="data.status === 'Published'" [class.closed]="data.status === 'Closed'">{{ data.status }}</span> }
+        </div>
+      </div>
+    </div>
+
+    <div class="av-stats">
+      <div><i class="bi bi-calendar-event"></i><span>Submit date</span><b>{{ data.due }}</b></div>
+      <div><i class="bi bi-award"></i><span>Marks</span><b>{{ data.marks }}</b></div>
+      <div class="wide"><i class="bi bi-diagram-3"></i><span>Course · module · topic</span><b>{{ data.course }} · {{ data.where }}</b></div>
+    </div>
+
+    <div class="av-card">
+      <h4><i class="bi bi-card-text"></i> Instructions</h4>
+      <p class="desc" [class.muted]="!data.description">{{ data.description || 'No additional instructions provided.' }}</p>
+    </div>
+
+    <div class="av-card">
+      <h4><i class="bi bi-paperclip"></i> Document</h4>
+      @if (data.attachment; as file) {
+        @if (file.available !== false) {
+          <app-attachment-viewer [name]="file.name" [size]="file.size" [mime]="file.mime ?? null" [load]="data.loadFile" />
+        } @else {
+          <p class="muted">{{ file.name }} ({{ file.size }}) was recorded before file upload was available. Ask your instructor to upload it again.</p>
+        }
+      } @else {
+        <p class="muted">No document attached.</p>
+      }
+    </div>
+  </div>
+
+  <div class="modal-footer-custom">
+    <button type="button" class="cancel-btn" (click)="close()">Close</button>
+    @if (data.editable) {
+      <button *appCan="'a_assess.edit'" type="button" class="save-btn" (click)="edit()"><i class="bi bi-pencil-square"></i> Edit</button>
+    }
+  </div>
+</div>

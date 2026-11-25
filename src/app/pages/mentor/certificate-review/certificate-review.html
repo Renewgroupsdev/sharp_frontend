@@ -1,0 +1,41 @@
+<div class="m-page">
+  <div>
+    <h1 class="page-title"><i class="bi bi-award"></i> Certificate Review</h1>
+    <p class="m-sub">You confirm the student earned it. The programme office issues the certificate after your approval.</p>
+  </div>
+
+  @if (error(); as err) { <div class="m-card" role="alert">{{ err }}</div> }
+
+  <div class="m-card">
+    <h3>{{ waiting().length }} from your batch waiting</h3>
+    <div class="m-scroll">
+      <table class="m-table">
+        <thead><tr><th>Student</th><th>Course</th><th>Score</th><th>Attendance</th><th>Your review</th><th></th></tr></thead>
+        <tbody>
+          @for (c of waiting(); track c.id) {
+            <tr>
+              <td><div class="m-who"><span class="m-av">{{ initialsOf(c.name) }}</span><div><b>{{ c.name }}</b><small>{{ c.student_id }}</small></div></div></td>
+              <td>{{ c.course }}</td>
+              <td>@if (c.score !== null) { <span class="pill" [class.g]="c.score >= (c.eligibility?.min_score ?? 0)" [class.w]="c.score < (c.eligibility?.min_score ?? 0)">{{ c.score }}%</span> } @else { — }</td>
+              <td>@if (c.attendance !== null) { <span class="pill" [class.g]="c.attendance >= (c.eligibility?.min_attendance ?? 0)" [class.w]="c.attendance < (c.eligibility?.min_attendance ?? 0)">{{ c.attendance }}%</span> } @else { — }</td>
+              <td>
+                @if (c.mentor?.decision === 'approved') { <span class="pill g">Approved</span> }
+                @else if (c.mentor?.decision === 'returned') { <span class="pill w" [title]="c.mentor?.note ?? ''">Returned</span> }
+                @else { <span class="pill n">Not reviewed</span> }
+              </td>
+              <td>
+                <div class="m-inline">
+                  <button class="m-btn alt" type="button" (click)="view(c)"><i class="bi bi-eye"></i> Preview</button>
+                  <button class="m-btn" type="button" (click)="approve(c)"><i class="bi bi-check2"></i> Approve</button>
+                  <button class="m-btn alt" type="button" (click)="returnCert(c)"><i class="bi bi-arrow-return-left"></i> Return</button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            @if (loaded()) { <tr><td colspan="6" class="m-empty">Nothing waiting. All certificates from your batch are reviewed.</td></tr> }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

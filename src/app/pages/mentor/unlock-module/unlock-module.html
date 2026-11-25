@@ -1,0 +1,92 @@
+<div class="m-page">
+  <div>
+    <h1 class="page-title"><i class="bi bi-unlock"></i> Unlock Module</h1>
+    <p class="m-sub">A module opens when the one before it is finished: every lesson done and its quizzes passed. Use an early unlock only when a student has a genuine reason, such as joining the batch late.</p>
+  </div>
+
+  <div class="m-card">
+    <label class="um-pick">Student
+      <select [value]="studentId()" (change)="pick($any($event.target).value)" aria-label="Choose a student">
+        <option value="">Choose a student…</option>
+        @for (s of students(); track s.id) { <option [value]="s.id">{{ s.n }} ({{ s.id }})</option> }
+      </select>
+    </label>
+    @if (!students().length) { <p class="m-sub">No students in your batch yet.</p> }
+  </div>
+
+  @if (error(); as err) { <div class="m-note" role="alert"><i class="bi bi-exclamation-triangle"></i><div>{{ err }}</div></div> }
+
+  @if (studentId()) {
+    @for (c of overview(); track c.course.id) {
+      <div class="m-card">
+        <h3>{{ c.course.title }}</h3>
+        <div class="m-scroll">
+          <table class="m-table">
+            <thead><tr><th>#</th><th>Module</th><th>Lessons</th><th>Quizzes</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              @for (m of c.modules; track m.chapter_id) {
+                <tr>
+                  <td><b>{{ m.position + 1 }}</b></td>
+                  <td><b>{{ m.name }}</b>@if (m.locked && m.reason) { <small>{{ m.reason }}</small> }</td>
+                  <td>{{ m.lessons_done }} / {{ m.lessons_total }}</td>
+                  <td>
+                    @for (q of m.quizzes; track q.id) { <span class="pill" [class.g]="q.passed" [class.n]="!q.passed" [title]="q.title">{{ q.passed ? 'Passed' : 'Not passed' }}{{ q.best_percent !== null ? ' ' + q.best_percent + '%' : '' }}</span> }
+                    @empty { <span class="m-sub">None</span> }
+                  </td>
+                  <td>
+                    @if (m.complete) { <span class="pill g">Complete</span> }
+                    @else if (m.unlocked_early) { <span class="pill b">Opened early</span> }
+                    @else if (m.locked) { <span class="pill n"><i class="bi bi-lock"></i> Locked</span> }
+                    @else { <span class="pill b">In progress</span> }
+                  </td>
+                  <td>
+                    @if (m.locked) {
+                      @if (target() === m.chapter_id) {
+                        <div class="um-reason">
+                          <input type="text" maxlength="255" placeholder="Reason, e.g. joined the batch late" aria-label="Reason for unlocking" [value]="reason()" (input)="reason.set($any($event.target).value)" (keydown.enter)="confirm(m.chapter_id, m.name)" />
+                          <button class="m-btn" type="button" [disabled]="busy()" (click)="confirm(m.chapter_id, m.name)"><i class="bi bi-check2"></i> Confirm</button>
+                          <button class="m-btn alt" type="button" (click)="target.set(null)">Cancel</button>
+                        </div>
+                      } @else {
+                        <button class="m-btn" type="button" (click)="openUnlock(m.chapter_id)"><i class="bi bi-unlock"></i> Unlock</button>
+                      }
+                    } @else if (m.unlocked_early && recordFor(m.chapter_id); as rec) {
+                      <button class="m-btn alt" type="button" (click)="revoke(rec)"><i class="bi bi-lock"></i> Lock again</button>
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="6" class="m-empty">This course has no published modules yet.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    } @empty {
+      @if (!loading()) { <div class="m-card"><div class="m-empty">This student has no courses yet.</div></div> }
+    }
+  }
+
+  <div class="m-card">
+    <h3>Unlock history <span class="m-sub">{{ history().length }}</span></h3>
+    <div class="m-scroll">
+      <table class="m-table">
+        <thead><tr><th>Student</th><th>Course · module</th><th>Reason</th><th>Unlocked by</th><th>When</th><th></th></tr></thead>
+        <tbody>
+          @for (h of history(); track h.id) {
+            <tr>
+              <td><b>{{ h.name }}</b><small>{{ h.student_id }}</small></td>
+              <td>{{ h.course }}<small>{{ h.module }}</small></td>
+              <td>{{ h.reason }}</td>
+              <td>{{ h.unlocked_by || '—' }}</td>
+              <td>{{ h.created_at }}</td>
+              <td><button class="m-btn alt" type="button" (click)="revoke(h)"><i class="bi bi-lock"></i> Lock again</button></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="m-empty">No early unlocks yet.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,26 @@
+.intro {
+  margin: 0 0 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+
+  code { word-break: break-word; color: var(--primary-dark); }
+}
+
+.file-row { margin-top: 10px; }
+
+.summary {
+  margin-top: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--primary-border);
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  font-size: 12px;
+}
+
+.problems {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  color: var(--status-red-text);
+  font-size: 12px;
+}

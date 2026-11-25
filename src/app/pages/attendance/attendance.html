@@ -1,0 +1,256 @@
+<div class="purchase-page container-fluid px-0">
+  <div class="page-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+    <div>
+      <h6 class="page-title"><i class="bi bi-calendar-check"></i> Attendance Management</h6>
+      <p class="page-subtitle">Students report Present or Absent from their login. Mark each report here; marking writes the day's attendance. Admins, OBs and mentors can also mark manually on a person's behalf.</p>
+    </div>
+  </div>
+
+  <div class="segment att-tabs" role="tablist">
+    <button type="button" role="tab" [class.active]="tab() === 'list'" (click)="tab.set('list')">Attendance list ({{ pending() }} to mark)</button>
+    <button type="button" role="tab" [class.active]="tab() === 'manual'" (click)="tab.set('manual')">Mark manual attendance</button>
+  </div>
+
+  @switch (tab()) {
+    @case ('list') {
+      <div class="att-note">Pending reports come first. <b>Mark present</b> or <b>Mark absent</b> to decide each one; you can change a marked report again. An absence report always carries the student's reason. Attendance marked by hand in the manual tab is listed here too, under <b>Marked by</b>.</div>
+
+      <app-count-ribbon class="d-block mb-2" [items]="stats()" [activeKeys]="activeRibbonKeys" (select)="onRibbonSelect($event)" />
+
+      <app-common-filter-card
+        searchPlaceholder="Search student name, ID, institute or reason"
+        [filters]="filters"
+        (exportClick)="onExport($event)"
+        (searchChange)="onSearch($event)"
+        (filtersChange)="onFiltersChange($event)"
+      ></app-common-filter-card>
+
+      <div class="table-col">
+        <app-common-table-card
+          title="Attendance reports"
+          [recordCountText]="recordCountText"
+          [columns]="columns"
+          [rows]="rows"
+          [totalRecords]="totalRecords"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="pageSizeOptions"
+          [currentPage]="currentPage"
+          [pageInfoText]="pageInfoText"
+          [sortActive]="sortActive"
+          [sortDirection]="sortDirection"
+          (pageChange)="onPageChange($event)"
+          (sortChange)="onSortChange($event)"
+          (quickActionClick)="onQuickAction($event)"
+          (profileClick)="onProfile($event)"
+        ></app-common-table-card>
+      </div>
+    }
+
+    @case ('manual') {
+      <div class="att-note">
+        @if (limited()) {
+          <b>Mentor view:</b> you can mark manual attendance only for your assigned students ({{ actor()?.b }}).
+        } @else {
+          <b>{{ actor()?.r || 'Admin' }} view:</b> you can mark manual attendance on behalf of any student or mentor.
+        }
+      </div>
+      <div class="att-bar">
+        <label>Acting as
+          <select [ngModel]="actorId()" (ngModelChange)="pickActor($event)">
+            @for (a of actors(); track a.id) { <option [value]="a.id">{{ a.n }} — {{ a.r }}</option> }
+          </select>
+        </label>
+        <label>Date <input type="date" [ngModel]="mDate()" (ngModelChange)="mDate.set($event)" /></label>
+      </div>
+      <p class="att-hint">Students with no attendance for the day are listed here as <b>Pending</b>. Students who sent a report, or are already marked, are not shown. A remark is required for every manual mark.
+        <button type="button" class="att-link" (click)="selectUnmarked()" [disabled]="!unmarkedCount()">Select all ({{ unmarkedCount() }})</button></p>
+      @if (selected().size) {
+        <div class="att-selbar" *appCan="'a_attend.create'">
+          <b>{{ selected().size }} selected</b>
+          <button type="button" class="att-link" (click)="toggleAll(false)">Clear</button>
+          <button type="button" class="att-btn" (click)="bulkOpen.set(true)"><i class="bi bi-people-fill"></i> Bulk mark attendance</button>
+        </div>
+      }
+      <div class="att-filters">
+        <label class="att-search"><i class="bi bi-search"></i><input type="search" placeholder="Search name, ID or college" [ngModel]="mSearch()" (ngModelChange)="mSearch.set($event)" /></label>
+        <select aria-label="College" [ngModel]="mCollege()" (ngModelChange)="mCollege.set($event)">
+          <option value="">All colleges</option>
+          @for (o of collegeOptions(); track o) { <option [value]="o">{{ o }}</option> }
+        </select>
+        <select aria-label="Batch" [ngModel]="mBatch()" (ngModelChange)="mBatch.set($event)">
+          <option value="">All batches</option>
+          @for (o of batchOptions(); track o) { <option [value]="o">{{ o }}</option> }
+        </select>
+        @if (filtersOn()) { <button type="button" class="att-link" (click)="clearManualFilters()">Clear filters</button> }
+        <span class="att-muted att-count">{{ shownRows().length }} student{{ shownRows().length === 1 ? '' : 's' }}</span>
+      </div>
+      <div class="att-card">
+        <div class="att-scroll">
+          <table class="att-table">
+            <thead><tr><th class="att-tick"><input type="checkbox" aria-label="Select every student" [checked]="allTicked()" [disabled]="!studentRows().length" (change)="toggleAll($any($event.target).checked)" /></th><th>Name</th><th>College</th><th>Batch</th><th>Status · {{ displayDate(mDate()) }}</th><th></th></tr></thead>
+            <tbody>
+              @for (row of shownRows(); track row.u.id) {
+                <tr [class.att-picked]="selected().has(row.u.id)">
+                  <td class="att-tick">@if (row.u.r === 'Student') { <input type="checkbox" [attr.aria-label]="'Select ' + row.u.n" [checked]="selected().has(row.u.id)" (change)="toggleOne(row.u.id, $any($event.target).checked)" /> }</td>
+                  <td><a class="att-name" href="javascript:void(0)" role="button" (click)="openStudent(row.u.id)">{{ row.u.n }}</a><small>{{ row.u.id }}</small></td>
+                  <td>{{ row.u.org }}</td>
+                  <td>{{ row.u.b }}</td>
+                  <td>
+                    @if (row.ex) {
+                      <span class="att-pill" [ngClass]="'p-' + row.ex.status.toLowerCase()">{{ row.ex.status }}</span>
+                      <span class="att-pill" [ngClass]="row.ex.mode === 'Manual' ? 'p-pending' : 'p-approved'">{{ row.ex.mode }}</span>
+                      @if (row.ex.by) { <small class="att-muted">by {{ row.ex.by }}</small> }
+                    } @else {
+                      <span class="att-pill p-pending">Pending</span>
+                      @if (row.reported) { <small class="att-muted">student reported {{ row.reported }}</small> }
+                    }
+                  </td>
+                  <td class="att-act"><button *appCan="'a_attend.create'" type="button" class="att-btn" [class.on]="pop()?.id === row.u.id" (click)="openPop(row)"><i class="bi" [class]="row.ex ? 'bi-pencil-square' : 'bi-person-check'"></i> {{ row.ex ? 'Update' : 'Mark' }}</button></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="6" class="att-empty">No students to show.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      @if (bulkOpen()) {
+        <div class="att-modal-backdrop" (click)="bulkOpen.set(false)"></div>
+        <form class="att-modal" role="dialog" aria-label="Bulk mark attendance" (ngSubmit)="applyBulk()" (keydown.escape)="bulkOpen.set(false)">
+          <div class="att-modal-head">
+            <div><b>Bulk mark attendance</b><small>{{ selected().size }} student{{ selected().size === 1 ? '' : 's' }} · {{ displayDate(mDate()) }}</small></div>
+            <button type="button" class="att-x" aria-label="Close" (click)="bulkOpen.set(false)"><i class="bi bi-x-lg"></i></button>
+          </div>
+          <div class="att-pop-choice" role="radiogroup" aria-label="Status">
+            <button type="button" role="radio" [attr.aria-checked]="bulkStatus() === 'Present'" class="present" [class.on]="bulkStatus() === 'Present'" (click)="bulkStatus.set('Present')"><i class="bi bi-person-check-fill"></i> Present</button>
+            <button type="button" role="radio" [attr.aria-checked]="bulkStatus() === 'Absent'" class="absent" [class.on]="bulkStatus() === 'Absent'" (click)="bulkStatus.set('Absent')"><i class="bi bi-person-x-fill"></i> Absent</button>
+          </div>
+          <label>Remark for all
+            <input type="text" name="bulkRemark" autofocus placeholder="e.g. Workshop day, whole batch present" [ngModel]="bulkRemark()" (ngModelChange)="bulkRemark.set($event)" />
+          </label>
+          <div class="att-pop-actions">
+            <button type="button" class="att-link" (click)="bulkOpen.set(false)">Cancel</button>
+            <button type="submit" class="att-btn" [disabled]="bulkBusy()">{{ bulkBusy() ? 'Saving…' : 'Apply to ' + selected().size + ' selected' }}</button>
+          </div>
+        </form>
+      }
+
+    }
+  }
+      @if (pop(); as p) {
+        @if (popRow(); as row) {
+          <div class="att-backdrop" (click)="closePop()"></div>
+          <form class="att-pop" role="dialog" [attr.aria-label]="'Mark attendance for ' + row.u.n"
+            (ngSubmit)="savePop()" (keydown.escape)="closePop()">
+            <div class="att-pop-top">
+              <span class="att-pop-avatar">{{ initials(row.u.n) }}</span>
+              <div class="att-pop-who"><b>{{ row.u.n }}</b><small>{{ row.u.org }} · {{ row.u.b }}</small></div>
+              <button type="button" class="att-x" aria-label="Close" (click)="closePop()"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="att-pop-date"><i class="bi bi-calendar3"></i> {{ displayDate(mDate()) }} · manual attendance</div>
+            <div class="att-pop-choice" role="radiogroup" aria-label="Status">
+              <button type="button" role="radio" [attr.aria-checked]="row.st === 'Present'" [class.on]="row.st === 'Present'" class="present" (click)="setDraft(row.u.id, { st: 'Present' })"><i class="bi bi-person-check-fill"></i><span>Present</span></button>
+              <button type="button" role="radio" [attr.aria-checked]="row.st === 'Absent'" [class.on]="row.st === 'Absent'" class="absent" (click)="setDraft(row.u.id, { st: 'Absent' })"><i class="bi bi-person-x-fill"></i><span>Absent</span></button>
+            </div>
+            <label>Remark <em>required</em>
+              <textarea name="remark" rows="2" autofocus placeholder="Why is this marked manually?" [ngModel]="row.rem" (ngModelChange)="setDraft(row.u.id, { rem: $event })"></textarea>
+            </label>
+            <div class="att-pop-chips">
+              @for (q of quickRemarks; track q) { <button type="button" (click)="setDraft(row.u.id, { rem: q })">{{ q }}</button> }
+            </div>
+            <div class="att-pop-actions">
+              <button type="button" class="att-ghost" (click)="closePop()">Cancel</button>
+              <button type="submit" class="att-save" [class.absent]="row.st === 'Absent'" [disabled]="popBusy() || !row.rem.trim()">
+                <i class="bi" [class]="row.st === 'Absent' ? 'bi-person-x-fill' : 'bi-check-lg'"></i> {{ popBusy() ? 'Saving…' : 'Mark ' + row.st.toLowerCase() }}
+              </button>
+            </div>
+          </form>
+        }
+      }
+
+  @if (viewSid(); as sid) {
+    <div class="att-modal-backdrop" (click)="closeStudent()"></div>
+    <aside class="att-detail" role="dialog" aria-label="Student details" (keydown.escape)="closeStudent()">
+      <div class="pp">
+        <span class="pp-role-tag"><i [ngClass]="'role-' + (viewUser()?.r || 'Student').toLowerCase().split(' ').join('-')">{{ viewUser()?.r || 'Student' }}</i></span>
+        <div class="pp-bar">
+          <button type="button" class="pp-icon-btn" aria-label="Close" (click)="closeStudent()"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div class="pp-head">
+          @if (viewUser(); as u) {
+            @if (u.pic) { <img class="pp-avatar" [src]="u.pic" [alt]="u.n" /> } @else { <span class="pp-avatar" [style.background]="u.col">{{ u.i }}</span> }
+          } @else { <span class="pp-avatar">{{ initials(sid) }}</span> }
+          <div class="pp-who">
+            <div>
+              <h2 class="pp-title">{{ viewUser()?.n || sid }}</h2>
+              <div class="pp-sub">
+                @if (viewUser(); as u) { <span class="pp-badge" [ngClass]="u.st === 'Suspended' ? 'bad' : u.st === 'Invited' ? 'wait' : 'ok'">{{ u.st }}</span> }
+                <span>· {{ viewUser()?.r || 'Student' }}</span><span>· {{ sid }}</span>
+              </div>
+            </div>
+            <div class="pp-meta">
+              <div><span>College</span><b [title]="viewUser()?.org || ''">{{ viewUser()?.org || '—' }}</b></div>
+              <div class="with-icon"><i class="bi bi-envelope"></i><b>{{ viewUser()?.email || '—' }}</b></div>
+              <div><span>Batch</span><b>{{ viewUser()?.b || '—' }}</b></div>
+              <div class="with-icon"><i class="bi bi-telephone"></i><b>{{ viewUser()?.ph || '—' }}</b></div>
+            </div>
+          </div>
+        </div>
+
+        <nav class="pp-ribbon" role="tablist">
+          <button type="button" role="tab" class="ribbon-tab" [class.on]="viewTab() === 'details'" (click)="viewTab.set('details')">Details</button>
+          <button type="button" role="tab" class="ribbon-tab" [class.on]="viewTab() === 'attendance'" (click)="viewTab.set('attendance')">Attendance <span class="att-tab-count">{{ viewStats().total }}</span></button>
+        </nav>
+
+        <div class="pp-body">
+          @if (viewTab() === 'details') {
+            <div class="pp-stats">
+              <div><b>{{ viewStats().total }}</b><span>Days recorded</span></div>
+              <div class="ok"><b>{{ viewStats().present }}</b><span>Present</span></div>
+              <div class="bad"><b>{{ viewStats().absent }}</b><span>Absent</span></div>
+              <div><b>{{ viewStats().rate }}%</b><span>Attendance</span></div>
+            </div>
+            <section class="pp-card">
+              <h3>Personal Information</h3>
+              <dl class="pp-grid">
+                <div><dt>Full name</dt><dd>{{ viewUser()?.n || sid }}</dd></div>
+                <div><dt>Student ID</dt><dd>{{ sid }}</dd></div>
+                <div><dt>Email</dt><dd>{{ viewUser()?.email || '—' }}</dd></div>
+                <div><dt>Mobile</dt><dd>{{ viewUser()?.ph || '—' }}</dd></div>
+              </dl>
+            </section>
+            <section class="pp-card">
+              <h3>Programme Information</h3>
+              <dl class="pp-grid">
+                <div><dt>College</dt><dd>{{ viewUser()?.org || '—' }}</dd></div>
+                <div><dt>Batch</dt><dd>{{ viewUser()?.b || '—' }}</dd></div>
+                <div><dt>Status</dt><dd>{{ viewUser()?.st || '—' }}</dd></div>
+                <div><dt>Last sign-in</dt><dd>{{ viewUser()?.last || '—' }}</dd></div>
+              </dl>
+            </section>
+          } @else {
+            <section class="pp-card">
+              <h3>Attendance list <small class="att-muted">last 6 months</small></h3>
+              <div class="att-history">
+                @if (viewBusy()) {
+                  <p class="att-muted">Loading…</p>
+                } @else {
+                  @for (r of viewRecords(); track r.id) {
+                    <div class="att-hrow">
+                      <span class="att-hdate">{{ r.date }}</span>
+                      <span class="att-pill" [ngClass]="'p-' + r.status.toLowerCase()">{{ r.status }}</span>
+                      <span class="att-muted att-hmode">{{ r.mode }}@if (r.by) { · {{ r.by }} }</span>
+                      @if (r.remarks) { <small class="att-hnote">{{ r.remarks }}</small> }
+                    </div>
+                  } @empty { <p class="att-muted">No attendance recorded yet.</p> }
+                }
+              </div>
+            </section>
+          }
+        </div>
+      </div>
+    </aside>
+  }
+</div>

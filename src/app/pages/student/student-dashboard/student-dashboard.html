@@ -1,0 +1,110 @@
+<div class="st-page">
+  @if (error(); as err) { <div class="st-card warn" role="alert">{{ err }}</div> }
+  <div class="st-grid side">
+    <div class="d-main">
+      <section class="d-hero">
+        <div class="copy">
+          <span class="eyebrow">{{ greeting }}, {{ name() }}</span>
+          <h1>Learn Skills<br />for a Better<br /><em>Tomorrow</em></h1>
+          <p>
+            {{ batch() }}{{ batch() && org() ? ' · ' : '' }}{{ org() }}.
+            @if (courses().length) { You have completed {{ done() }} of {{ courses().length }} course(s), keep going. }
+            @else { Your courses appear here once your batch is mapped to them. }
+          </p>
+          <button type="button" class="dark-btn" (click)="open(current()?.id)">{{ inProgress() || done() ? 'Continue Learning' : 'Start Learning' }} <i class="bi bi-arrow-right"></i></button>
+        </div>
+        <div class="art" aria-hidden="true">
+          <i class="bi bi-mortarboard-fill"></i>
+          <i class="bi bi-lightbulb-fill bulb"></i>
+          <i class="bi bi-stars spark"></i>
+        </div>
+      </section>
+
+      <div class="shortcuts">
+        @for (s of shortcuts; track s.link) {
+          <a class="shortcut" [routerLink]="s.link" [style.background]="s.bg" [style.color]="s.c"><i class="bi" [class]="s.icon"></i><span>{{ s.label }}</span></a>
+        }
+      </div>
+
+      <app-role-dashboard [heading]="false" />
+
+      <app-submission-stats />
+
+      <section>
+        <div class="st-h"><span class="big">My Courses</span><a class="see" routerLink="/app/learning">See All <i class="bi bi-arrow-right"></i></a></div>
+        <div class="st-grid cols-3 mods">
+          @for (c of courses(); track c.id; let i = $index) {
+            @let t = tint(i);
+            <button type="button" class="mod-card" (click)="open(c.id)">
+              <span class="thumb" [style.background]="t.bg" [style.color]="t.fg">
+                <span class="tag">{{ c.category || 'Course' }}</span>
+                <i class="bi" [class]="t.icon"></i>
+              </span>
+              <b>{{ c.title }}</b>
+              <span class="mut">{{ c.lessons_total }} lessons · {{ c.hours }} h</span>
+              <span class="foot">
+                @switch (c.status) {
+                  @case ('Completed') { <span class="pill g"><i class="bi bi-check2"></i> Completed</span> }
+                  @case ('In progress') { <span class="pill m">{{ c.lessons_done }}/{{ c.lessons_total }} done</span> }
+                  @default { <span class="pill">Not started</span> }
+                }
+                <span class="go"><i class="bi bi-arrow-right"></i></span>
+              </span>
+            </button>
+          } @empty {
+            @if (loaded()) { <span class="mut">No courses yet. They appear once your batch is mapped to a course.</span> }
+          }
+        </div>
+      </section>
+    </div>
+
+    <aside class="d-side">
+      <div class="st-card">
+        <div class="st-h"><span class="big">My Progress</span></div>
+        <div class="prog">
+          <div class="ring">
+            <svg viewBox="0 0 80 80">
+              <circle cx="40" cy="40" [attr.r]="ringR" class="bg" />
+              <circle cx="40" cy="40" [attr.r]="ringR" class="fg" [attr.stroke-dasharray]="ringLen" [attr.stroke-dashoffset]="ringOffset()" />
+            </svg>
+            <span>{{ overall() }}%</span>
+          </div>
+          <div><b class="t1">Overall progress</b><span class="t2">{{ attendancePct() }}% attendance</span></div>
+        </div>
+        <div class="legend">
+          <div><i class="dot g"></i><span>Completed</span><b>{{ done() }}</b></div>
+          <div><i class="dot y"></i><span>In Progress</span><b>{{ inProgress() }}</b></div>
+          <div><i class="dot o"></i><span>Not Started</span><b>{{ notStarted() }}</b></div>
+        </div>
+      </div>
+
+      @if (current(); as c) {
+        <div class="st-card soft">
+          <div class="st-h"><span class="big">Continue Learning</span></div>
+          <div class="cont">
+            <span class="thumb" [style.background]="tint(0).bg" [style.color]="tint(0).fg"><i class="bi" [class]="tint(0).icon"></i></span>
+            <div class="grow">
+              <span class="t2">{{ c.category || 'Course' }}</span>
+              <b class="t1">{{ c.title }}</b>
+              <div class="st-bar"><i [style.width.%]="c.progress"></i></div>
+            </div>
+            <span class="mut pct">{{ c.progress }}%</span>
+          </div>
+          <button type="button" class="st-btn wide" (click)="open(c.id)">{{ c.status === 'Completed' ? 'Review' : 'Continue' }} <i class="bi bi-arrow-right"></i></button>
+        </div>
+      }
+
+      <div class="st-card">
+        <div class="st-h"><span class="big">Recent Attendance</span><a class="see" routerLink="/app/attendance">See All <i class="bi bi-arrow-right"></i></a></div>
+        @for (a of recentAttendance(); track a.id) {
+          <div class="st-row">
+            <span class="grow"><span class="t1">{{ a.att_date }}</span><span class="t2">{{ a.reason || (a.marked_by_name ? 'Marked by ' + a.marked_by_name : 'Marked on the app') }}</span></span>
+            <span class="pill" [class]="attendancePill(a.status)">{{ a.status }}</span>
+          </div>
+        } @empty {
+          <span class="mut">No attendance recorded yet.</span>
+        }
+      </div>
+    </aside>
+  </div>
+</div>

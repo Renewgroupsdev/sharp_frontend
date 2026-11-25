@@ -1,0 +1,37 @@
+<section class="st-page">
+  <div class="st-head">
+    <div>
+      <h2 class="page-title"><i class="bi bi-journal-richtext"></i> My Learning</h2>
+      <p class="st-sub">{{ summary().total }} course(s) · {{ summary().done }} completed · {{ summary().avg }}% average progress</p>
+    </div>
+  </div>
+
+  @if (error(); as err) { <div class="st-card warn" role="alert">{{ err }}</div> }
+
+  <div class="st-grid cols-3">
+    @for (c of courses(); track c.id) {
+      <div class="st-card course-card">
+        <div class="course-top">
+          <span class="pill m">{{ c.category || 'Course' }}</span>
+          <span class="pill" [class]="pill(c.status)">{{ c.status }}</span>
+        </div>
+        <h3 class="course-title">{{ c.title }}</h3>
+        <span class="t2">{{ c.level }} · {{ c.mode }} · {{ c.hours }} hours</span>
+        <span class="t2">Mentor: {{ c.mentors.join(', ') || 'Unassigned' }}</span>
+        <div class="bar" role="progressbar" [attr.aria-valuenow]="c.progress" aria-valuemin="0" aria-valuemax="100"><i [style.width.%]="c.progress"></i></div>
+        <div class="course-foot">
+          <span class="mut">{{ c.lessons_done }} of {{ c.lessons_total }} lessons · {{ c.progress }}%</span>
+          <a class="st-btn" [routerLink]="['/app/learning', c.id]">{{ action(c.status) }} <i class="bi bi-arrow-right"></i></a>
+        </div>
+      </div>
+    } @empty {
+      @if (loaded()) {
+        <div class="st-card gray empty">
+          <i class="bi bi-journal-x"></i>
+          <span class="t1">No courses yet</span>
+          <span class="t2">Courses appear here once your batch is mapped to them.</span>
+        </div>
+      }
+    }
+  </div>
+</section>

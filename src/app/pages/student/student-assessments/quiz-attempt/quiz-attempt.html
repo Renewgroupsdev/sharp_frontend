@@ -1,0 +1,176 @@
+<section class="st-page qa">
+  @switch (phase()) {
+    @case ('loading') { <p class="mut">Loading…</p> }
+
+    @case ('error') {
+      <div class="st-card warn" role="alert">{{ error() }}</div>
+      <a class="back-link" routerLink="/app/assessments"><i class="bi bi-arrow-left"></i> Back to assessments</a>
+    }
+
+    @case ('intro') {
+      @if (info(); as a) {
+        <a class="back-link" routerLink="/app/assessments"><i class="bi bi-arrow-left"></i> Assessments</a>
+        <div class="st-card qa-intro">
+          <span class="eyebrow">{{ a.course }}{{ a.module ? ' · ' + a.module : '' }}</span>
+          <h2 class="qa-title">{{ a.title }}</h2>
+
+          @if (a.type !== 'assignment') {
+            <div class="qa-rules">
+              <div><b>{{ a.questions_count }}</b><span>Questions</span></div>
+              <div><b>{{ a.max_marks }}</b><span>Marks</span></div>
+              <div><b>{{ minutes(a.time_limit_sec) }}</b><span>Time</span></div>
+              <div><b>{{ a.min_percent }}%</b><span>Pass mark</span></div>
+              <div><b>{{ a.attempts_used }}{{ a.attempts_allowed === null ? '' : ' / ' + a.attempts_allowed }}</b><span>Attempts used</span></div>
+            </div>
+            @if (a.time_limit_sec) { <p class="t2">The timer starts when you press Start and it is submitted automatically when it runs out.</p> }
+
+            @if (detail()!.in_progress) {
+              <p class="qa-note"><i class="bi bi-hourglass-split"></i> You have an attempt in progress. Resume it to continue where you left off.</p>
+            }
+            <div class="qa-actions">
+              <button type="button" class="st-btn" [disabled]="!canStart() || busy()" (click)="begin()">
+                {{ detail()!.in_progress ? 'Resume attempt' : (a.attempts_used ? 'Start another attempt' : 'Start ' + a.type) }} <i class="bi bi-arrow-right"></i>
+              </button>
+              @if (!canStart()) { <span class="mut">You have used every attempt.</span> }
+            </div>
+          } @else {
+            <p class="t2">{{ a.description || 'No description.' }}</p>
+            <p class="mut">Online submission for {{ a.type }}s is coming soon.</p>
+          }
+        </div>
+
+        @if (detail()!.attempts.length) {
+          <div class="st-card">
+            <h3>Your attempts</h3>
+            @for (t of detail()!.attempts; track t.id) {
+              <div class="st-row">
+                <span class="grow"><span class="t1">Attempt {{ t.attempt_no }} · {{ t.result_percent }}%</span><span class="t2">{{ t.submitted_at }} · {{ clock(t.time_taken_sec) }}</span></span>
+                <span class="pill" [class.g]="t.passed" [class.d]="!t.passed">{{ t.passed ? 'Passed' : 'Not passed' }}</span>
+                <a class="st-btn alt" [routerLink]="['/app/assessments', id, 'review']" [queryParams]="{ attempt: t.id }">Review</a>
+              </div>
+            }
+          </div>
+        }
+      }
+    }
+
+    @case ('running') {
+      <div class="qa-bar">
+        <div class="qa-bar-main">
+          <b>{{ info()?.title }}</b>
+          <span class="mut">{{ questions().length - unanswered() }} of {{ questions().length }} answered</span>
+        </div>
+        @if (remaining() !== null) {
+          <span class="qa-timer" [class.low]="remaining()! <= 60" role="timer" [attr.aria-label]="'Time left ' + clock(remaining())"><i class="bi bi-stopwatch"></i> {{ clock(remaining()) }}</span>
+        }
+      </div>
+
+      @if (!samePage()) {
+        <nav class="qa-nav" aria-label="Questions">
+          @for (q of questions(); track q.id; let i = $index) {
+            <button type="button" [class.on]="i === index()" [class.done]="isAnswered(q)" [attr.aria-label]="'Question ' + (i + 1) + (isAnswered(q) ? ', answered' : '')" (click)="go(i)">{{ i + 1 }}</button>
+          }
+        </nav>
+        @if (current(); as q) { <ng-container [ngTemplateOutlet]="question" [ngTemplateOutletContext]="{ $implicit: q, n: index() + 1 }"></ng-container> }
+        <div class="qa-actions between">
+          <button type="button" class="st-btn alt" [disabled]="index() === 0" (click)="go(index() - 1)"><i class="bi bi-arrow-left"></i> Previous</button>
+          @if (index() < questions().length - 1) {
+            <button type="button" class="st-btn" (click)="go(index() + 1)">Next <i class="bi bi-arrow-right"></i></button>
+          } @else {
+            <button type="button" class="st-btn" [disabled]="busy()" (click)="submit()"><i class="bi bi-check-lg"></i> Submit quiz</button>
+          }
+        </div>
+      } @else {
+        @for (q of questions(); track q.id; let i = $index) {
+          <ng-container [ngTemplateOutlet]="question" [ngTemplateOutletContext]="{ $implicit: q, n: i + 1 }"></ng-container>
+        }
+        <div class="qa-actions"><button type="button" class="st-btn" [disabled]="busy()" (click)="submit()"><i class="bi bi-check-lg"></i> Submit quiz</button></div>
+      }
+    }
+
+    @case ('result') {
+      @if (outcome(); as r) {
+        <div class="st-card qa-result" [class.pass]="r.show_score && r.passed" [class.fail]="r.show_score && !r.passed">
+          @if (r.show_score) {
+            <i class="bi" [class]="r.passed ? 'bi-patch-check-fill' : 'bi-x-octagon-fill'"></i>
+            <h2>{{ r.passed ? 'Passed' : 'Not passed' }}</h2>
+            <div class="qa-score">{{ r.result_percent }}%</div>
+            <p class="t2">{{ r.marks }} of {{ r.total }} marks · pass mark {{ r.min_percent }}%{{ r.correct_count !== undefined ? ' · ' + r.correct_count + ' of ' + r.question_count + ' correct' : '' }}</p>
+            <p class="mut">Time taken {{ clock(r.time_taken_sec ?? 0) }}</p>
+          } @else {
+            <i class="bi bi-send-check-fill"></i>
+            <h2>Quiz submitted</h2>
+            <p class="t2">Your answers were received. The score is not shown for this quiz.</p>
+          }
+          @if (r.needs_manual_grading) { <p class="qa-note"><i class="bi bi-pencil-square"></i> Some answers are waiting for your mentor to mark. This score covers the rest and may change.</p> }
+        </div>
+
+        <div class="qa-actions">
+          @if (r.review_allowed) { <button type="button" class="st-btn alt" (click)="review()"><i class="bi bi-search"></i> Review answers</button> }
+          @if (r.attempts_left === null || r.attempts_left > 0) { <button type="button" class="st-btn" (click)="retry()"><i class="bi bi-arrow-repeat"></i> Try again{{ r.attempts_left === null ? '' : ' (' + r.attempts_left + ' left)' }}</button> }
+          <a class="st-btn alt" routerLink="/app/assessments">Back to assessments</a>
+        </div>
+      }
+    }
+  }
+</section>
+
+<ng-template #question let-q let-n="n">
+  <div class="st-card qa-q">
+    <div class="qa-q-head"><span class="qa-num">{{ n }}</span><span class="pill">{{ q.marks }} mark{{ q.marks === 1 ? '' : 's' }}</span></div>
+    <p class="qa-text">{{ q.text }}</p>
+    @if (q.image) { <img class="qa-img" [src]="q.image" alt="" /> }
+
+    @switch (q.type) {
+      @case ('multiple_choice') {
+        <fieldset class="qa-opts">
+          <legend class="mut">{{ q.multiple ? 'Select all that apply' : 'Select one' }}</legend>
+          @for (o of q.options; track $index) {
+            <label class="qa-opt" [class.on]="isChosen(q, $index)">
+              <input [type]="q.multiple ? 'checkbox' : 'radio'" [name]="'q' + q.id" [checked]="isChosen(q, $index)" (change)="choose(q, $index, $any($event.target).checked)" />
+              <span>{{ o }}</span>
+            </label>
+          }
+        </fieldset>
+      }
+      @case ('sorting') {
+        <p class="mut">Put the items in the right order.</p>
+        <ol class="qa-sort">
+          @for (item of order(q); track item; let i = $index; let first = $first; let last = $last) {
+            <li>
+              <span>{{ item }}</span>
+              <span class="qa-sort-btns">
+                <button type="button" [disabled]="first" [attr.aria-label]="'Move ' + item + ' up'" (click)="move(q, i, -1)"><i class="bi bi-chevron-up"></i></button>
+                <button type="button" [disabled]="last" [attr.aria-label]="'Move ' + item + ' down'" (click)="move(q, i, 1)"><i class="bi bi-chevron-down"></i></button>
+              </span>
+            </li>
+          }
+        </ol>
+      }
+      @case ('matching') {
+        <p class="mut">Match each item on the left with one on the right.</p>
+        <div class="qa-match">
+          @for (l of q.left; track $index) {
+            <span class="qa-left">{{ l }}</span>
+            <select [attr.aria-label]="'Match for ' + l" (change)="match(q, l, $any($event.target).value)">
+              <option value="" [selected]="!matchOf(q, l)">Choose…</option>
+              @for (r of q.right; track $index) { <option [value]="r" [selected]="matchOf(q, l) === r">{{ r }}</option> }
+            </select>
+          }
+        </div>
+      }
+      @case ('puzzle') {
+        <p class="mut">Unscramble the letters{{ q.hint ? ' · Hint: ' + q.hint : '' }}</p>
+        <div class="qa-scramble" aria-hidden="true">@for (c of q.scrambled.split(''); track $index) { <span [class.gap]="c === ' '">{{ c === ' ' ? '' : c }}</span> }</div>
+        <input class="qa-input" type="text" [value]="text(q)" placeholder="Type the word or phrase" autocomplete="off" (input)="write(q, $any($event.target).value)" />
+      }
+      @case ('short_answer') {
+        <input class="qa-input" type="text" [value]="text(q)" placeholder="Type your answer" autocomplete="off" (input)="write(q, $any($event.target).value)" />
+      }
+      @case ('long_answer') {
+        <textarea class="qa-input" rows="7" [value]="text(q)" placeholder="Write your answer" (input)="write(q, $any($event.target).value)"></textarea>
+        <span class="mut" [class.over]="q.word_limit && words(text(q)) > q.word_limit">{{ words(text(q)) }}{{ q.word_limit ? ' / ' + q.word_limit : '' }} words</span>
+      }
+    }
+  </div>
+</ng-template>

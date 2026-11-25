@@ -1,0 +1,40 @@
+<div class="purchase-page container-fluid px-0">
+  <div class="page-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+    <div>
+      <h6 class="page-title"><i class="bi bi-collection-play"></i> Learning Management</h6>
+      <p class="page-subtitle">Students by course with their progress, filterable by name, progress, course and institute.</p>
+    </div>
+    <div class="header-actions">
+      <button *appCan="'a_learn.create'" type="button" class="add-lead-btn" (click)="addRecord()"><i class="bi bi-plus-lg"></i> Add record</button>
+    </div>
+  </div>
+
+  <app-count-ribbon class="d-block mb-2" [items]="stats()" />
+
+  <app-common-filter-card
+    searchPlaceholder="Search student name or ID"
+    [filters]="filters"
+    (exportClick)="onExport($event)"
+    (searchChange)="onSearch($event)"
+    (filtersChange)="onFiltersChange($event)"
+  ></app-common-filter-card>
+
+  <div class="table-col">
+    <app-common-table-card
+      title="Learning records"
+      [recordCountText]="recordCountText"
+      [columns]="columns"
+      [rows]="rows"
+      [totalRecords]="totalRecords"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [currentPage]="currentPage"
+      [pageInfoText]="pageInfoText"
+      [sortActive]="sortActive"
+      [sortDirection]="sortDirection"
+      (pageChange)="onPageChange($event)"
+      (sortChange)="onSortChange($event)"
+      (quickActionClick)="onQuickAction($event)"
+    ></app-common-table-card>
+  </div>
+</div>

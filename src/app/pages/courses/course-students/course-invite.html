@@ -1,0 +1,36 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-envelope-paper"></i></div>
+      <div class="title-content">
+        <h2>Send invitation</h2>
+        <p>{{ course?.title }} — notifies the course mentors and the enrolled students</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <form (ngSubmit)="send()" novalidate>
+    <div class="modal-body-custom">
+      @if (serverError(); as err) { <div class="error-text" role="alert">{{ err }}</div> }
+      <div class="form-grid">
+        <div class="form-field full-width">
+          <label>Send to</label>
+          <div class="chip-row">
+            <label class="chip"><input type="checkbox" name="toMentors" [(ngModel)]="model.toMentors" /> Mentors ({{ mentorCount }})</label>
+            <label class="chip"><input type="checkbox" name="toStudents" [(ngModel)]="model.toStudents" /> Enrolled students ({{ studentCount }})</label>
+          </div>
+        </div>
+        <div class="form-field full-width">
+          <label for="ci-msg">Message <span>*</span></label>
+          <div class="input-wrap"><textarea id="ci-msg" name="msg" rows="4" required [(ngModel)]="model.msg" [class.is-invalid]="submitted() && !model.msg.trim()"></textarea></div>
+          @if (submitted() && !model.msg.trim()) { <small class="error-text">Message is required.</small> }
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer-custom">
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+      <button type="submit" class="save-btn"><i class="bi bi-send"></i> Send invitation</button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,51 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-person-plus"></i></div>
+      <div class="title-content">
+        <h2>New enrollment</h2>
+        <p>Choose the courses and the batches they run for</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <form (ngSubmit)="save()" novalidate>
+    <div class="modal-body-custom">
+      @if (serverError(); as err) { <div class="error-text" role="alert">{{ err }}</div> }
+      <div class="form-grid">
+        <div class="form-field full-width">
+          <label>Courses <span>*</span></label>
+          <div class="chip-row">
+            @for (c of courses; track c.id) {
+              <label class="chip"><input type="checkbox" [name]="'c' + c.id" [checked]="pickedCourses().includes(c.id)" (change)="toggle(pickedCourses, c.id, $any($event.target).checked)" /> {{ c.title }}</label>
+            } @empty {
+              <span class="muted">No courses yet. Add them under Course Management.</span>
+            }
+          </div>
+          @if (submitted() && !pickedCourses().length) { <small class="error-text">Choose at least one course.</small> }
+        </div>
+
+        <div class="form-field full-width">
+          <label>Batches <span>*</span></label>
+          <div class="chip-row">
+            @for (b of batches(); track b.id) {
+              <label class="chip"><input type="checkbox" [name]="'b' + b.id" [checked]="pickedBatches().includes(b.id)" (change)="toggle(pickedBatches, b.id, $any($event.target).checked)" /> {{ b.name }} · {{ b.students }} student(s)</label>
+            } @empty {
+              <span class="muted">No batches yet. Add them under Institute Management.</span>
+            }
+          </div>
+          @if (submitted() && !pickedBatches().length) { <small class="error-text">Choose at least one batch.</small> }
+          @else if (pickedCourses().length && pickedBatches().length) {
+            <small class="hint-text">{{ newPairs() }} new course run(s). {{ studentTotal() }} student enrolment(s) will be added; runs that already exist are skipped.</small>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer-custom">
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+      <button type="submit" class="save-btn" [disabled]="saving()"><i class="bi bi-check-lg"></i> Enroll</button>
+    </div>
+  </form>
+</div>

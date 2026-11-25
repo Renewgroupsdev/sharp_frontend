@@ -1,0 +1,40 @@
+.ed-back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 4px; padding: 0; border: 0; background: none; color: var(--primary); font-size: 12px; cursor: pointer; }
+.ed-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.ed-error { margin-bottom: 10px; padding: 12px; border-radius: 10px; background: var(--status-red-bg); color: var(--status-red-text); }
+
+.ed-status { margin-left: 8px; padding: 2px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; background: var(--status-gray-bg); color: var(--text-muted);
+  &.st-upcoming { background: #e4f1fb; color: #0b6c9a; }
+  &.st-ongoing { background: var(--status-orange-bg); color: var(--status-orange-text); }
+  &.st-completed { background: var(--status-green-bg); color: var(--status-green-text); } }
+
+.ed-card { margin-top: 12px; padding: 14px; border: 1px solid var(--card-border); border-radius: 14px; background: var(--app-surface-solid); min-width: 0;
+  h3 { margin: 0 0 8px; font-size: 14px; display: flex; align-items: center; gap: 8px; } }
+.ed-card-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; h3 { margin: 0; } }
+.ed-search { flex: 1 1 200px; max-width: 280px; height: 34px; padding: 0 12px; border: 1px solid var(--border-soft); border-radius: 9px; background: var(--app-surface-solid); color: var(--text-dark); font-size: 13px; outline: none;
+  &:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); } }
+.ed-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; @media (max-width: 900px) { grid-template-columns: 1fr; } }
+
+.ed-scroll { overflow: auto; border: 1px solid var(--border-soft); border-radius: 10px; }
+.ed-table { width: 100%; border-collapse: collapse; font-size: 12.5px;
+  th { padding: 9px 12px; text-align: left; background: var(--primary-soft); color: var(--text-dark); font-weight: 600; white-space: nowrap; }
+  td { padding: 9px 12px; border-top: 1px solid var(--border-soft); color: var(--text-dark); vertical-align: top; }
+  td b { display: block; } td small { display: block; color: var(--text-muted); font-size: 11px; }
+  .w-prog { min-width: 170px; } }
+.ed-empty { padding: 22px; text-align: center; color: var(--text-muted); }
+
+.prog { display: flex; align-items: center; gap: 8px;
+  .track { flex: 1; height: 8px; border-radius: 99px; background: var(--border-soft); overflow: hidden; }
+  .track i { display: block; height: 100%; border-radius: inherit; background: var(--primary); }
+  b { min-width: 36px; text-align: right; font-size: 12px; }
+  &.none .track i { background: var(--border-soft); } &.low .track i { background: var(--status-orange-text); } &.done .track i { background: var(--status-green-text); } }
+
+.cert { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 11px; font-weight: 600; background: var(--status-orange-bg); color: var(--status-orange-text);
+  &.c-issued { background: var(--status-green-bg); color: var(--status-green-text); }
+  &.c-rejected { background: var(--status-red-bg); color: var(--status-red-text); } }
+.cert-actions { display: flex; gap: 6px; margin-top: 4px;
+  button { padding: 2px 10px; border: 1px solid var(--primary-border); border-radius: 7px; background: var(--primary-soft); color: var(--primary-dark); font-size: 11px; cursor: pointer;
+    &.no { background: var(--status-red-bg); border-color: transparent; color: var(--status-red-text); }
+    &:disabled { opacity: 0.5; cursor: default; } } }
+
+.ed-person { padding: 8px 0; border-top: 1px solid var(--border-soft); b { display: block; font-size: 13px; } small { color: var(--text-muted); font-size: 11.5px; } }
+.muted { color: var(--text-muted); font-size: 12.5px; font-weight: 400; }

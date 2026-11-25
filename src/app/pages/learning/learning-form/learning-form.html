@@ -1,0 +1,69 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-collection-play"></i></div>
+      <div class="title-content">
+        <h2>{{ isEdit ? 'Edit learning record' : 'Add learning record' }}</h2>
+        <p>Progress of an enrolled student through a course</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <form #f="ngForm" (ngSubmit)="save(f)" novalidate>
+    <div class="modal-body-custom">
+      @if (serverError(); as err) { <div class="error-text" role="alert">{{ err }}</div> }
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="ln-course">Course <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-journal-text"></i>
+            <select id="ln-course" name="courseId" required [disabled]="isEdit" [(ngModel)]="model.courseId" (ngModelChange)="onCourseChange($event)" #course="ngModel" [class.is-invalid]="submitted() && course.invalid">
+              <option value="" disabled>Select a course</option>
+              @for (c of courses; track c.id) { <option [value]="c.id">{{ c.title }}</option> }
+            </select>
+            <i class="bi bi-chevron-down select-arrow"></i>
+          </div>
+          @if (submitted() && course.invalid) { <small class="error-text">Choose a course.</small> }
+          @else if (!courses.length) { <small class="hint-text">No course is mapped to a batch yet.</small> }
+        </div>
+        <div class="form-field">
+          <label for="ln-student">Student <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-person"></i>
+            <select id="ln-student" name="sid" required [disabled]="isEdit || !model.courseId" [(ngModel)]="model.sid" #sid="ngModel" [class.is-invalid]="submitted() && sid.invalid">
+              <option value="" disabled>{{ model.courseId ? 'Select a student' : 'Choose a course first' }}</option>
+              @for (s of students(); track s.id) { <option [value]="s.id">{{ s.n }} ({{ s.id }})</option> }
+            </select>
+            <i class="bi bi-chevron-down select-arrow"></i>
+          </div>
+          @if (submitted() && sid.invalid) { <small class="error-text">Choose a student.</small> }
+          @else if (model.courseId && !students().length) { <small class="hint-text">No students in this course's batches yet.</small> }
+        </div>
+        <div class="form-field">
+          <label for="ln-progress">Progress (%) <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-percent"></i>
+            <input id="ln-progress" type="number" name="progress" required min="0" max="100" [(ngModel)]="model.progress" #progress="ngModel" [class.is-invalid]="submitted() && progress.invalid" />
+          </div>
+          @if (submitted() && progress.invalid) { <small class="error-text">Enter a value from 0 to 100.</small> }
+        </div>
+        <div class="form-field">
+          <label for="ln-mats">Materials completed</label>
+          <div class="input-wrap"><i class="bi bi-files"></i>
+            <input id="ln-mats" type="number" name="mats" min="0" [(ngModel)]="model.mats" />
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="ln-last">Last accessed</label>
+          <div class="input-wrap"><i class="bi bi-clock-history"></i>
+            <input id="ln-last" type="date" name="last" [(ngModel)]="model.last" />
+          </div>
+          <small class="hint-text">Leave empty to use today.</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer-custom">
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+      <button type="submit" class="save-btn" [disabled]="saving()"><i class="bi bi-floppy"></i> {{ isEdit ? 'Save changes' : 'Save' }}</button>
+    </div>
+  </form>
+</div>

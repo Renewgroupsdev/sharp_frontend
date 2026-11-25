@@ -1,0 +1,49 @@
+@if (batch(); as b) {
+  <div class="lead-modal">
+    <div class="modal-header-custom">
+      <div class="modal-title-wrap">
+        <div class="title-icon"><i class="bi bi-collection"></i></div>
+        <div class="title-content">
+          <h2>Batch Details</h2>
+          <p>{{ b.id }}</p>
+        </div>
+      </div>
+      <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <div class="modal-body-custom">
+      <div class="who">
+        <div class="who-text"><strong>{{ b.n }}</strong></div>
+        <span class="pill" [ngClass]="'st-' + b.st">{{ statusLabel() }}</span>
+      </div>
+
+      <dl class="facts">
+        @for (f of facts(); track f.label) {
+          <div><dt>{{ f.label }}</dt><dd>{{ f.value }}</dd></div>
+        }
+      </dl>
+
+      <div class="section-title"><i class="bi bi-journal-bookmark"></i> Courses</div>
+      @if (!b.courses?.length) { <p class="empty">No course is mapped to this batch yet.</p> }
+      <ul class="list">
+        @for (c of b.courses; track c) {
+          <li><strong>{{ c }}</strong><small>All {{ facts()[2].value }} student(s) enrolled</small></li>
+        }
+      </ul>
+
+      <div class="section-title"><i class="bi bi-bank"></i> Institutes</div>
+      @if (allInstitutes()) { <p class="empty">All institutes take part in this batch.</p> }
+      <ul class="list">
+        @for (o of participants(); track o.id) {
+          <li><strong>{{ o.n }}</strong><small>{{ o.city }}</small></li>
+        }
+      </ul>
+    </div>
+
+    <div class="modal-footer-custom">
+      <button type="button" class="cancel-btn" (click)="close()">Close</button>
+      <button *appCan="'a_orgs.delete'" type="button" class="cancel-btn danger" (click)="remove()"><i class="bi bi-trash3"></i> Delete</button>
+      <button *appCan="'a_orgs.edit'" type="button" class="save-btn" (click)="edit()"><i class="bi bi-pencil-square"></i> Edit</button>
+    </div>
+  </div>
+}

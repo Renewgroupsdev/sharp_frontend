@@ -1,0 +1,62 @@
+<div class="purchase-page container-fluid px-0">
+  <div class="page-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+    <div>
+      <h6 class="page-title"><i class="bi bi-journal-bookmark"></i> Course Management</h6>
+      <p class="page-subtitle">Create courses, build their modules and lessons, see enrolled students and invite them.</p>
+    </div>
+    <div class="header-actions">
+      @if (tab() === 'categories') {
+        <button *appCan="'a_courses.create'" type="button" class="add-lead-btn" (click)="addCategory()"><i class="bi bi-plus-lg"></i> Add category</button>
+      } @else if (tab() === 'courses') {
+        <button *appCan="'a_courses.create'" type="button" class="add-lead-btn" (click)="addCourse()"><i class="bi bi-plus-lg"></i> Add course</button>
+      }
+    </div>
+  </div>
+
+  <div class="segment" role="tablist" aria-label="Course views">
+    @for (t of tabs(); track t.key) {
+      <button type="button" role="tab" [class.active]="tab() === t.key" [attr.aria-selected]="tab() === t.key" (click)="setTab(t.key)">{{ t.label }}</button>
+    }
+  </div>
+
+  @if (tab() === 'categories') {
+    <div class="alert-banner info">
+      <i class="bi bi-info-circle"></i>
+      <div>The category list is used to show the type of each course. It is a sub-module of Course Management and feeds the Category field on the Add course page.</div>
+    </div>
+  }
+
+  @if (tab() === 'courses') {
+    <app-count-ribbon class="d-block mb-2" [items]="stats()" [activeKeys]="activeRibbonKeys" (select)="onRibbonSelect($event)" />
+  }
+
+  <app-common-filter-card
+    [searchPlaceholder]="searchPlaceholder"
+    [filters]="filters"
+    [showExport]="tab() === 'courses'"
+    (exportClick)="onExport($event)"
+    (searchChange)="onSearch($event)"
+    (filtersChange)="onFiltersChange($event)"
+  ></app-common-filter-card>
+
+  <div class="table-col">
+    <app-common-table-card
+      [title]="title()"
+      [recordCountText]="recordCountText"
+      [columns]="columns"
+      [rows]="rows"
+      [totalRecords]="totalRecords"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [currentPage]="currentPage"
+      [pageInfoText]="pageInfoText"
+      [sortActive]="sortActive"
+      [sortDirection]="sortDirection"
+      (pageChange)="onPageChange($event)"
+      (sortChange)="onSortChange($event)"
+      (quickActionClick)="onQuickAction($event)"
+      (profileClick)="open($event)"
+      (toggleChange)="onToggle($event)"
+    ></app-common-table-card>
+  </div>
+</div>

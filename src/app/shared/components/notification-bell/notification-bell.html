@@ -1,0 +1,30 @@
+<button type="button" class="bell" [class.open]="open()" aria-label="Notifications" [attr.aria-expanded]="open()" aria-haspopup="true" (click)="toggle()">
+  <i class="bi bi-bell"></i>
+  @if (unread() > 0) { <span class="badge">{{ unread() > 99 ? '99+' : unread() }}</span> }
+</button>
+
+@if (open()) {
+  <div class="panel" role="dialog" aria-label="Notifications">
+    <div class="panel-head">
+      <b>Notifications</b>
+      <button type="button" class="link" [disabled]="!unread()" (click)="markAll()">Mark all read</button>
+    </div>
+    <ul>
+      @for (n of items(); track n.id) {
+        <li>
+          <button type="button" class="item" [class.unread]="!n.read" (click)="pick(n)">
+            <span class="ico"><i class="bi" [class]="icon(n.type)"></i></span>
+            <span class="txt">
+              <b>{{ n.title }}</b>
+              @if (n.body) { <span>{{ n.body }}</span> }
+              <small>{{ ago(n.at) }}</small>
+            </span>
+            @if (!n.read) { <i class="dot" aria-label="Unread"></i> }
+          </button>
+        </li>
+      } @empty {
+        <li class="empty">You are all caught up.</li>
+      }
+    </ul>
+  </div>
+}

@@ -1,0 +1,79 @@
+// Shared by the institute and batch detail dialogs.
+.who {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0 10px;
+}
+
+.who-text {
+  flex: 1;
+  min-width: 0;
+
+  strong { display: block; font-size: 14px; }
+  small { color: var(--text-muted); font-size: 11px; }
+}
+
+.pill {
+  padding: 2px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--status-gray-bg);
+  color: var(--status-gray-text);
+
+  &.st-active { background: var(--status-green-bg); color: var(--status-green-text); }
+  &.st-running { background: var(--status-orange-bg); color: var(--status-orange-text); }
+  &.st-enrolling { background: var(--status-blue-bg); color: var(--status-blue-text); }
+}
+
+.facts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+
+  div {
+    padding: 6px 8px;
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    background: var(--app-surface-bg);
+    min-width: 0;
+  }
+
+  dt { color: var(--text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; }
+  dd { margin: 2px 0 0; font-size: 12px; font-weight: 600; word-break: break-word; }
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 6px 10px;
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    background: var(--app-surface-bg);
+    font-size: 12px;
+  }
+
+  small { color: var(--text-muted); font-size: 11px; }
+}
+
+.empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.cancel-btn.danger { color: var(--status-red-text); }
+
+@media (max-width: 600px) {
+  .facts { grid-template-columns: 1fr; }
+}

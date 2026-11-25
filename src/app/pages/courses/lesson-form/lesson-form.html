@@ -1,0 +1,79 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-play-circle"></i></div>
+      <div class="title-content">
+        <h2>{{ isEdit ? 'Edit lesson' : 'Add lesson' }}</h2>
+        <p>{{ chapter?.name }} · {{ course?.title }}</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <form #f="ngForm" (ngSubmit)="save(f)" novalidate>
+    <div class="modal-body-custom">
+      @if (serverError(); as err) { <div class="error-text" role="alert">{{ err }}</div> }
+      <div class="form-grid">
+        <div class="form-field full-width">
+          <label for="ls-name">Lesson name <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-fonts"></i>
+            <input id="ls-name" name="name" required maxlength="120" [(ngModel)]="model.name" #name="ngModel" [class.is-invalid]="submitted() && name.invalid" />
+          </div>
+          @if (submitted() && name.invalid) { <small class="error-text">Lesson name is required.</small> }
+        </div>
+        <div class="form-field">
+          <label for="ls-dur">Duration (minutes) <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-clock"></i><input id="ls-dur" type="number" min="1" name="dur" required [(ngModel)]="model.dur" /></div>
+        </div>
+        <div class="form-field">
+          <label for="ls-host">Source</label>
+          <div class="input-wrap"><i class="bi bi-collection-play"></i>
+            <select id="ls-host" name="host" [ngModel]="host()" (ngModelChange)="onHost($event)">
+              @for (h of hosts; track h) { <option [value]="h">{{ label(h) }}</option> }
+            </select>
+            <i class="bi bi-chevron-down select-arrow"></i>
+          </div>
+        </div>
+        @if (needsUrl()) {
+          <div class="form-field full-width">
+            <label for="ls-url">{{ field().label }} <span>*</span></label>
+            <div class="input-wrap"><i class="bi" [class]="icon[host()]"></i><input id="ls-url" name="url" type="url" [placeholder]="field().placeholder ?? 'https://'" [(ngModel)]="model.url" /></div>
+            <small class="hint-text">{{ field().hint }}</small>
+          </div>
+        }
+        @if (host() === 'Editor') {
+          <div class="form-field full-width">
+            <label for="ls-content">{{ field().label }} <span>*</span></label>
+            <app-rich-text-editor inputId="ls-content" name="content" [minHeight]="180" placeholder="Write or paste the lesson text…" [(ngModel)]="model.content"></app-rich-text-editor>
+            <small class="hint-text">{{ field().hint }}</small>
+          </div>
+        }
+        @if (needsFile()) {
+          <div class="form-field full-width">
+            <label for="ls-file">{{ field().label }} <span>*</span></label>
+            <input id="ls-file" type="file" [accept]="accept()" (change)="onFile($event)" />
+            <small class="hint-text">{{ field().hint }}</small>
+            @if (currentFile) { <small class="hint-text">Current file: {{ currentFile }}</small> }
+          </div>
+        }
+        <div class="form-field">
+          <label for="ls-privacy">Privacy</label>
+          <div class="input-wrap"><i class="bi bi-shield-lock"></i>
+            <select id="ls-privacy" name="privacy" [(ngModel)]="model.privacy">
+              @for (p of privacyOptions; track p) { <option [value]="p">{{ p }}</option> }
+            </select>
+            <i class="bi bi-chevron-down select-arrow"></i>
+          </div>
+        </div>
+        <div class="form-field full-width">
+          <label for="ls-desc">Description</label>
+          <div class="input-wrap"><textarea id="ls-desc" name="desc" rows="3" [(ngModel)]="model.desc"></textarea></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer-custom">
+      <button type="button" class="cancel-btn" (click)="close()">Back</button>
+      <button type="submit" class="save-btn"><i class="bi bi-check-lg"></i> {{ isEdit ? 'Save lesson' : 'Add lesson' }}</button>
+    </div>
+  </form>
+</div>

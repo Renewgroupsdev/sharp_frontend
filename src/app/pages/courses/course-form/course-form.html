@@ -1,0 +1,171 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-journal-bookmark"></i></div>
+      <div class="title-content">
+        <h2>{{ isEdit ? 'Edit course' : 'Create course' }}</h2>
+        <p>{{ course() ? course()!.id + ' · ' + course()!.title : 'Course details, modules and lessons' }}</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div class="modal-body-custom">
+    <ol class="course-stepper" aria-label="Course steps">
+      @for (s of steps; track s.label; let i = $index) {
+        <li [class.done]="i < step()" [class.current]="i === step()">
+          <button type="button" class="step-btn" [disabled]="i > 0 && !courseId()" [attr.aria-current]="i === step() ? 'step' : null" (click)="goTo(i)">
+            <span class="dot"><i class="bi" [class]="i < step() ? 'bi-check-lg' : s.icon"></i></span>
+            <small>{{ s.label }}</small>
+          </button>
+        </li>
+      }
+    </ol>
+
+    @switch (step()) {
+      @case (0) {
+        <form id="course-form" #f="ngForm" (ngSubmit)="saveCurriculum(f)" novalidate>
+          @if (serverError(); as err) { <div class="error-text" role="alert">{{ err }}</div> }
+          <section class="cf-sec">
+            <header class="cf-sec-head"><i class="bi bi-info-circle"></i><div><h4>Basics</h4><p>Title, category and duration</p></div></header>
+            <div class="form-grid">
+            <div class="form-field full-width">
+              <label for="cf-title">Course title <span>*</span></label>
+              <div class="input-wrap"><i class="bi bi-journal-text"></i>
+                <input id="cf-title" name="title" required maxlength="120" [(ngModel)]="model.title" #title="ngModel" [class.is-invalid]="submitted() && title.invalid" />
+              </div>
+              @if (submitted() && title.invalid) { <small class="error-text">Course title is required.</small> }
+            </div>
+            <div class="form-field">
+              <label for="cf-cat">Course category <span>*</span></label>
+              <div class="input-wrap"><i class="bi bi-tags"></i>
+                <select id="cf-cat" name="category" required [(ngModel)]="model.category">
+                  @for (k of categoryOptions(); track k) { <option [value]="k">{{ k }}</option> }
+                </select>
+                <i class="bi bi-chevron-down select-arrow"></i>
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="cf-hours">Duration (hours) <span>*</span></label>
+              <div class="input-wrap"><i class="bi bi-clock"></i><input id="cf-hours" type="number" min="1" name="hours" required [(ngModel)]="model.hours" /></div>
+            </div>
+            </div>
+          </section>
+          <section class="cf-sec">
+            <header class="cf-sec-head"><i class="bi bi-people"></i><div><h4>Mentors & batches</h4><p>Who teaches it and who is enrolled</p></div></header>
+            <div class="form-grid">
+            <div class="form-field full-width">
+              <label>Mentors</label>
+              <div class="chip-row">
+                @for (n of mentorNames(); track n) {
+                  <label class="chip"><input type="checkbox" [name]="'mentor-' + n" [checked]="model.mentors.includes(n)" (change)="toggleMentor(n, $any($event.target).checked)" /> {{ n }}</label>
+                } @empty {
+                  <span class="muted">No mentor accounts yet — add them under User Management.</span>
+                }
+              </div>
+            </div>
+            <div class="form-field full-width">
+              <label>Batches</label>
+              <div class="chip-row">
+                @for (b of batchOptions(); track b.name) {
+                  <label class="chip"><input type="checkbox" [name]="'batch-' + b.name" [checked]="model.batches.includes(b.name)" (change)="toggleBatch(b.name, $any($event.target).checked)" /> {{ b.name }} · {{ b.students }}</label>
+                } @empty {
+                  <span class="muted">No batches yet — add them under Institute Management.</span>
+                }
+              </div>
+              <small class="hint-text">Every student in a ticked batch is enrolled in this course automatically ({{ enrolledCount() }} student(s) now).</small>
+            </div>
+            </div>
+          </section>
+          <section class="cf-sec">
+            <header class="cf-sec-head"><i class="bi bi-sliders"></i><div><h4>Delivery & access</h4><p>How it is delivered and who can see it</p></div></header>
+            <div class="form-grid">
+            <div class="form-field">
+              <label for="cf-mode">Mode of delivery</label>
+              <div class="input-wrap"><i class="bi bi-broadcast"></i>
+                <select id="cf-mode" name="mode" [(ngModel)]="model.mode">@for (o of modes; track o) { <option [value]="o">{{ o }}</option> }</select>
+                <i class="bi bi-chevron-down select-arrow"></i>
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="cf-level">Level</label>
+              <div class="input-wrap"><i class="bi bi-bar-chart-steps"></i>
+                <select id="cf-level" name="level" [(ngModel)]="model.level">@for (o of levels; track o) { <option [value]="o">{{ o }}</option> }</select>
+                <i class="bi bi-chevron-down select-arrow"></i>
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="cf-scope">Course view scope</label>
+              <div class="input-wrap"><i class="bi bi-eye"></i>
+                <select id="cf-scope" name="scope" [(ngModel)]="model.scope">@for (o of scopes; track o) { <option [value]="o">{{ o }}</option> }</select>
+                <i class="bi bi-chevron-down select-arrow"></i>
+              </div>
+              <small class="hint-text">Private courses are visible only to enrolled students.</small>
+            </div>
+            <div class="form-field">
+              <label for="cf-status">Status</label>
+              <div class="input-wrap"><i class="bi bi-toggle-on"></i>
+                <select id="cf-status" name="status" [(ngModel)]="model.status">@for (o of statuses; track o) { <option [value]="o">{{ o }}</option> }</select>
+                <i class="bi bi-chevron-down select-arrow"></i>
+              </div>
+            </div>
+            </div>
+          </section>
+          <section class="cf-sec">
+            <header class="cf-sec-head"><i class="bi bi-card-text"></i><div><h4>Content</h4><p>Description, outcomes and requirements</p></div></header>
+            <div class="form-grid">
+            <div class="form-field full-width">
+              <label for="cf-desc">Course description</label>
+              <div class="input-wrap"><textarea id="cf-desc" name="desc" rows="3" [(ngModel)]="model.desc"></textarea></div>
+            </div>
+            <div class="form-field">
+              <label for="cf-out">Course outcomes</label>
+              <div class="input-wrap"><textarea id="cf-out" name="outcomes" rows="3" [(ngModel)]="model.outcomes"></textarea></div>
+              <small class="hint-text">One outcome per line.</small>
+            </div>
+            <div class="form-field">
+              <label for="cf-reqs">Course requirements</label>
+              <div class="input-wrap"><textarea id="cf-reqs" name="reqs" rows="3" [(ngModel)]="model.reqs"></textarea></div>
+              <small class="hint-text">One requirement per line.</small>
+            </div>
+            </div>
+          </section>
+          <section class="cf-sec">
+            <header class="cf-sec-head"><i class="bi bi-image"></i><div><h4>Thumbnail</h4><p>Shown on the course card</p></div></header>
+            <div class="form-grid">
+            <div class="form-field full-width">
+              <label for="cf-thumb">Course thumbnail</label>
+              <div class="thumb-row">
+                @if (model.thumb) { <img class="thumb" [src]="model.thumb" alt="Course thumbnail preview" /> }
+                <input id="cf-thumb" type="file" accept="image/*" (change)="onThumb($event)" />
+              </div>
+              <small class="hint-text">Optional · max 300 KB</small>
+            </div>
+            </div>
+          </section>
+        </form>
+      }
+      @case (1) {
+        <p class="step-hint">Add modules (chapters), then add topics / lessons inside each module.</p>
+        <app-course-modules [courseId]="courseId()"></app-course-modules>
+      }
+    }
+  </div>
+
+  <div class="modal-footer-custom">
+    @switch (step()) {
+      @case (0) {
+        <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+        <button type="submit" form="course-form" class="save-btn" [disabled]="saving()">{{ courseId() ? 'Save & continue' : 'Create course & continue' }} <i class="bi bi-arrow-right"></i></button>
+      }
+      @default {
+        <button type="button" class="cancel-btn" (click)="goTo(step() - 1)"><i class="bi bi-arrow-left"></i> Back</button>
+        @if (step() < lastStep) {
+          <button type="button" class="save-btn" (click)="goTo(step() + 1)">Next: {{ steps[step() + 1].label }} <i class="bi bi-arrow-right"></i></button>
+        } @else {
+          <button type="button" class="save-btn" (click)="finish()"><i class="bi bi-check-lg"></i> Finish</button>
+        }
+      }
+    }
+  </div>
+</div>

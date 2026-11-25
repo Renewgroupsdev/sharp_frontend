@@ -1,0 +1,18 @@
+<div class="purchase-page container-fluid px-0">
+  <div class="page-header">
+    <h6 class="page-title"><i class="bi bi-award"></i> Certificate Management</h6>
+    <p class="page-subtitle">Review, issue, cancel and download course certificates. Set the template and the minimum attendance and score.</p>
+  </div>
+
+  <div class="tab-bar" role="tablist">
+    @for (t of tabs; track t.key) {
+      <button type="button" role="tab" class="tab-btn" [class.active]="tab() === t.key" [attr.aria-selected]="tab() === t.key" (click)="tab.set(t.key)">
+        <i class="bi" [class]="t.icon"></i> {{ t.label }}
+      </button>
+    }
+  </div>
+
+  <div class="tab-panel">
+    @if (tab() === 'list') { <app-certificate-list /> } @else { <app-certificate-settings /> }
+  </div>
+</div>

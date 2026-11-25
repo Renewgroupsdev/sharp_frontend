@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 64" role="img" aria-label="SHARP">
+  <defs>
+    <linearGradient id="sharp-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d5c4b"/>
+      <stop offset="1" stop-color="#073f35"/>
+    </linearGradient>
+  </defs>
+  <g>
+    <rect width="64" height="64" rx="15" fill="url(#sharp-bg)"/>
+    <path d="M45 19H26L19 26V30L26 35H38L45 40V44L40 49H19" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="miter" stroke-miterlimit="10" stroke-linecap="butt"/>
+    <path d="M46 9L55 18H46Z" fill="#18b875"/>
+  </g>
+  <text x="80" y="42" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="36" font-weight="800" letter-spacing="3" fill="#073f35">SHARP</text>
+  <text x="82" y="57" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="9" font-weight="600" letter-spacing="1.6" fill="#0d5c4b">LEARN · MENTOR · GROW</text>
+</svg>

@@ -1,0 +1,49 @@
+<div class="purchase-page container-fluid px-0">
+  <div class="page-header">
+    @if (meta; as m) {
+      <h6 class="page-title"><i class="bi" [class]="m.icon"></i> {{ m.label === 'Quiz' ? 'Quiz' : m.label + 's' }}</h6>
+      <p class="page-subtitle">{{ subtitles[m.key] }}</p>
+    } @else {
+      <h6 class="page-title"><i class="bi bi-patch-check"></i> Assessment Library</h6>
+      <p class="page-subtitle">Build quizzes, assessments and assignments once, then use them in each course by module and topic.</p>
+    }
+  </div>
+
+  @if (!pinned) {
+    <div class="tab-bar" role="tablist">
+      @for (k of kinds; track k.key) {
+        <button type="button" role="tab" class="tab-btn" [class.active]="kind() === k.key" [attr.aria-selected]="kind() === k.key" (click)="pickKind(k.key)">
+          <i class="bi" [class]="k.icon"></i> {{ k.label }} <b class="tab-count">{{ count(k.key) }}</b>
+        </button>
+      }
+    </div>
+  }
+
+  @if (subs().length) {
+    <div class="tab-bar sub" role="tablist">
+      @for (s of subs(); track s.key) {
+        <button type="button" role="tab" class="tab-btn" [class.active]="sub() === s.key" [attr.aria-selected]="sub() === s.key" (click)="sub.set(s.key)">
+          <i class="bi" [class]="s.icon"></i> {{ s.label }}
+        </button>
+      }
+    </div>
+  }
+
+  <div class="tab-panel">
+    <!-- Re-created per kind so each list picks up its own type, columns and filters. -->
+    @for (k of [kind()]; track k) {
+      @if (k === 'all') {
+        <app-assessment-list />
+      } @else {
+        @switch (sub()) {
+          @case ('list') { <app-assessment-list [type]="type()" /> }
+          @case ('groups') { <app-question-groups [type]="$any(type())" /> }
+          @case ('bank') { <app-question-bank [type]="$any(type())" /> }
+          @case ('report') { <app-quiz-report [type]="$any(type())" /> }
+          @case ('attempts') { <app-quiz-attempts [embedded]="true" [type]="type()" /> }
+          @case ('setup') { <app-quiz-setup [fixedType]="type()" /> }
+        }
+      }
+    }
+  </div>
+</div>

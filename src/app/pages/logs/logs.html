@@ -1,0 +1,39 @@
+<section class="purchase-page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title"><i class="bi bi-list-check"></i> Logs Management</h2>
+      <p class="page-subtitle">Every create, update, delete and approval made in the modules is recorded here.</p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="ghost-btn" (click)="download()"><i class="bi bi-download"></i> Download</button>
+      <button *appCan="'a_logs.delete'" type="button" class="ghost-btn" (click)="clear()"><i class="bi bi-trash"></i> Clear log</button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <input class="date-input search" type="search" placeholder="Search actor or activity" [ngModel]="search()" (ngModelChange)="search.set($event)" />
+    <select class="date-input" [ngModel]="module()" (ngModelChange)="module.set($event)">
+      <option value="">All modules</option>
+      @for (m of modules(); track m) { <option [value]="m">{{ m }}</option> }
+    </select>
+    <span class="count">{{ rows().length }} entries</span>
+  </div>
+
+  <div class="table-wrap">
+    <table class="log-table">
+      <thead><tr><th>When</th><th>Actor</th><th>Module</th><th>Activity</th></tr></thead>
+      <tbody>
+        @for (l of shown(); track l.id) {
+          <tr>
+            <td class="when">{{ l.w }}</td>
+            <td>{{ l.a }}</td>
+            <td><span class="pill">{{ l.m }}</span></td>
+            <td>{{ l.t }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="4" class="empty">No log entries.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

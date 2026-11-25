@@ -1,0 +1,17 @@
+.imp-pick { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.imp-file { flex: 1 1 240px; display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px; border: 1px dashed var(--primary-border); border-radius: 10px; background: var(--primary-soft); color: var(--primary-dark); font-size: 13px; cursor: pointer; overflow: hidden;
+  span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  input { display: none; } }
+
+.imp-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin: 10px 0; font-size: 12.5px;
+  .s b { font-size: 16px; margin-right: 4px; }
+  .ok b { color: var(--status-green-text); } .ex b { color: var(--text-muted); } .er b { color: var(--status-red-text); }
+  .link { margin-left: auto; border: 0; background: none; color: var(--primary); font-size: 12px; cursor: pointer; } }
+
+.imp-scroll { max-height: 40vh; overflow: auto; border: 1px solid var(--border-soft); border-radius: 10px; }
+.imp-table { width: 100%; border-collapse: collapse; font-size: 12.5px;
+  th { position: sticky; top: 0; padding: 8px 12px; text-align: left; background: var(--primary-soft); font-weight: 600; }
+  td { padding: 7px 12px; border-top: 1px solid var(--border-soft); } }
+.pill { padding: 2px 9px; border-radius: 99px; font-size: 11px; font-weight: 600; background: var(--status-gray-bg); color: var(--text-muted);
+  &.ok { background: var(--status-green-bg); color: var(--status-green-text); }
+  &.error { background: var(--status-red-bg); color: var(--status-red-text); } }

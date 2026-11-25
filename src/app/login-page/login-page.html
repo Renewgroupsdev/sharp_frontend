@@ -1,0 +1,21 @@
+<div class="login-shell">
+  <div class="login-card">
+    <img src="assets/02_Renew%20Group%20-Logo%20png.png" alt="" class="logo">
+    <p class="sub">Student, Mentor &amp; Admin portal</p>
+    <h1>Sign in</h1>
+    <p class="hint">Use the username and password issued to you.</p>
+
+    <form (ngSubmit)="submit()">
+      @if (error()) { <div class="error" role="alert">{{ error() }}</div> }
+      <label class="fld">
+        <span>Username</span>
+        <input type="text" name="username" [(ngModel)]="username" autocomplete="username" autofocus required>
+      </label>
+      <label class="fld">
+        <span>Password</span>
+        <input type="password" name="password" [(ngModel)]="password" autocomplete="current-password" required>
+      </label>
+      <button type="submit" class="submit" [disabled]="busy()">{{ busy() ? 'Signing in…' : 'Sign in' }}</button>
+    </form>
+  </div>
+</div>

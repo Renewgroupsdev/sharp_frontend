@@ -1,0 +1,24 @@
+<header class="topbar">
+  <button type="button" class="menu-btn" aria-label="Toggle navigation" (click)="nav.toggleSidebar()"><i class="bi bi-list"></i></button>
+
+  <div class="brand">
+    <img src="assets/02_Renew%20Group%20-Logo%20only%20png.png" alt="" class="brand-mark">
+    <div class="brand-copy">
+      <!-- <strong>SHARP</strong> -->
+      <span>TNCCI · Student, Mentor &amp; Admin portal</span>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <app-notification-bell></app-notification-bell>
+
+  <div class="account">
+    <span class="avatar" [style.background]="auth.actor().col">{{ auth.actor().i }}</span>
+    <div class="who">
+      <strong>{{ auth.actor().n }}</strong>
+      <span>{{ auth.role() }}</span>
+    </div>
+    <button type="button" class="logout" title="Sign out" aria-label="Sign out" (click)="auth.logout()"><i class="bi bi-box-arrow-right"></i></button>
+  </div>
+</header>

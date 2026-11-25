@@ -1,0 +1,39 @@
+<div class="ms" [class.open]="open()">
+  <button type="button" class="ms-btn" [id]="inputId()" aria-haspopup="listbox" [attr.aria-expanded]="open()" (click)="toggleOpen()">
+    @if (selected().length) {
+      <span class="ms-chips">
+        @for (s of selected(); track s) {
+          <span class="ms-chip">{{ s }}<i class="bi bi-x" role="button" [attr.aria-label]="'Remove ' + s" (click)="remove(s, $event)"></i></span>
+        }
+      </span>
+    } @else {
+      <span class="ms-ph">{{ placeholder() }}</span>
+    }
+    <i class="bi bi-chevron-down ms-arrow"></i>
+  </button>
+
+  @if (open()) {
+    <div class="ms-panel" role="listbox" aria-multiselectable="true">
+      <div class="ms-search">
+        <i class="bi bi-search"></i>
+        <input type="search" name="ms-search" [ngModel]="query()" (ngModelChange)="query.set($event)" (keydown.enter)="$event.preventDefault()" placeholder="Search" aria-label="Search the list" autocomplete="off" />
+      </div>
+      @for (name of shown(); track name) {
+        <label class="ms-row" [class.on]="isOn(name)">
+          <input type="checkbox" [checked]="isOn(name)" (change)="toggle(name)" />
+          <span>{{ name }}</span>
+        </label>
+      }
+      @if (!shown().length) { <small class="ms-msg">No match. Use “Other…” to add it.</small> }
+      @if (!adding()) {
+        <button type="button" class="ms-other" (click)="openOther()"><i class="bi bi-plus-circle"></i> Other…</button>
+      } @else {
+        <div class="ms-add">
+          <input type="text" name="ms-other" [maxLength]="maxLength()" [(ngModel)]="other" placeholder="Type a new name" (keydown.enter)="$event.preventDefault(); addOther()" autocomplete="off" />
+          <button type="button" class="ms-addbtn" (click)="addOther()">Add</button>
+        </div>
+      }
+      @if (message(); as m) { <small class="ms-msg">{{ m }}</small> }
+    </div>
+  }
+</div>

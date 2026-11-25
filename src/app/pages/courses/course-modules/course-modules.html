@@ -1,0 +1,61 @@
+@if (course(); as c) {
+  @if (c.chapters.length) {
+    <div class="cm-summary">
+      <div><b>{{ c.chapters.length }}</b><span>Modules</span></div>
+      <div><b>{{ totals().lessons }}</b><span>Lessons</span></div>
+      <div><b>{{ totals().minutes }}</b><span>Minutes</span></div>
+      @if (!readonly()) {
+        <button type="button" class="mini primary cm-add" (click)="openModule()"><i class="bi bi-plus-lg"></i> Add module</button>
+      }
+    </div>
+  }
+
+  @for (ch of c.chapters; track ch.id; let i = $index) {
+    <div class="chapter">
+      <div class="chapter-head">
+        <span class="cm-num">{{ i + 1 }}</span>
+        <div class="cm-title">
+          <b>{{ ch.name }}</b>
+          <small class="muted">{{ ch.lessons.length }} lesson{{ ch.lessons.length === 1 ? '' : 's' }}</small>
+        </div>
+        @if (ch.status === 'Draft') { <span class="badge-draft">Draft</span> }
+        <span class="spacer"></span>
+        @if (!readonly()) {
+          <button type="button" class="mini primary" (click)="openLesson(ch.id)"><i class="bi bi-plus-lg"></i> Add lesson</button>
+          <button type="button" class="icon-btn" title="Edit module" aria-label="Edit module" (click)="openModule(ch.id)"><i class="bi bi-pencil-square"></i></button>
+          <button type="button" class="icon-btn danger" title="Delete module" aria-label="Delete module" (click)="deleteChapter(ch.id)"><i class="bi bi-trash3"></i></button>
+        }
+      </div>
+      @if (ch.desc) { <div class="chapter-desc">{{ ch.desc }}</div> }
+      @for (l of ch.lessons; track l.id) {
+        <div class="lesson">
+          <span class="les-icon"><i class="bi" [class]="icon[l.host]"></i></span>
+          <div class="les-main">
+            <b>{{ l.name }}</b>
+            <span class="les-tags">
+              <span class="tag">{{ hostLabel(l.host) }}</span>
+              <span class="tag" [class.priv]="l.privacy === 'Private'">{{ l.privacy }}</span>
+              <span class="tag"><i class="bi bi-clock"></i> {{ l.dur || 0 }} min</span>
+            </span>
+          </div>
+          @if (!readonly()) {
+            <span class="lesson-actions">
+              <button type="button" class="icon-btn" title="Edit lesson" aria-label="Edit lesson" (click)="openLesson(ch.id, l.id)"><i class="bi bi-pencil-square"></i></button>
+              <button type="button" class="icon-btn danger" title="Delete lesson" aria-label="Delete lesson" (click)="deleteLesson(ch.id, l.id)"><i class="bi bi-trash3"></i></button>
+            </span>
+          }
+        </div>
+      } @empty {
+        <div class="lesson empty-les"><span class="muted">No lessons yet.</span></div>
+      }
+    </div>
+  } @empty {
+    <div class="empty">
+      <i class="bi bi-journal-plus"></i>
+      <p>No modules yet.</p>
+      @if (!readonly()) {
+        <button type="button" class="mini primary" (click)="openModule()"><i class="bi bi-plus-lg"></i> Add first module</button>
+      }
+    </div>
+  }
+}

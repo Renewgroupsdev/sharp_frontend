@@ -1,0 +1,8 @@
+.qr-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; .qa-title { margin: 0; } }
+.qr-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; @media (max-width: 640px) { grid-template-columns: 1fr; } }
+.qr-box { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border: 1px solid var(--border-soft-strong); border-radius: 10px; background: var(--app-surface-bg);
+  &.ok { background: var(--status-green-bg); border-color: transparent; }
+  &.bad { background: var(--status-red-bg); border-color: transparent; }
+  &.right { background: var(--primary-soft); border-color: var(--primary-border); } }
+.qr-line { font-size: 13px; color: var(--text-dark); overflow-wrap: anywhere; white-space: pre-wrap; }
+.qr-expl { margin: 0; padding: 8px 10px; border-radius: 9px; background: var(--status-orange-bg); color: var(--status-orange-text); font-size: 12.5px; }

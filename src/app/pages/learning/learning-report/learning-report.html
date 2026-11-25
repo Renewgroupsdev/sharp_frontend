@@ -1,0 +1,37 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-bar-chart-line"></i></div>
+      <div class="title-content">
+        <h2>Progress report{{ record ? ' — ' + record.name : '' }}</h2>
+        @if (record) { <p>{{ record.course }} · overall {{ record.progress }}% · {{ record.status }}</p> }
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div class="modal-body-custom">
+    @if (error(); as err) { <div class="error-text" role="alert">{{ err }}</div> }
+    <table class="rep-table">
+      <thead><tr><th>Module</th><th>Lessons done</th><th>Progress</th><th>Status</th></tr></thead>
+      <tbody>
+        @for (m of modules(); track m.name) {
+          <tr>
+            <td><b>{{ m.name }}</b></td>
+            <td>{{ m.done }} / {{ m.total }}</td>
+            <td><div class="rep-bar"><i [style.width.%]="m.pct"></i></div><small>{{ m.pct }}%</small></td>
+            <td><span class="pill" [ngClass]="m.status === 'Completed' ? 'done' : m.status === 'In progress' ? 'going' : ''">{{ m.status }}</span></td>
+          </tr>
+        } @empty {
+          <tr><td colspan="4" class="rep-empty">{{ loading() ? 'Loading…' : 'This course has no published modules yet.' }}</td></tr>
+        }
+      </tbody>
+    </table>
+    <small class="rep-note">Modules show the lessons the student has completed. The overall percentage can also be set by hand with Edit.</small>
+  </div>
+
+  <div class="modal-footer-custom">
+    @if (canEdit) { <button type="button" class="cancel-btn" (click)="edit()"><i class="bi bi-pencil-square"></i> Edit</button> }
+    <button type="button" class="save-btn" (click)="close()">Close</button>
+  </div>
+</div>

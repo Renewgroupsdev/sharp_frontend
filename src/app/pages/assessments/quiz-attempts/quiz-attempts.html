@@ -1,0 +1,67 @@
+<div class="purchase-page container-fluid px-0">
+  @if (!embedded) {
+    <div class="page-header">
+      <h6 class="page-title"><i class="bi bi-clipboard-data"></i> Quiz attempts</h6>
+      <p class="page-subtitle">One row per student. Open the arrow to see every attempt, then open an attempt to see the exact questions the student was given and how they answered.</p>
+    </div>
+  }
+
+  @if (error(); as err) { <div class="alert-banner danger" role="alert"><i class="bi bi-exclamation-triangle"></i><div>{{ err }}</div></div> }
+
+  <app-count-ribbon class="d-block mb-2" ariaLabel="Students by status" [items]="stats()" [activeKeys]="activeRibbonKeys" (select)="onRibbonSelect($event)" />
+
+  <app-common-filter-card
+    searchPlaceholder="Search student, ID, quiz or course"
+    [filters]="filters"
+    [showExport]="false"
+    (searchChange)="onSearch($event)"
+    (filtersChange)="onFiltersChange($event)"
+  ></app-common-filter-card>
+
+  <div class="table-col">
+    <app-common-table-card
+      title="Students"
+      [loading]="loading()"
+      [recordCountText]="recordCountText"
+      [columns]="columns"
+      [rows]="rows"
+      [totalRecords]="totalRecords"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [currentPage]="currentPage"
+      [pageInfoText]="pageInfoText"
+      [sortActive]="sortActive"
+      [sortDirection]="sortDirection"
+      [expandedRowTemplate]="attemptsTpl"
+      [expandedIds]="expanded()"
+      (expandToggle)="toggle($event)"
+      (pageChange)="onPageChange($event)"
+      (sortChange)="onSortChange($event)"
+      (quickActionClick)="onQuickAction($event)"
+      (profileClick)="toggle($event)"
+    ></app-common-table-card>
+  </div>
+</div>
+
+<!-- The student's attempts, newest first. -->
+<ng-template #attemptsTpl let-row>
+  <table class="att-table">
+    <thead>
+      <tr><th>Attempt</th><th>Quiz</th><th>Started</th><th>Time</th><th>Marks</th><th>Result %</th><th>Status</th><th></th></tr>
+    </thead>
+    <tbody>
+      @for (l of linesFor(row); track l.id) {
+        <tr>
+          <td>{{ l.attemptNo }}</td>
+          <td><b>{{ l.quiz }}</b><small>{{ l.course }}</small></td>
+          <td>{{ l.started }}</td>
+          <td>{{ l.timeTaken }}</td>
+          <td>{{ l.score }}</td>
+          <td>{{ l.percent }}</td>
+          <td><span class="att-pill" [class]="'att-pill o-' + l.outcome">{{ l.outcomeLabel }}</span></td>
+          <td class="att-act"><button type="button" class="att-view" (click)="openAttempt(l.id)"><i class="bi bi-eye-fill"></i> View</button></td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</ng-template>

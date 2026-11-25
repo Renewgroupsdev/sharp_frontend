@@ -1,0 +1,46 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi" [class.bi-people]="kind === 'Chat'" [class.bi-megaphone]="kind === 'Announcement'"></i></div>
+      <div class="title-content">
+        <h2>{{ isEdit ? 'Edit group' : 'Create ' + (kind === 'Chat' ? 'chat' : 'announcement') + ' group' }}</h2>
+        <p>{{ isEdit ? existing?.title : 'Admin, Super Admin and OB are added automatically' }}</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <form (ngSubmit)="save()" novalidate>
+    <div class="modal-body-custom">
+      <div class="form-grid">
+        <div class="form-field" [class.full-width]="isEdit">
+          <label for="gf-name">Group name <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-chat-square-text"></i>
+            <input id="gf-name" name="name" required maxlength="120" [(ngModel)]="name" [class.is-invalid]="submitted() && !name.trim()" />
+          </div>
+          @if (submitted() && !name.trim()) { <small class="error-text">Enter a group name.</small> }
+        </div>
+        @if (!isEdit) {
+          <div class="form-field">
+            <label for="gf-by">Created by</label>
+            <div class="input-wrap"><i class="bi bi-person"></i><input id="gf-by" name="by" readonly [value]="createdBy" /></div>
+          </div>
+        }
+        <div class="form-field full-width">
+          <label>Members <span>*</span></label>
+          @if (loading()) {
+            <small class="muted">Loading members…</small>
+          } @else {
+            <app-community-member-picker [users]="people()" [(selected)]="picked"></app-community-member-picker>
+          }
+        </div>
+      </div>
+      @if (serverError(); as err) { <p class="error-text" role="alert">{{ err }}</p> }
+    </div>
+    <div class="modal-footer-custom">
+      <span class="footer-note">{{ picked().length }} selected</span>
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+      <button type="submit" class="save-btn" [disabled]="saving() || loading()"><i class="bi bi-check-lg"></i> {{ saving() ? 'Saving…' : isEdit ? 'Save changes' : 'Create group' }}</button>
+    </div>
+  </form>
+</div>

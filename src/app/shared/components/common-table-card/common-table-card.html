@@ -1,0 +1,504 @@
+﻿<div class="table-card">
+
+  <div class="table-card-header d-flex flex-wrap align-items-start align-items-sm-center justify-content-between">
+    <div class="table-card-heading">
+      <div class="heading-line">
+        <h3>{{ title }}</h3>
+        @if (recordCountText) {
+          <span class="record-count">{{ recordCountText }}</span>
+        }
+      </div>
+    </div>
+
+    @if (bulkActionsLabel && allowed('bulkActions')) {
+      <button type="button" class="bulk-actions-btn" (click)="bulkActionsClick.emit()">
+        {{ bulkActionsLabel }}
+        <i class="bi bi-chevron-down"></i>
+      </button>
+    }
+  </div>
+
+  <div class="table-scroll-wrap">
+    @if (loading) {
+      <app-page-loader [content]="true"></app-page-loader>
+    }
+
+    <div class="table-scroll table-responsive">
+    <table
+      mat-table
+      [dataSource]="rows"
+      matSort
+      [matSortActive]="sortActive"
+      [matSortDirection]="sortDirection"
+      [matSortDisableClear]="true"
+      (matSortChange)="sortChange.emit($event)"
+      class="data-table"
+      [multiTemplateDataRows]="!!expandedRowTemplate"
+      [class.drag-drop-enabled]="dragDropEnabled"
+      cdkDropList
+      [id]="dropListId"
+      [cdkDropListConnectedTo]="connectedTo"
+      cdkDropListOrientation="vertical"
+      [cdkDropListDisabled]="!dragDropEnabled"
+      (cdkDropListDropped)="drop($event)"
+      aria-label="Leads table">
+
+      @if (dragDropEnabled) {
+        <ng-container matColumnDef="dragHandle">
+          <th mat-header-cell *matHeaderCellDef style="width: 36px;"></th>
+          <td mat-cell *matCellDef="let row" style="width: 36px;">
+            <span
+              class="drag-handle"
+              cdkDragHandle
+              (mousedown)="onHandleMouseDown()"
+              (keydown.enter)="onHandleMouseDown()"
+              tabindex="0"
+              role="button"
+              aria-label="Reorder row"
+              title="Drag to reorder">
+              <i class="bi bi-grip-vertical"></i>
+            </span>
+          </td>
+        </ng-container>
+      }
+
+      @for (col of columns; track col.key) {
+        <ng-container [matColumnDef]="col.key">
+
+          @if (isSortable(col)) {
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+              mat-sort-header [style.min-width.px]="colMinWidth(col)">
+              {{ col.header }}
+              <i
+                class="bi sort-indicator"
+                [class.bi-arrow-up]="sortActive === col.key && sortDirection === 'asc'"
+                [class.bi-arrow-down]="sortActive === col.key && sortDirection === 'desc'"
+                aria-hidden="true"></i>
+            </th>
+          } @else {
+            <th
+              mat-header-cell
+              *matHeaderCellDef [style.min-width.px]="colMinWidth(col)">
+              @if (col.type === 'select') {
+                <input type="checkbox" class="row-check" aria-label="Select all rows on this page" [checked]="allSelected" (change)="toggleAll($any($event.target).checked)" />
+              } @else {
+                {{ col.header }}
+              }
+            </th>
+          }
+
+          <td
+            mat-cell
+            *matCellDef="let row; let rowIndex = index"
+            [attr.data-label]="col.header">
+
+            @if (col.type === 'lead') {
+              <div class="lead-cell">
+                @if (asLeadCell(row[col.key]).photo; as photo) {
+                  <img class="lead-photo" [src]="photo" alt="" />
+                } @else {
+                  <span class="avatar" [ngClass]="avatarClass(rowIndex)">
+                    {{ initials(asLeadCell(row[col.key]).name) }}
+                  </span>
+                }
+                <span class="lead-text">
+                  @if (allowed('profile')) {
+                    <a class="lead-name lead-name-link" href="javascript:void(0)" role="button"
+                       [title]="asLeadCell(row[col.key]).name"
+                       (click)="profileClick.emit(row)"
+                       (keydown.enter)="profileClick.emit(row)">{{ asLeadCell(row[col.key]).name }}</a>
+                  } @else {
+                    <span class="lead-name" [title]="asLeadCell(row[col.key]).name">{{ asLeadCell(row[col.key]).name }}</span>
+                  }
+                  @if (asLeadCell(row[col.key]).subtitle) {
+                    <span class="lead-subtitle">{{ asLeadCell(row[col.key]).subtitle }}</span>
+                  }
+                </span>
+              </div>
+            }
+
+            @else if (col.type === 'branch') {
+              <div class="location-cell">
+                <i class="bi bi-geo-alt-fill location-icon" aria-hidden="true"></i>
+                <span class="location-text" [title]="row[col.key]">
+                  {{ row[col.key] }}
+                </span>
+              </div>
+            }
+
+            @else if (col.type === 'badge') {
+              <span class="status-badge" [ngClass]="badgeClass(row[col.key] + '')">
+                {{ row[col.key] }}
+              </span>
+            }
+
+            @else if (col.type === 'toggle') {
+              <label class="row-switch">
+                <input type="checkbox" role="switch"
+                       [attr.aria-label]="col.header + ' of ' + (row['__name'] || 'row')"
+                       [checked]="row[col.key] === 'Active'"
+                       [disabled]="row['__locked']"
+                       (change)="toggleChange.emit({ row: row, key: col.key, checked: $any($event.target).checked })" />
+                <span class="track"><span class="thumb"></span></span>
+                <span class="switch-text">{{ row[col.key] }}</span>
+              </label>
+            }
+
+            @else if (col.type === 'expand') {
+              <button type="button" class="expand-btn" [class.open]="isExpanded(row)" [attr.aria-expanded]="isExpanded(row)" aria-label="Show details" (click)="$event.stopPropagation(); expandToggle.emit(row)">
+                <i class="bi bi-chevron-down"></i>
+              </button>
+            }
+
+            @else if (col.type === 'avatarGroup') {
+              <div class="avatar-group assigned-avatar-group">
+                @for (caller of asCallerAvatars(row[col.key]); track caller.empNo) {
+                  <span
+                    class="avatar avatar-sm avatar-stacked assigned-avatar"
+                    [ngClass]="avatarColorForName(caller.name)"
+                    tabindex="0"
+                    role="img"
+                    [attr.aria-label]="caller.name + ' - ' + caller.empNo"
+                    (mouseenter)="showAvatarTooltip($event, caller)"
+                    (mouseleave)="hideAvatarTooltip()"
+                    (focus)="showAvatarTooltip($event, caller)"
+                    (blur)="hideAvatarTooltip()">
+                    @if (caller.image) {
+                      <img
+                        [src]="caller.image"
+                        [alt]="caller.name"
+                        class="assigned-avatar-img"
+                        (error)="$any($event.target).style.display='none'">
+                    } @else {
+                      <span class="avatar-initials">{{ initials(caller.name) }}</span>
+                    }
+                  </span>
+                }
+                @if (!asCallerAvatars(row[col.key]).length) {
+                  <span class="unassigned-cell">
+                    <i class="bi bi-person-plus"></i>
+                    Unassigned
+                  </span>
+                }
+              </div>
+            }
+
+            @else if (col.type === 'callLog') {
+              <div class="call-log-cell">
+                @if (allowed('viewCallLog')) {
+                <button
+                  type="button"
+                  class="row-action-btn call-log-btn"
+                  (click)="viewCallLogClick.emit(row)"
+                  [attr.aria-label]="actionName('viewCallLog', 'View call log history')"
+                  [title]="actionName('viewCallLog', 'View call log history')">
+                  <i [class]="'bi ' + actionIcon('viewCallLog', 'bi-clock-history')"></i>
+                </button>
+                }
+              </div>
+            }
+
+            @else if (col.type === 'rowActions') {
+              <div class="action-cell">
+                <!-- Edit -->
+                @if (allowed('edit')) {
+                <button
+                  type="button"
+                  class="row-action-btn action-edit"
+                  (click)="editClick.emit(row)"
+                  [attr.aria-label]="actionName('edit', 'Edit row')"
+                  [title]="actionName('edit', 'Edit')">
+                  <i [class]="'bi ' + actionIcon('edit', 'bi-pencil-fill')"></i>
+                </button>
+                }
+
+                <!-- Delete -->
+                @if (allowed('delete')) {
+                <button
+                  type="button"
+                  class="row-action-btn action-delete"
+                  (click)="deleteClick.emit(row)"
+                  [attr.aria-label]="actionName('delete', 'Delete row')"
+                  [title]="actionName('delete', 'Delete')">
+                  <i [class]="'bi ' + actionIcon('delete', 'bi-trash3-fill')"></i>
+                </button>
+                }
+              </div>
+            }
+
+            @else if (col.type === 'action') {
+              <div class="action-cell">
+                  <!-- Call -->
+                  <!-- Rows flagged editDeleteOnly (e.g. an Invalid lead) keep only Edit and Delete -->
+                  @if (allowed('call') && !row['editDeleteOnly']) {
+                  <button
+                    type="button"
+                    class="row-action-btn action-call"
+                    (click)="callClick.emit(row)"
+                    [attr.aria-label]="actionName('call', 'Call lead')"
+                    [title]="actionName('call', 'Call lead')">
+                    <i [class]="'bi ' + actionIcon('call', 'bi-telephone-outbound-fill')"></i>
+                  </button>
+                  }
+
+                  <!-- Telecaller check: is this lead genuine? -->
+                  @if (row['canValidate'] && allowed('validate') && !row['editDeleteOnly']) {
+                    <button
+                      type="button"
+                      class="row-action-btn action-valid"
+                      (click)="validateClick.emit({ row, valid: true })"
+                      aria-label="Mark lead valid"
+                      title="Valid lead">
+                      <i class="bi bi-check-lg"></i>
+                    </button>
+                    <button
+                      type="button"
+                      class="row-action-btn action-invalid"
+                      (click)="validateClick.emit({ row, valid: false })"
+                      aria-label="Mark lead invalid"
+                      title="Invalid lead">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  }
+
+                  <!-- Edit -->
+                  @if (allowed('edit')) {
+                  <button
+                    type="button"
+                    class="row-action-btn action-edit"
+                    (click)="editClick.emit(row)"
+                    [attr.aria-label]="actionName('edit', 'Edit lead')"
+                    [title]="actionName('edit', 'Edit')">
+                    <i [class]="'bi ' + actionIcon('edit', 'bi-pencil-fill')"></i>
+                  </button>
+                  }
+
+                  <!-- Appointment -->
+                  <!-- <button
+                    type="button"
+                    class="row-action-btn action-appointment"
+                    (click)="appointmentClick.emit(row)"
+                    aria-label="Appointment"
+                    title="Appointment">
+                    <i class="bi bi-calendar2-check-fill"></i>
+                  </button> -->
+
+                  <!-- Follow-up -->
+                  @if (allowed('followUp') && !row['editDeleteOnly']) {
+                  <button
+                    type="button"
+                    class="row-action-btn action-followup"
+                    (click)="followUpClick.emit(row)"
+                    [attr.aria-label]="actionName('followUp', 'Follow-up')"
+                    [title]="actionName('followUp', 'Follow-up')">
+                    <i [class]="'bi ' + actionIcon('followUp', 'bi-arrow-repeat')"></i>
+                  </button>
+                  }
+
+                  <!-- Send to Branch -->
+                  @if (allowed('sendToBranch') && !row['editDeleteOnly']) {
+                  <button
+                    type="button"
+                    class="row-action-btn action-branch"
+                    (click)="sendToBranchClick.emit(row)"
+                    [attr.aria-label]="actionName('sendToBranch', 'Send to assigned branch')"
+                    [title]="actionName('sendToBranch', 'Send to assigned branch')">
+                    <i [class]="'bi ' + actionIcon('sendToBranch', 'bi-building-fill-add')"></i>
+                  </button>
+                  }
+
+                  <!-- Delete -->
+                  @if (allowed('delete')) {
+                  <button
+                    type="button"
+                    class="row-action-btn action-delete"
+                    (click)="deleteClick.emit(row)"
+                    [attr.aria-label]="actionName('delete', 'Delete lead')"
+                    [title]="actionName('delete', 'Delete')">
+                    <i [class]="'bi ' + actionIcon('delete', 'bi-trash3-fill')"></i>
+                  </button>
+                  }
+                </div>
+            }
+
+            @else if (col.type === 'quickActions' && col.menu) {
+              @let menuActions = asQuickActions(row[col.key]);
+              @if (menuActions.length) {
+                <div class="quick-actions-cell menu-cell">
+                  <button
+                    type="button"
+                    class="row-action-btn qa-menu-trigger"
+                    [class.open]="actionMenu?.id === row['id']"
+                    aria-haspopup="menu"
+                    [attr.aria-expanded]="actionMenu?.id === row['id']"
+                    aria-label="Actions"
+                    title="Actions"
+                    (click)="toggleActionMenu($event, row, menuActions.length)">
+                    <i class="bi bi-three-dots-vertical"></i>
+                  </button>
+                  @if (actionMenu?.id === row['id']) {
+                    <div
+                      class="qa-menu"
+                      role="menu"
+                      [style.top.px]="actionMenu!.top"
+                      [style.right.px]="actionMenu!.right"
+                      [style.transform]="actionMenu!.up ? 'translateY(-100%)' : null">
+                      @for (action of menuActions; track action.key) {
+                        <button
+                          type="button"
+                          role="menuitem"
+                          class="qa-menu-item"
+                          [class.qa-danger]="action.variant === 'danger'"
+                          (click)="runMenuAction($event, row, action.key)">
+                          <i class="bi" [ngClass]="action.icon"></i>
+                          <span>{{ action.label }}</span>
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            }
+
+            @else if (col.type === 'quickActions') {
+              <div class="quick-actions-cell">
+                @for (action of asQuickActions(row[col.key]); track action.key) {
+                  <button
+                    type="button"
+                    class="row-action-btn"
+                    [class.qa-primary]="action.variant === 'primary'"
+                    [class.qa-danger]="action.variant === 'danger'"
+                    (click)="quickActionClick.emit({ row, action: action.key })"
+                    [attr.aria-label]="action.label"
+                    [title]="action.label">
+                    <i class="bi" [ngClass]="action.icon"></i>
+                  </button>
+                }
+              </div>
+            }
+
+            @else if (col.type === 'progress') {
+              @let p = asProgress(row[col.key]);
+              <div class="progress-cell" [ngClass]="'tone-' + progressTone(p.value)">
+                <div class="progress-line">
+                  <div class="progress-track" role="progressbar" [attr.aria-valuenow]="p.value" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="col.header + ' ' + p.value + '%'"><i [style.width.%]="p.value"></i></div>
+                  <b>{{ p.value }}%</b>
+                </div>
+                @if (p.sub) { <small>{{ p.sub }}</small> }
+              </div>
+            }
+
+            @else if (col.type === 'select') {
+              <input type="checkbox" class="row-check" aria-label="Select row" [checked]="isSelected(row)" (click)="$event.stopPropagation()" (change)="toggleRow(row, $any($event.target).checked)" />
+            }
+
+            @else if (col.type === 'countLink') {
+              <button type="button" class="count-pill" [disabled]="!+row[col.key]" [attr.aria-label]="row[col.key] + ' ' + col.header + ', open the list'" (click)="$event.stopPropagation(); cellClick.emit({ row, key: col.key })">{{ row[col.key] }}</button>
+            }
+
+            @else if (col.type === 'countList') {
+              @let items = asList(row[col.key]);
+              @if (items.length) {
+                <button
+                  type="button"
+                  class="count-pill"
+                  [class.open]="listPop?.id === row['id'] && listPop?.label === col.header"
+                  [attr.aria-label]="items.length + ' ' + col.header + ': ' + items.join(', ')"
+                  (mouseenter)="hoverList($event, row, col)"
+                  (mouseleave)="leaveList()"
+                  (click)="toggleList($event, row, col)">
+                  {{ items.length }}
+                </button>
+              } @else {
+                <span class="text-cell muted-cell">—</span>
+              }
+            }
+
+            @else if (col.type === 'longText') {
+              @if (wordCount(row[col.key]) > longWords) {
+                <span class="text-cell long-cell has-pop" tabindex="0" (mouseenter)="showText($event, row[col.key])" (mouseleave)="hideText()" (focus)="showText($any($event), row[col.key])" (blur)="hideText()">{{ clipWords(row[col.key]) }}</span>
+              } @else {
+                <span class="text-cell long-cell">{{ row[col.key] }}</span>
+              }
+            }
+
+            @else {
+              <span class="text-cell" [title]="row[col.key]">{{ row[col.key] }}</span>
+            }
+
+          </td>
+        </ng-container>
+      }
+
+      <ng-container matColumnDef="expandedDetail">
+        <td mat-cell *matCellDef="let row" class="expanded-cell" [attr.colspan]="displayedColumns.length">
+          @if (isExpanded(row) && expandedRowTemplate) {
+            <div class="expanded-body"><ng-container *ngTemplateOutlet="expandedRowTemplate; context: { $implicit: row }"></ng-container></div>
+          }
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: displayedColumns; let rowIndex = index"
+        [class.row-selected]="selectedId !== null && row['id'] === selectedId"
+        [class.row-selectable]="rowSelect.observed"
+        [class.row-followup-soon]="row['_urgency'] === 'soon'"
+        [class.row-followup-urgent]="row['_urgency'] === 'urgent'"
+        (click)="onRowClick($event, row)"
+        cdkDrag
+        [cdkDragData]="row"
+        [cdkDragDisabled]="dragDisabled || !dragDropEnabled"
+        [cdkDragBoundary]="dragBoundary"
+        [cdkDragLockAxis]="dragLockAxis"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['expandedDetail']; when: hasDetail" class="detail-row" [class.detail-closed]="!isExpanded(row)"></tr>
+
+      <tr class="mat-row empty-material-row" *matNoDataRow>
+        <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+          No records found
+        </td>
+      </tr>
+    </table>
+    </div>
+  </div>
+
+  <div class="table-card-footer d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+    <span class="page-info">{{ pageInfoText }}</span>
+
+    @if (totalRecords > 0) {
+      <mat-paginator
+        class="compact-paginator w-100 w-md-auto d-flex justify-content-end"
+        [length]="totalRecords"
+        [pageIndex]="currentPage - 1"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="pageSizeOptions"
+        [hidePageSize]="false"
+        [showFirstLastButtons]="false"
+        (page)="onPaginatorChange($event)"
+        aria-label="Lead records pagination">
+      </mat-paginator>
+    }
+  </div>
+
+</div>
+
+@if (listPop; as pop) {
+  <div class="list-pop" role="dialog" [attr.aria-label]="pop.label" [style.top.px]="pop.top" [style.left.px]="pop.left" (click)="$event.stopPropagation()">
+    <div class="list-pop-title">{{ pop.label }} · {{ pop.items.length }}</div>
+    <ul>
+      @for (item of pop.items; track item) { <li>{{ item }}</li> }
+    </ul>
+  </div>
+}
+
+@if (avatarTooltip) {
+  <div class="avatar-tooltip-fixed" [style.top.px]="avatarTooltip.top" [style.left.px]="avatarTooltip.left">
+    {{ avatarTooltip.name }}
+  </div>
+}
+@if (textTip) {
+  <div class="text-tip-fixed" role="tooltip" [style.top.px]="textTip.top" [style.left.px]="textTip.left">{{ textTip.text }}</div>
+}

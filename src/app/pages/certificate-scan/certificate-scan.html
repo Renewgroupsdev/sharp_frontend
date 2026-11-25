@@ -1,0 +1,42 @@
+<main class="sc">
+  <section class="sc-card" [class.wide]="result()?.status === 'issued' || result()?.status === 'completed'">
+    @if (error(); as err) {
+      <div class="sc-box warn" role="alert"><i class="bi bi-exclamation-triangle-fill"></i><div><b>Could not check this code</b><p>{{ err }}</p></div></div>
+    } @else if (result(); as r) {
+      @switch (r.status) {
+        @case ('issued') {
+          <p class="sc-ok"><i class="bi bi-patch-check-fill"></i> Course completed. This certificate is genuine and valid.</p>
+          @if (r.certificate; as c) { <app-certificate-view [cert]="c" /> }
+        }
+        @case ('completed') {
+          <p class="sc-ok"><i class="bi bi-patch-check-fill"></i> Course completed (100%). {{ r.name }} has finished “{{ r.course }}”.</p>
+          @if (r.certificate; as c) { <app-certificate-view [cert]="c" /> }
+          <p class="sc-note">The certificate number is added once the programme office issues the certificate.</p>
+        }
+        @case ('in_progress') {
+          <div class="sc-box warn" role="status">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <div>
+              <b>Course not completed</b>
+              <p>{{ r.name }} has not completed “{{ r.course }}” yet, so there is no certificate to show.</p>
+              <div class="sc-bar" role="progressbar" [attr.aria-valuenow]="r.progress ?? 0" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="'Course progress'"><i [style.width.%]="r.progress ?? 0"></i></div>
+              <small>{{ r.progress ?? 0 }}% of the course done</small>
+            </div>
+          </div>
+        }
+        @case ('cancelled') {
+          <div class="sc-box bad" role="alert">
+            <i class="bi bi-slash-circle-fill"></i>
+            <div><b>Certificate cancelled</b><p>The certificate for “{{ r.course }}” was issued and later cancelled{{ r.cancelled_at ? ' on ' + day(r.cancelled_at) : '' }}. It is no longer valid.</p></div>
+          </div>
+        }
+        @default {
+          <div class="sc-box bad" role="alert"><i class="bi bi-x-circle-fill"></i><div><b>QR code not recognised</b><p>This code does not belong to any certificate issued by the programme.</p></div></div>
+        }
+      }
+    } @else {
+      <p class="sc-load">Checking…</p>
+    }
+    <p class="sc-foot">SHARP programme · TNCCI</p>
+  </section>
+</main>

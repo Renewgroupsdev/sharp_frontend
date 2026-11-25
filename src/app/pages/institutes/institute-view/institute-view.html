@@ -1,0 +1,47 @@
+@if (institute(); as o) {
+  <div class="lead-modal">
+    <div class="modal-header-custom">
+      <div class="modal-title-wrap">
+        <div class="title-icon"><i class="bi bi-bank"></i></div>
+        <div class="title-content">
+          <h2>Institute Details</h2>
+          <p>{{ o.id }} · {{ o.code }}</p>
+        </div>
+      </div>
+      <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <div class="modal-body-custom">
+      <div class="who">
+        <div class="who-text">
+          <strong>{{ o.n }}</strong>
+          <small>{{ o.city }}</small>
+        </div>
+        <span class="pill" [ngClass]="'st-' + o.st.toLowerCase()">{{ o.st }}</span>
+      </div>
+
+      <dl class="facts">
+        @for (f of facts(); track f.label) {
+          <div><dt>{{ f.label }}</dt><dd>{{ f.value }}</dd></div>
+        }
+      </dl>
+
+      <div class="section-title"><i class="bi bi-collection"></i> Batches</div>
+      @if (batches().length) {
+        <ul class="list">
+          @for (b of batches(); track b.id) {
+            <li><strong>{{ b.n }}</strong><small>{{ b.start }} – {{ b.end }}</small></li>
+          }
+        </ul>
+      } @else {
+        <p class="empty">Not part of any batch yet.</p>
+      }
+    </div>
+
+    <div class="modal-footer-custom">
+      <button type="button" class="cancel-btn" (click)="close()">Close</button>
+      <button *appCan="'a_orgs.delete'" type="button" class="cancel-btn danger" (click)="remove()"><i class="bi bi-trash3"></i> Delete</button>
+      <button *appCan="'a_orgs.edit'" type="button" class="save-btn" (click)="edit()"><i class="bi bi-pencil-square"></i> Edit</button>
+    </div>
+  </div>
+}

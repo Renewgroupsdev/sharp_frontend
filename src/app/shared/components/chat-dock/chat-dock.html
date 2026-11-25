@@ -1,0 +1,109 @@
+@if (open()) {
+  <div class="cd-backdrop" (click)="toggle()"></div>
+  <aside class="cd-drawer" role="dialog" aria-label="Chats">
+    @if (picking()) {
+      <header class="cd-head">
+        <button type="button" class="cd-back" (click)="back()" aria-label="Back to chats"><i class="bi bi-arrow-left"></i></button>
+        <span class="cd-title">New personal chat<small>Only you and the person take part</small></span>
+        <button type="button" class="cd-close" (click)="toggle()" aria-label="Close chat"><i class="bi bi-x-lg"></i></button>
+      </header>
+      <div class="cd-search"><i class="bi bi-search"></i><input type="search" placeholder="Search by name or role" [value]="search()" (input)="search.set($any($event.target).value)" autofocus /></div>
+      <div class="cd-list">
+        @for (p of people(); track p.id) {
+          <button type="button" class="cd-row" [disabled]="starting()" (click)="startWith(p)">
+            <span class="cd-av" [style.background]="p.col" style="color:#fff">{{ p.i }}</span>
+            <span class="cd-row-main"><b>{{ p.n }}</b><small>{{ p.r }}</small></span>
+          </button>
+        } @empty {
+          <p class="cd-empty">No one found.</p>
+        }
+      </div>
+    } @else if (active(); as g) {
+      <header class="cd-head">
+        <button type="button" class="cd-back cd-back-n" (click)="back()" aria-label="Back to chats"><i class="bi bi-arrow-left"></i>@if (totalUnread() > 0) { <span class="cd-back-badge">{{ totalUnread() > 99 ? '99+' : totalUnread() }}</span> }</button>
+        <span class="cd-ico"><i class="bi" [class]="g.source === 'dm' ? 'bi-person-fill' : 'bi-people-fill'"></i></span>
+        <span class="cd-title">{{ label(g) }}<small>@if (g.source !== 'dm') { <i class="bi bi-lock-fill"></i> } {{ subtitle(g) }}</small></span>
+        <button type="button" class="cd-back" [class.cd-pinned]="g.pinned" (click)="togglePin(g)" [title]="g.pinned ? 'Unpin chat' : 'Pin chat'" [attr.aria-label]="g.pinned ? 'Unpin chat' : 'Pin chat'" [attr.aria-pressed]="g.pinned"><i class="bi" [class]="g.pinned ? 'bi-pin-angle-fill' : 'bi-pin-angle'"></i></button>
+        @if (canAdd()) { <button type="button" class="cd-back" (click)="panel.set('add')" title="Add members" aria-label="Add members"><i class="bi bi-person-plus"></i></button> }
+        @if (canEdit()) { <button type="button" class="cd-back" (click)="panel.set('edit')" title="Edit group" aria-label="Edit group"><i class="bi bi-pencil-square"></i></button> }
+        <button type="button" class="cd-close" (click)="toggle()" aria-label="Close chat"><i class="bi bi-x-lg"></i></button>
+      </header>
+      @if (panel(); as p) {
+        <div class="cd-panel-title">{{ p === 'add' ? 'Add members' : 'Edit group' }}</div>
+        <div class="cd-conv"><app-chat-group-manage [group]="g" [mode]="p" (done)="panelDone()" (cancel)="panel.set(null)" /></div>
+      } @else {
+      <nav class="cd-tabs">
+        <button type="button" [class.on]="tab() === 'chat'" (click)="tab.set('chat')"><i class="bi bi-chat"></i> Chat</button>
+        <button type="button" [class.on]="tab() === 'members'" (click)="showMembers()"><i class="bi bi-people"></i> Members</button>
+      </nav>
+      <div class="cd-conv" [hidden]="tab() !== 'chat'">
+        <app-group-chat
+          [groupId]="g.id"
+          [bubbles]="true"
+          [canPost]="g.can_post"
+          [announcement]="g.kind === 'Announcement'"
+          [placeholder]="g.kind === 'Announcement' ? 'Post an announcement…' : 'Message ' + label(g) + '…'"
+          [readOnlyNote]="g.kind === 'Announcement' ? 'Announcements are posted by the programme office.' : 'You can read this conversation but not write in it.'"
+        />
+      </div>
+      @if (tab() === 'members') {
+        <div class="cd-members">
+          @for (m of members(); track m.user_id) {
+            <div class="cd-member">
+              <span class="cd-av" [style.background]="m.color || '#0E7A4E'" [style.color]="'#fff'">{{ m.initials || '?' }}</span>
+              <span class="cd-row-main"><b>{{ m.name }}</b><small>{{ m.role }}{{ m.org ? ' · ' + m.org : '' }}</small></span>
+              <span class="cd-presence" [class.on]="m.online"><i class="cd-pdot"></i>{{ presence(m) }}</span>
+            </div>
+          } @empty {
+            <p class="cd-empty">{{ membersLoading() ? 'Loading…' : 'No members to show.' }}</p>
+          }
+        </div>
+      }
+      }
+    } @else {
+      <header class="cd-head">
+        <span class="cd-ico"><i class="bi bi-chat-dots-fill"></i></span>
+        <span class="cd-title">SHARP Community<small>@if (totalUnread() > 0) { {{ totalUnread() }} unread message{{ totalUnread() === 1 ? '' : 's' }} } @else { Groups, personal chats and announcements }</small></span>
+        <button type="button" class="cd-back" (click)="newMessage()" aria-label="New personal message" title="New personal message"><i class="bi bi-chat-left-text"></i></button>
+        <button type="button" class="cd-close" (click)="toggle()" aria-label="Close chat"><i class="bi bi-x-lg"></i></button>
+      </header>
+      <nav class="cd-tabs cd-tabs-sm">
+        @for (t of tabs; track t.key) {
+          <button type="button" [class.on]="filter() === t.key" (click)="filter.set(t.key)" [attr.title]="t.label">
+            <i class="bi" [class]="t.icon"></i> {{ t.label }}
+            @if (tabUnread()[t.key] > 0) { <span class="cd-tab-dot">{{ tabUnread()[t.key] }}</span> }
+          </button>
+        }
+      </nav>
+      <div class="cd-list">
+        @for (g of shown(); track g.id) {
+          <div class="cd-item" [class.pinned]="g.pinned">
+            <button type="button" class="cd-row" (click)="pick(g)">
+              <span class="cd-av"><i class="bi" [class]="g.source === 'dm' ? 'bi-person-fill' : g.kind === 'Announcement' ? 'bi-megaphone-fill' : 'bi-people-fill'"></i></span>
+              <span class="cd-row-main">
+                <b>{{ label(g) }}</b>
+                <small>{{ preview(g) }}</small>
+              </span>
+              @if (unread()[g.id]; as n) { <span class="cd-badge">{{ n }}</span> }
+              @else if (g.pinned) { <i class="bi bi-pin-angle-fill cd-pin-mark" aria-label="Pinned"></i> }
+            </button>
+            <button type="button" class="cd-pin-btn" (click)="togglePin(g, $event)" [title]="g.pinned ? 'Unpin chat' : 'Pin chat'" [attr.aria-label]="(g.pinned ? 'Unpin ' : 'Pin ') + label(g)"><i class="bi" [class]="g.pinned ? 'bi-pin-angle-fill' : 'bi-pin-angle'"></i></button>
+          </div>
+        } @empty {
+          <p class="cd-empty">Nothing here yet.</p>
+        }
+      </div>
+    }
+  </aside>
+} @else {
+  @if (notice(); as n) {
+    <button type="button" class="cd-notice" (click)="openNotice(n)">
+      <span class="cd-notice-ico"><i class="bi bi-chat-dots-fill"></i></span>
+      <span class="cd-notice-main"><b>{{ n.title }}</b><small>{{ n.by }}: {{ n.body }}</small>@if (n.count > 1) { <em>{{ n.count }} new messages</em> }</span>
+    </button>
+  }
+  <button type="button" class="cd-fab" (click)="toggle()" aria-label="Open chats">
+    <i class="bi bi-chat-dots-fill"></i>
+    @if (totalUnread() > 0) { <span class="cd-fab-badge">{{ totalUnread() > 99 ? '99+' : totalUnread() }}</span> }
+  </button>
+}

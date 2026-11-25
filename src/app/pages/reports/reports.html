@@ -1,0 +1,37 @@
+<section class="purchase-page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title"><i class="bi bi-bar-chart"></i> Reports</h2>
+      <p class="page-subtitle">Live summaries from every module, each downloadable as CSV.</p>
+    </div>
+  </div>
+
+  <app-count-ribbon class="d-block mb-2" [items]="tiles()" />
+
+  <div class="cards">
+    @for (c of charts(); track c.title) {
+      <div class="card">
+        <h4>{{ c.title }}</h4>
+        @for (d of c.data; track d.label) {
+          <div class="bar-row">
+            <span class="bar-label" [title]="d.label">{{ d.label }}</span>
+            <div class="bar-track"><i [style.width.%]="width(d, c.max)"></i></div>
+            <em>{{ d.value }}</em>
+          </div>
+        } @empty {
+          <p class="muted">No data yet.</p>
+        }
+      </div>
+    }
+  </div>
+
+  <h4 class="section-title">Download reports</h4>
+  <div class="cards">
+    @for (r of reports(); track r.key) {
+      <div class="card download">
+        <div><b>{{ r.title }}</b><span class="muted">{{ r.rows.length }} rows</span></div>
+        <button type="button" class="ghost-btn" (click)="download(r)"><i class="bi bi-download"></i> Download CSV</button>
+      </div>
+    }
+  </div>
+</section>

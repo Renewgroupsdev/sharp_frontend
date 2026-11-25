@@ -1,0 +1,63 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-megaphone"></i></div>
+      <div class="title-content">
+        <h2>Send a notification</h2>
+        <p>It appears in each person's bell and pops up on their screen at once</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <form (ngSubmit)="send()" novalidate>
+    <div class="modal-body-custom">
+      <div class="form-grid">
+        <div class="form-field full-width">
+          <label>Send to roles</label>
+          <div class="role-chips">
+            @for (r of roles; track r.value) {
+              <label class="role-chip" [class.on]="chosenRoles().includes(r.value)">
+                <input type="checkbox" [checked]="chosenRoles().includes(r.value)" (change)="toggleRole(r.value)" /> {{ r.label }}
+              </label>
+            }
+          </div>
+        </div>
+        <div class="form-field full-width">
+          <label for="sm-batch">Only in batch (optional)</label>
+          <div class="input-wrap"><i class="bi bi-diagram-3"></i>
+            <select id="sm-batch" name="batch" [(ngModel)]="batchId">
+              <option value="">All batches</option>
+              @for (b of batchList(); track b.id) { <option [value]="b.id">{{ b.n }}</option> }
+            </select>
+            <i class="bi bi-chevron-down select-arrow"></i>
+          </div>
+        </div>
+        <div class="form-field full-width">
+          <label>And/or these people</label>
+          <app-community-member-picker [users]="people()" [(selected)]="picked"></app-community-member-picker>
+          @if (submitted() && !hasAudience) { <small class="error-text">Choose at least one role or person.</small> }
+        </div>
+        <div class="form-field full-width">
+          <label for="sm-title">Title <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-type"></i>
+            <input id="sm-title" name="title" maxlength="150" [(ngModel)]="title" [class.is-invalid]="submitted() && !title.trim()" placeholder="e.g. Holiday tomorrow" />
+          </div>
+          @if (submitted() && !title.trim()) { <small class="error-text">Enter a title.</small> }
+        </div>
+        <div class="form-field full-width">
+          <label for="sm-body">Message</label>
+          <div class="input-wrap textarea-wrap"><i class="bi bi-chat-text"></i>
+            <textarea id="sm-body" name="body" rows="3" maxlength="500" [(ngModel)]="body"></textarea>
+          </div>
+        </div>
+      </div>
+      @if (serverError(); as err) { <p class="error-text" role="alert">{{ err }}</p> }
+    </div>
+    <div class="modal-footer-custom">
+      <span class="footer-note">{{ chosenRoles().length }} role(s), {{ picked().length }} person(s)</span>
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+      <button type="submit" class="save-btn" [disabled]="saving()"><i class="bi bi-send"></i> {{ saving() ? 'Sending…' : 'Send now' }}</button>
+    </div>
+  </form>
+</div>

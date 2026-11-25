@@ -1,0 +1,41 @@
+.cal-wrap { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 12px; margin-top: 8px; align-items: start; }
+@media (max-width: 900px) { .cal-wrap { grid-template-columns: 1fr; } }
+
+.cal-card, .cal-side { padding: 14px; border: 1px solid var(--card-border); border-radius: 14px; background: var(--app-surface-solid); min-width: 0; }
+
+.cal-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; h3 { flex: 1; margin: 0; font-size: 15px; } }
+.cal-nav, .cal-today { height: 30px; border: 1px solid var(--border-soft); border-radius: 8px; background: var(--app-surface-solid); color: var(--text-dark); cursor: pointer; }
+.cal-nav { width: 30px; }
+.cal-today { padding: 0 12px; font-size: 12px; }
+.cal-nav:hover, .cal-today:hover { background: var(--primary-soft); color: var(--primary); }
+
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.cal-dow { text-align: center; font-size: 10.5px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); }
+.cal-cell {
+  position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 62px; padding: 6px; border: 1px solid var(--border-soft); border-radius: 10px;
+  background: var(--app-surface-solid); color: var(--text-dark); font: inherit; text-align: left; cursor: pointer;
+  b { font-size: 12.5px; }
+  small { font-size: 10px; color: var(--text-muted); }
+  &.blank { border: 0; background: none; cursor: default; }
+  &.busy { background: var(--primary-soft); }
+  &.today { box-shadow: 0 0 0 2px var(--primary); }
+  &.picked { border-color: var(--primary); background: var(--primary-soft); }
+}
+.marks { display: flex; gap: 3px; }
+.mk { display: inline-grid; place-items: center; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 99px; font-size: 10px; font-style: normal; font-weight: 700; color: #fff;
+  &.start { background: var(--status-green-text); }
+  &.end { background: var(--status-red-text); } }
+
+.cal-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: 11px; color: var(--text-muted);
+  span { display: inline-flex; align-items: center; gap: 5px; } }
+.sw.busy { width: 14px; height: 14px; border-radius: 4px; background: var(--primary-soft); border: 1px solid var(--primary-border); }
+
+.cal-side { h4 { margin: 0 0 8px; font-size: 14px; }
+  section { margin-top: 10px; }
+  h5 { margin: 0 0 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted);
+    &.start { color: var(--status-green-text); } &.end { color: var(--status-red-text); } }
+  .none { color: var(--text-muted); font-size: 12.5px; } }
+.run { display: block; width: 100%; padding: 8px 10px; margin-bottom: 4px; border: 1px solid var(--border-soft); border-radius: 9px; background: var(--app-surface-solid); text-align: left; font: inherit; cursor: pointer;
+  b { display: block; font-size: 12.5px; color: var(--text-dark); }
+  small { color: var(--text-muted); font-size: 11px; }
+  &:hover { background: var(--primary-soft); } }

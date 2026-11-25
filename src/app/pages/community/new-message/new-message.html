@@ -1,0 +1,42 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-envelope"></i></div>
+      <div class="title-content">
+        <h2>New personal message</h2>
+        <p>Sent as {{ actorName }}. Only you and the recipient take part; Admin, Super Admin and OB can review it.</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <form (ngSubmit)="send()" novalidate>
+    <div class="modal-body-custom">
+      <div class="form-grid">
+        <div class="form-field full-width">
+          <label for="nm-to">To <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-person"></i>
+            <select id="nm-to" name="to" [(ngModel)]="to" [class.is-invalid]="submitted() && !to">
+              <option value="">Choose a person</option>
+              @for (u of people(); track u.id) { <option [value]="u.id">{{ u.n }} · {{ u.r }}</option> }
+            </select>
+            <i class="bi bi-chevron-down select-arrow"></i>
+          </div>
+          @if (submitted() && !to) { <small class="error-text">Choose who to message.</small> }
+        </div>
+        <div class="form-field full-width">
+          <label for="nm-text">Message <span>*</span></label>
+          <div class="input-wrap textarea-wrap"><i class="bi bi-chat-text"></i>
+            <textarea id="nm-text" name="text" rows="4" maxlength="1000" [(ngModel)]="text" [class.is-invalid]="submitted() && !text.trim()"></textarea>
+          </div>
+          @if (submitted() && !text.trim()) { <small class="error-text">Write a message.</small> }
+        </div>
+      </div>
+      @if (serverError(); as err) { <p class="error-text" role="alert">{{ err }}</p> }
+    </div>
+    <div class="modal-footer-custom">
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+      <button type="submit" class="save-btn" [disabled]="saving()"><i class="bi bi-send"></i> {{ saving() ? 'Sending…' : 'Send' }}</button>
+    </div>
+  </form>
+</div>

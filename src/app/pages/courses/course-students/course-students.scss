@@ -1,0 +1,36 @@
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid var(--border-soft-strong);
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 500 !important;
+  cursor: pointer;
+
+  input { width: auto; margin: 0; }
+}
+
+.muted { color: var(--text-muted); font-size: 12px; }
+
+.lead { display: block; color: var(--text-dark); }
+
+.sub { display: block; color: var(--text-muted); font-size: 10px; }
+
+.row-actions { display: inline-flex; gap: 4px; }
+
+.lead-text { margin: 0 0 8px; color: var(--text-muted); font-size: 12px; }
+
+.sec { margin: 14px 0 6px; font-size: 13px; color: var(--text-dark); }
+
+.kv {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 0;
+  border-top: 1px solid var(--border-soft);
+  font-size: 12px;
+}

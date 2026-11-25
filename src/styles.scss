@@ -1,0 +1,887 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
+/* Global theme */
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+@import "@angular/cdk/overlay-prebuilt.css";
+
+:root {
+  /* ---------------------------------------------------------
+     Brand & surface colors
+  ---------------------------------------------------------- */
+  --brand-blue: var(--primary);
+  --brand-blue-dark: var(--primary-dark);
+  --brand-green: var(--primary);
+  --brand-green-dark: var(--primary-dark);
+  --brand-teal-dark: var(--primary-dark);
+  --brand-ink: #080536;
+
+  --app-bg: #2C3545;
+  --app-bg-solid: #2C3545;
+  --app-surface: #ffffff;
+  --app-surface-solid: #ffffff;
+  --app-surface-soft: rgba(255, 255, 255, 0.12);
+  --app-surface-bg: #F4F5F9;
+  --bg-color-light-green: #e4e4f1;
+  --bg-color-green: #080536;
+
+  --bg-light-green: #ececf6;
+  --bg-light-green-soft: #F9F9FB;
+  --text-dark: #17152D;
+  --text-muted: #8a8d99;
+  --border-soft: rgba(8, 5, 54, 0.08);
+  --border-soft-strong: rgba(8, 5, 54, 0.14);
+  --table-header-bg: #F4F4F8;
+  --table-row-alt-bg: #F9F9F9;
+  --table-row-hover-bg: #F1F1F8;
+  --control-bg: linear-gradient(180deg, #ffffff, #fbfbfd);
+  --control-bg-hover: var(--bg-light-green-soft);
+  --input-bg: linear-gradient(180deg, #fbfbfd, #f6f6f9);
+  --card-border: rgba(8, 5, 54, 0.07);
+  --table-header-text: #7b7e8a;
+  --table-border: #ECECF0;
+  --table-scrollbar-thumb: rgba(8, 5, 54, 0.3);
+  --table-scrollbar-track: rgba(8, 5, 54, 0.06);
+
+  /* ---------------------------------------------------------
+     Status / badge colors code
+  ---------------------------------------------------------- */
+  --status-green-bg: #e3f4ec;
+  --status-green-text: #48A879;
+  --status-orange-bg: #fdf1dc;
+  --status-orange-text: #d9921c;
+  --status-red-bg: #fce9ea;
+  --status-red-text: #E56B6F;
+  --status-gray-bg: #eef1f0;
+  --status-gray-text: #66817a;
+  --status-blue-bg: #e5f0fb;
+  --status-blue-text: #1868b0;
+  --status-purple-bg: #f0e9fd;
+  --status-purple-text: #7c3aed;
+
+  /* Avatar palette (rotates across table rows) */
+  --avatar-color-1-bg: #e3f0fb;
+  --avatar-color-1-text: #0878b8;
+  --avatar-color-2-bg: #e2f6ec;
+  --avatar-color-2-text: #119965;
+  --avatar-color-3-bg: #fdf1e0;
+  --avatar-color-3-text: #c47c14;
+  --avatar-color-4-bg: #f2e8fc;
+  --avatar-color-4-text: #7c3aed;
+  --avatar-color-5-bg: #fce8f1;
+  --avatar-color-5-text: #2a8f76;
+
+  /* ---------------------------------------------------------
+     font-family 
+  ---------------------------------------------------------- */
+  --font-family-base: 'Rubik', sans-serif;
+  --font-family-display: 'Rubik', sans-serif;
+  --font-family-sidnav: 'Roboto', sans-serif;
+
+  /* Premium accent — used sparingly (export actions, hero highlights) */
+  --gold: #F3B34A;
+  --gold-dark: #d9921c;
+  --gold-soft: #fdf1dc;
+
+  --fs-2xs: 12px;
+  --fs-xs: 13px;
+  --fs-sm: 14px;
+  --fs-base: 15px;
+  --fs-md: 16px;
+  --fs-lg: 18px;
+  --fs-xl: 21px;
+  --fs-2xl: 25px;
+  --fs-3xl: 30px;
+
+  --fw-regular: 400;
+  --fw-medium: 600;
+  --fw-semibold: 700;
+  --fw-bold: 800;
+
+  --lh-tight: 1.2;
+  --lh-normal: 1.35;
+
+  /* ---------------------------------------------------------
+     Spacing / radius / elevation scale
+  ---------------------------------------------------------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 10px;
+  --space-4: 14px;
+  --space-5: 18px;
+  --space-6: 24px;
+
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 13px;
+  --radius-xl: 16px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 1px 2px rgba(8, 5, 54, 0.04), 0 10px 22px -12px rgba(8, 5, 54, 0.14);
+  --shadow-card-hover: 0 1px 2px rgba(8, 5, 54, 0.05), 0 14px 28px -12px rgba(8, 5, 54, 0.2);
+  --shadow-elevated: 0 1px 2px rgba(8, 5, 54, 0.04), 0 12px 26px -10px rgba(8, 5, 54, 0.15);
+  --shadow-pop: 0 18px 45px rgba(8, 5, 54, 0.18);
+
+  /* Premium elevation — soft, color-tinted "floating glass" shadows layered
+     on top of the plain ones above; used for headers, sidebars & hero surfaces */
+  --shadow-premium-sm: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 6px 16px -8px color-mix(in srgb, var(--primary, #0d5c4b) 22%, transparent), 0 2px 6px rgba(16, 40, 36, 0.06);
+  --shadow-premium-md: 0 1px 0 rgba(255, 255, 255, 0.55) inset, 0 16px 32px -14px color-mix(in srgb, var(--primary, #0d5c4b) 26%, transparent), 0 4px 14px rgba(16, 40, 36, 0.08);
+  --shadow-premium-lg: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 26px 54px -18px color-mix(in srgb, var(--primary, #0d5c4b) 30%, transparent), 0 8px 22px rgba(16, 40, 36, 0.1);
+  --glass-border: color-mix(in srgb, var(--primary, #0d5c4b) 14%, rgba(255, 255, 255, 0.6));
+
+  /* ---------------------------------------------------------
+     Premium stat-card gradients — one dark, color-coded surface
+     per semantic color (green / blue / orange / purple / red),
+     plus a "primary" fallback tied to the active theme color.
+     Used for dashboard tiles & detail-card stat strips.
+  ---------------------------------------------------------- */
+  --stat-grad-primary: radial-gradient(circle at 90% -20%, var(--primary-shadow), transparent 55%), linear-gradient(155deg, var(--primary-dark), color-mix(in srgb, var(--primary-dark) 55%, #04120f) 85%);
+  --stat-grad-green: radial-gradient(circle at 90% -20%, color-mix(in srgb, var(--status-green-text) 42%, transparent), transparent 55%), linear-gradient(155deg, color-mix(in srgb, var(--status-green-text) 58%, #062a20), #041b15 85%);
+  --stat-grad-blue: radial-gradient(circle at 90% -20%, color-mix(in srgb, var(--status-blue-text) 42%, transparent), transparent 55%), linear-gradient(155deg, color-mix(in srgb, var(--status-blue-text) 58%, #051d33), #031222 85%);
+  --stat-grad-orange: radial-gradient(circle at 90% -20%, color-mix(in srgb, var(--status-orange-text) 42%, transparent), transparent 55%), linear-gradient(155deg, color-mix(in srgb, var(--status-orange-text) 58%, #3a2408), #241705 85%);
+  --stat-grad-purple: radial-gradient(circle at 90% -20%, color-mix(in srgb, var(--status-purple-text) 42%, transparent), transparent 55%), linear-gradient(155deg, color-mix(in srgb, var(--status-purple-text) 58%, #1c1033), #120a20 85%);
+  --stat-grad-red: radial-gradient(circle at 90% -20%, color-mix(in srgb, var(--status-red-text) 42%, transparent), transparent 55%), linear-gradient(155deg, color-mix(in srgb, var(--status-red-text) 58%, #330a08), #200604 85%);
+
+  --topnavbar-height: 80px;
+  --sidebar-width: 236px;
+  --sidebar-compact-width: 78px;
+
+
+  /* =========================================================
+   Left side navbar 
+   ========================================================= */
+  --nav-accent: var(--primary);
+  --nav-accent-soft: color-mix(in srgb, var(--primary) 22%, transparent);
+  --nav-accent-border: color-mix(in srgb, var(--primary) 38%, transparent);
+
+  --nav-grad-top: var(--primary);
+  --nav-grad-mid: var(--primary-dark);
+  --nav-grad-bottom: var(--primary-dark);
+
+  --nav-text: rgba(255, 255, 255, .72);
+  --nav-muted: rgba(255, 255, 255, .42);
+  --nav-line: rgba(255, 255, 255, .10);
+
+  /* A fixed, neutral "ink navy" used for a few module icons so the sidebar
+     reads as a set of distinct sections rather than one flat color —
+     independent of the primary picker, the same way status colors are. */
+  --nav-module-ink: #33415c;
+
+  /* Soft, elegant light gradient for the sidebar surface — a gentle wash of
+     brand color from top to bottom rather than a flat white panel */
+  --nav-surface-gradient: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--primary) 26%, var(--app-surface-solid)) 0%,
+    color-mix(in srgb, var(--primary) 8%, var(--app-surface-solid)) 26%,
+    var(--app-surface-solid) 50%,
+    color-mix(in srgb, var(--primary) 7%, var(--app-surface-solid)) 74%,
+    color-mix(in srgb, var(--primary) 17%, var(--app-surface-solid)) 100%
+  );
+}
+
+:root[data-theme='dark'] {
+  --app-bg: linear-gradient(145deg, #101c1a 0%, #14242a 48%, #111918 100%);
+  --app-bg-solid: #111b1a;
+  --app-surface: rgba(27, 40, 39, 0.97);
+  --app-surface-solid: #1b2927;
+  --app-surface-soft: rgba(255, 255, 255, 0.06);
+  --app-surface-bg: #111d1b;
+  --bg-color-light-green: #23483d;
+  --bg-color-green: #58b79b;
+  --bg-light-green: #21483d;
+  --bg-light-green-soft: #182c29;
+  --text-dark: #e4f2ed;
+  --text-muted: #9bb5ad;
+  --border-soft: rgba(151, 220, 195, 0.16);
+  --border-soft-strong: rgba(151, 220, 195, 0.24);
+  --table-header-bg: #21483d;
+  --table-row-alt-bg: #182c29;
+  --table-row-hover-bg: #285548;
+  --control-bg: #1d3732;
+  --control-bg-hover: #285548;
+  --input-bg: #172b28;
+  --card-border: transparent;
+  --table-header-text: #b8d5ca;
+  --table-border: rgba(151, 220, 195, 0.18);
+  --table-scrollbar-thumb: #4b8f7b;
+  --table-scrollbar-track: #142522;
+  --status-green-bg: #1d5944;
+  --status-green-text: #83e1b3;
+  --status-orange-bg: #624923;
+  --status-orange-text: #ffd18a;
+  --status-red-bg: #642f32;
+  --status-red-text: #ffaaa9;
+  --status-gray-bg: #30413e;
+  --status-gray-text: #c0d5cf;
+  --status-blue-bg: #214d66;
+  --status-blue-text: #9bd7f4;
+  --status-purple-bg: #3e2f66;
+  --status-purple-text: #c9aeff;
+  --shadow-card: 0 5px 16px rgba(0, 0, 0, 0.2);
+  --shadow-card-hover: 0 8px 20px rgba(0, 0, 0, 0.28);
+  --shadow-elevated: 0 7px 22px rgba(0, 0, 0, 0.24);
+  --shadow-pop: 0 18px 45px rgba(0, 0, 0, 0.4);
+}
+
+.cdk-overlay-pane {
+  background: transparent;
+}
+
+.mat-mdc-select-panel {
+  background: var(--app-surface-solid) !important;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-pop) !important;
+  color: var(--text-dark);
+}
+
+.mat-mdc-option {
+  color: var(--text-dark) !important;
+  background: var(--app-surface-solid) !important;
+}
+
+.mat-mdc-option:hover:not(.mdc-list-item--disabled),
+.mat-mdc-option.mat-mdc-option-active,
+.mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+  background: var(--control-bg-hover) !important;
+  color: var(--text-dark) !important;
+}
+
+.mat-mdc-option .mdc-list-item__primary-text {
+  color: inherit !important;
+}
+
+/* mat-paginator ships its Previous/Next/First/Last buttons with a built-in tooltip
+   ("Previous page", "Next page", ...) via MatTooltip. Nothing else in the app uses
+   MatTooltip, so hiding its overlay globally just removes that unwanted hover bubble. */
+.mat-mdc-tooltip-panel {
+  display: none !important;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--fs-base);
+}
+
+body {
+  height: 100vh;
+  background: var(--app-bg);
+  color: var(--text-dark);
+  font-weight: var(--fw-regular);
+  overflow: hidden;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.required-asterisk {
+  color: #dc3545 !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: inherit;
+}
+
+:root {
+  --font-family-base: 'Rubik', sans-serif;
+  --header-bg: #ffffff;
+  --sidebar-bg: #ffffff;
+  --primary: #080536;
+  --primary-dark: #17104F;
+  --primary-soft: #ececf6;
+  --primary-soft-strong: #e0e0ef;
+  --primary-border: rgba(8, 5, 54, .14);
+  --primary-border-strong: rgba(8, 5, 54, .35);
+  --primary-shadow: rgba(8, 5, 54, .22);
+  --brand-rose-gold: #F3B34A;
+  --shadow-header: 0 5px 24px rgba(8, 5, 54, .05);
+  --shadow-sidebar: 5px 0 24px rgba(8, 5, 54, .04);
+  --shadow-sidebar-horizontal: 0 4px 18px rgba(18,60,56,.05);
+}
+
+:root[data-primary='green'] {
+  --primary: #18b875; --primary-dark: #0f9d64; --primary-soft: #e9f8f2; --primary-soft-strong: #def3ea;
+  --primary-border: rgba(24,184,117,.16); --primary-border-strong: rgba(24,184,117,.35); --primary-shadow: rgba(24,184,117,.22);
+}
+:root[data-primary='blue'] {
+  --primary: #2d7ff9; --primary-dark: #1767d6; --primary-soft: #eaf2ff; --primary-soft-strong: #dceaff;
+  --primary-border: rgba(45,127,249,.17); --primary-border-strong: rgba(45,127,249,.35); --primary-shadow: rgba(45,127,249,.22);
+}
+:root[data-primary='purple'] {
+  --primary: #8b5cf6; --primary-dark: #7042dc; --primary-soft: #f2edff; --primary-soft-strong: #e9e0ff;
+  --primary-border: rgba(139,92,246,.17); --primary-border-strong: rgba(139,92,246,.35); --primary-shadow: rgba(139,92,246,.22);
+}
+:root[data-primary='teal'] {
+  --primary: #0f9f91; --primary-dark: #087f74; --primary-soft: #e7f8f6; --primary-soft-strong: #d9f1ee;
+  --primary-border: rgba(15,159,145,.17); --primary-border-strong: rgba(15,159,145,.35); --primary-shadow: rgba(15,159,145,.22);
+}
+
+:root[data-theme='dark'] {
+  --header-bg: rgba(25,39,37,.96);
+  --sidebar-bg: rgba(22,35,33,.98);
+  --shadow-header: 0 5px 24px rgba(0,0,0,.22);
+  --shadow-sidebar: 5px 0 24px rgba(0,0,0,.18);
+  --shadow-sidebar-horizontal: 0 4px 18px rgba(0,0,0,.18);
+  --card-border: rgba(151,220,195,.11);
+  --primary-soft: color-mix(in srgb, var(--primary) 15%, #172825);
+  --primary-soft-strong: color-mix(in srgb, var(--primary) 23%, #172825);
+  --nav-module-ink: #4c5c82;
+
+  --nav-surface-gradient: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--primary) 34%, var(--app-surface-solid)) 0%,
+    color-mix(in srgb, var(--primary) 12%, var(--app-surface-solid)) 28%,
+    var(--app-surface-solid) 50%,
+    color-mix(in srgb, var(--primary) 10%, var(--app-surface-solid)) 74%,
+    color-mix(in srgb, var(--primary) 22%, var(--app-surface-solid)) 100%
+  );
+
+  /* Dark-mode stat gradients — pushed brighter so each color reads clearly
+     against the app's already-dark chrome instead of blending into it */
+  --stat-grad-primary: radial-gradient(circle at 90% -20%, color-mix(in srgb, var(--primary) 55%, transparent), transparent 55%), linear-gradient(155deg, color-mix(in srgb, var(--primary) 62%, #06231c), #03110d 85%);
+  --stat-grad-green: radial-gradient(circle at 90% -20%, color-mix(in srgb, var(--status-green-text) 50%, transparent), transparent 55%), linear-gradient(155deg, color-mix(in srgb, var(--status-green-text) 46%, #0c3a2c), #06231b 85%);
+  --stat-grad-blue: radial-gradient(circle at 90% -20%, color-mix(in srgb, var(--status-blue-text) 50%, transparent), transparent 55%), linear-gradient(155deg, color-mix(in srgb, var(--status-blue-text) 46%, #0b2c48), #051a2c 85%);
+  --stat-grad-orange: radial-gradient(circle at 90% -20%, color-mix(in srgb, var(--status-orange-text) 50%, transparent), transparent 55%), linear-gradient(155deg, color-mix(in srgb, var(--status-orange-text) 46%, #4a2f0a), #2e1d06 85%);
+  --stat-grad-purple: radial-gradient(circle at 90% -20%, color-mix(in srgb, var(--status-purple-text) 50%, transparent), transparent 55%), linear-gradient(155deg, color-mix(in srgb, var(--status-purple-text) 46%, #2a1a4a), #180f2c 85%);
+  --stat-grad-red: radial-gradient(circle at 90% -20%, color-mix(in srgb, var(--status-red-text) 50%, transparent), transparent 55%), linear-gradient(155deg, color-mix(in srgb, var(--status-red-text) 46%, #451009), #2a0906 85%);
+}
+
+body {
+  font-family: var(--font-family-base);
+  font-size: var(--fs-base);
+  letter-spacing: -.01em;
+}
+
+/* Responsive type scale: text keeps growing a little on bigger screens instead
+   of staying pinned at the same pixel size regardless of available space. */
+@media (min-width: 1440px) {
+  :root {
+    --fs-2xs: 12.5px;
+    --fs-xs: 13.5px;
+    --fs-sm: 14.5px;
+    --fs-base: 15.5px;
+    --fs-md: 16.5px;
+    --fs-lg: 19px;
+    --fs-xl: 22px;
+    --fs-2xl: 26px;
+    --fs-3xl: 32px;
+  }
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --fs-2xs: 13px;
+    --fs-xs: 14px;
+    --fs-sm: 15px;
+    --fs-base: 16px;
+    --fs-md: 17px;
+    --fs-lg: 20px;
+    --fs-xl: 23px;
+    --fs-2xl: 27px;
+    --fs-3xl: 34px;
+  }
+}
+
+
+/* Global primary accent */
+button, a, input, select, textarea {
+  accent-color: var(--primary);
+}
+
+/* ==========================================================
+   Common table primary-color code system
+   ========================================================== */
+:root {
+  --table-header-bg: color-mix(in srgb, var(--primary) 12%, var(--app-surface-solid));
+  --table-header-text: color-mix(in srgb, var(--primary-dark) 82%, var(--text-dark));
+  --table-row-odd-bg: color-mix(in srgb, var(--primary) 2.5%, var(--app-surface-solid));
+  --table-row-alt-bg: color-mix(in srgb, var(--primary) 6.5%, var(--app-surface-solid));
+  --table-row-hover-bg: color-mix(in srgb, var(--primary) 11%, var(--app-surface-solid));
+  --table-border: color-mix(in srgb, var(--primary) 15%, transparent);
+}
+
+:root[data-theme='dark'] {
+  --table-header-bg: color-mix(in srgb, var(--primary) 22%, var(--app-surface-solid));
+  --table-header-text: color-mix(in srgb, var(--primary) 45%, var(--text-dark));
+  --table-row-odd-bg: color-mix(in srgb, var(--primary) 4%, var(--app-surface-solid));
+  --table-row-alt-bg: color-mix(in srgb, var(--primary) 10%, var(--app-surface-solid));
+  --table-row-hover-bg: color-mix(in srgb, var(--primary) 18%, var(--app-surface-solid));
+  --table-border: color-mix(in srgb, var(--primary) 20%, transparent);
+}
+
+
+:root[data-theme='dark'] .side-navbar::before {
+  background-image:
+    linear-gradient(165deg,
+      color-mix(in srgb, var(--primary) 42%, transparent) 0%,
+      color-mix(in srgb, var(--primary) 14%, transparent) 32%,
+      transparent 50%,
+      color-mix(in srgb, var(--primary) 16%, transparent) 68%,
+      color-mix(in srgb, var(--primary) 38%, transparent) 100%),
+    radial-gradient(120% 46% at 8% 8%, color-mix(in srgb, var(--primary) 32%, transparent), transparent 72%),
+    radial-gradient(130% 52% at 105% 58%, color-mix(in srgb, var(--primary) 24%, transparent), transparent 74%),
+    radial-gradient(140% 56% at 5% 104%, color-mix(in srgb, var(--primary) 32%, transparent), transparent 72%);
+}
+
+
+/* ==========================================================
+   Add Lead Material Dialog
+   ========================================================== */
+.add-lead-dialog .mat-mdc-dialog-surface {
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 14px !important;
+  background: var(--app-surface-solid) !important;
+  color: var(--text-dark) !important;
+  box-shadow: var(--shadow-pop) !important;
+}
+
+.add-lead-dialog .mat-mdc-dialog-container {
+  padding: 0 !important;
+}
+
+@media (max-width: 700px) {
+  .add-lead-dialog .mat-mdc-dialog-surface {
+    border-radius: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .add-lead-dialog .mat-mdc-dialog-surface {
+    border-radius: 10px !important;
+  }
+}
+
+/* ==========================================================
+   Booking Form Material Dialog (Schedule / Appointment)
+   ========================================================== */
+.booking-form-dialog .mat-mdc-dialog-surface {
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 14px !important;
+  background: var(--app-surface-solid) !important;
+  color: var(--text-dark) !important;
+  box-shadow: var(--shadow-pop) !important;
+}
+
+.booking-form-dialog .mat-mdc-dialog-container {
+  padding: 0 !important;
+}
+
+@media (max-width: 700px) {
+  .booking-form-dialog .mat-mdc-dialog-surface {
+    border-radius: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .booking-form-dialog .mat-mdc-dialog-surface {
+    border-radius: 10px !important;
+  }
+}
+
+/* ==========================================================
+   Add Customer Material Dialog (CRM)
+   ========================================================== */
+.add-customer-dialog .mat-mdc-dialog-surface {
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 14px !important;
+  background: var(--app-surface-solid) !important;
+  color: var(--text-dark) !important;
+  box-shadow: var(--shadow-pop) !important;
+}
+
+.add-customer-dialog .mat-mdc-dialog-container {
+  padding: 0 !important;
+}
+
+@media (max-width: 480px) {
+  .add-customer-dialog .mat-mdc-dialog-surface {
+    border-radius: 10px !important;
+  }
+}
+
+/* ==========================================================
+   Customer Profile Material Dialog (CRM)
+   ========================================================== */
+.customer-profile-dialog .mat-mdc-dialog-surface {
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 14px !important;
+  background: var(--app-surface-solid) !important;
+  color: var(--text-dark) !important;
+  box-shadow: var(--shadow-pop) !important;
+}
+
+.customer-profile-dialog .mat-mdc-dialog-container {
+  padding: 0 !important;
+}
+
+.lead-profile-dialog .mat-mdc-dialog-surface,
+.lead-profile-dialog .mat-mdc-dialog-container {
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 18px !important;
+  background: var(--app-surface-solid) !important;
+}
+
+@media (max-width: 480px) {
+  .customer-profile-dialog .mat-mdc-dialog-surface {
+    border-radius: 10px !important;
+  }
+}
+
+
+/* ==========================================================
+   Date/time picker (Tempus Dominus) - retint its own CSS custom
+   properties to the app's tokens instead of its Bootstrap-blue
+   defaults, so it follows the active primary color and dark mode.
+   ========================================================== */
+:root {
+  --td-active-bg: var(--primary);
+  --td-active-color: #fff;
+  --td-widget-background: var(--app-surface-solid);
+  --td-font-color: var(--text-dark);
+  --td-border-radius: 10px;
+  --td-btn-hover-bg: var(--primary-soft);
+  --td-secondary-border-color: var(--border-soft-strong);
+  --td-secondary-border-color-rgba: var(--border-soft-strong);
+  --td-dow-color: var(--text-muted);
+  --td-disabled-color: var(--text-muted);
+}
+
+:root[data-theme='dark'] {
+  --td-dark-widget-background: var(--app-surface-solid);
+  --td-dark-font-color: var(--text-dark);
+  --td-dark-active-bg: var(--primary);
+  --td-dark-btn-hover-bg: var(--primary-soft);
+  --td-dark-secondary-border-color: var(--border-soft-strong);
+  --td-dark-secondary-border-color-rgba: var(--border-soft-strong);
+  --td-dark-dow-color: var(--text-muted);
+}
+
+.tempus-dominus-widget {
+  border: 1px solid var(--border-soft-strong);
+  box-shadow: var(--shadow-pop);
+  border-radius: var(--radius-lg);
+  font-family: var(--font-family-base);
+  width: 17rem;
+  padding: 10px;
+}
+
+.tempus-dominus-widget .calendar-header .previous,
+.tempus-dominus-widget .calendar-header .next {
+  font-size: 14px;
+}
+
+.tempus-dominus-widget .date-container-days {
+  grid-auto-rows: 32px;
+}
+
+.tempus-dominus-widget .date-container-decades,
+.tempus-dominus-widget .date-container-years,
+.tempus-dominus-widget .date-container-months {
+  grid-auto-rows: 42px;
+}
+
+.tempus-dominus-widget :focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.tempus-dominus-widget .time-container-hour,
+.tempus-dominus-widget .time-container-minute,
+.tempus-dominus-widget .time-container-second,
+.tempus-dominus-widget .time-container-clock {
+  grid-auto-rows: 42px;
+}
+
+.tempus-dominus-widget .toolbar {
+  grid-auto-rows: 32px;
+  display: none;
+}
+
+.tempus-dominus-widget .date-container-days div:not(.no-highlight).today:before { 
+  bottom: 2px;
+  right: 3px;
+}
+
+.mat-mdc-row, tr.mat-mdc-row, th.mat-mdc-header-cell, td.mat-mdc-cell {
+  font-family: var(--font-family-base);
+}
+
+.mat-mdc-icon-button .mat-mdc-button-touch-target {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+div:where(.swal2-container) h2:where(.swal2-title) {
+  font-size: 1.2em;
+}
+
+/* Renew Group wordmark: "Renew" in the logo's emerald, "Group" in its gold (used in the top bar and the sidebar). */
+.rg-renew,
+.rg-group {
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.rg-renew { background-image: linear-gradient(135deg, #073f35 0%, #0d5c4b 45%, #1a7a63 100%); }
+.rg-group { background-image: linear-gradient(135deg, #9a7226 0%, #d9b865 48%, #b58a30 100%); }
+:root[data-theme='dark'] .rg-renew { background-image: linear-gradient(135deg, #2f9e83 0%, #6bc4ab 100%); }
+:root[data-theme='dark'] .rg-group { background-image: linear-gradient(135deg, #d9b865 0%, #f0d98f 100%); }
+
+
+/* ==========================================================
+   Responsive safety net (mobile -> large monitors)
+   Breakpoints: 480 phone, 768 tablet, 1024 small laptop,
+   1440 desktop, 1920 full-HD, 2560 QHD / 4K.
+   ========================================================== */
+img, video, canvas, svg {
+  max-width: 100%;
+}
+
+img, video {
+  height: auto;
+}
+
+/* Long words / emails / ids never push a card wider than the screen. */
+.page-title, .detail-label, td, th {
+  overflow-wrap: anywhere;
+}
+
+/* Extra-large monitors: keep growing the type scale one more step. */
+@media (min-width: 2560px) {
+  :root {
+    --fs-2xs: 14px;
+    --fs-xs: 15px;
+    --fs-sm: 16px;
+    --fs-base: 17px;
+    --fs-md: 18px;
+    --fs-lg: 22px;
+    --fs-xl: 25px;
+    --fs-2xl: 30px;
+    --fs-3xl: 38px;
+  }
+}
+
+/* Tablet and below: dialogs / overlays can never be wider than the viewport. */
+@media (max-width: 768px) {
+  .cdk-overlay-pane {
+    max-width: calc(100vw - 16px) !important;
+  }
+
+  .mat-mdc-dialog-container .mdc-dialog__surface {
+    max-height: calc(100dvh - 16px);
+  }
+
+  .tempus-dominus-widget {
+    max-width: calc(100vw - 16px);
+  }
+}
+
+/* Phones: Material dialogs use the full width. */
+@media (max-width: 480px) {
+  .cdk-overlay-pane.mat-mdc-dialog-panel {
+    max-width: 100vw !important;
+    width: calc(100vw - 16px) !important;
+  }
+}
+
+/* Touch screens: comfortable tap targets for icon buttons. */
+@media (hover: none) and (pointer: coarse) {
+  .mat-mdc-icon-button .mat-mdc-button-touch-target {
+    width: 40px !important;
+    height: 40px !important;
+  }
+}
+
+
+/* ==========================================================================
+   Card-style listing rows (matches the shared common-table-card look).
+   Each body row renders as its own bordered, rounded card with a gap between.
+   ========================================================================== */
+table:is(.att-table, .ed-table, .imp-table, .mem-table, .rep-table, .log-table, .m-table) {
+  border-collapse: separate !important;
+  border-spacing: 0 8px !important;
+
+  > thead > tr > th {
+    background: var(--app-surface-solid) !important;
+    color: var(--text-muted) !important;
+    border: 0 !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    font-weight: 600 !important;
+  }
+
+  > tbody > tr > td {
+    background: var(--app-surface-solid) !important;
+    border-top: 1px solid var(--table-border) !important;
+    border-bottom: 1px solid var(--table-border) !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    vertical-align: middle;
+    transition: background 0.18s ease, border-color 0.18s ease;
+  }
+
+  > tbody > tr > td:first-child {
+    border-left: 1px solid var(--table-border) !important;
+    border-radius: 10px 0 0 10px;
+  }
+
+  > tbody > tr > td:last-child {
+    border-right: 1px solid var(--table-border) !important;
+    border-radius: 0 10px 10px 0;
+  }
+
+  > tbody > tr:hover > td {
+    background: var(--table-row-hover-bg) !important;
+    border-color: color-mix(in srgb, var(--primary) 30%, var(--table-border)) !important;
+  }
+}
+
+/* Every Material dialog (forms, previews) opens as a right-side panel, full height. */
+.cdk-global-overlay-wrapper:has(.mat-mdc-dialog-panel) {
+  justify-content: flex-end !important;
+  align-items: stretch !important;
+}
+
+.cdk-overlay-pane.mat-mdc-dialog-panel {
+  height: 100vh !important;
+  max-height: 100vh !important;
+  max-width: 100vw !important;
+  animation: dialog-side-in .22s ease-out;
+
+  .mat-mdc-dialog-container,
+  .mat-mdc-dialog-surface {
+    height: 100%;
+    max-height: 100vh;
+    border-radius: 18px 0 0 18px !important;
+    box-shadow: -14px 0 40px rgba(8, 5, 54, .22);
+  }
+
+  .mat-mdc-dialog-content { max-height: none; }
+}
+
+@keyframes dialog-side-in {
+  from { transform: translateX(40px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+@media (max-width: 600px) {
+  .cdk-overlay-pane.mat-mdc-dialog-panel { width: 100vw !important; .mat-mdc-dialog-surface { border-radius: 0 !important; } }
+}
+
+/* ===== Profile side panel (user details, student details): top bar, header band, tabs, info cards ===== */
+.pp { display: flex; flex-direction: column; height: 100%; min-height: 0; background: #fff; }
+.pp-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 18px; border-bottom: 1px solid #ececf6; background: #fff; }
+.pp-bar-group { display: flex; align-items: center; gap: 8px; }
+.pp-icon-btn { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid #e3e1f1; border-radius: 8px; background: #fff; color: #5b6475; font-size: 14px; cursor: pointer; transition: background .15s ease, color .15s ease;
+  &:hover { background: #f3f2fa; color: #080536; } &.danger:hover { background: #fdecea; color: #c0322b; border-color: #f2b7b2; } }
+
+.pp-head { display: flex; align-items: center; gap: 20px; padding: 22px 26px; background: #eef2f8; }
+.pp-avatar { display: grid; flex: 0 0 auto; width: 88px; height: 88px; place-items: center; overflow: hidden; border: 3px solid #fff; border-radius: 50%; background: linear-gradient(135deg, #080536, #5a52a8); box-shadow: 0 4px 12px rgba(8, 5, 54, .18); color: #fff; font-size: 28px; font-weight: 700; object-fit: cover; }
+.pp-who { display: grid; gap: 14px; min-width: 0; flex: 1; }
+.pp-title { margin: 0; color: #131a2b; font-size: 17px; font-weight: 700; }
+.pp-sub { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 4px; color: #6b7686; font-size: 11.5px; }
+.pp-badge { display: inline-block; padding: 2px 9px; border: 1px solid currentColor; border-radius: 6px; font-size: 10.5px; font-weight: 700;
+  &.ok { color: #1f9d6b; background: #e8f6ef; } &.bad { color: #d92d20; background: #fdecea; } &.wait { color: #c27a12; background: #fff4e0; } }
+.pp-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 28px; }
+.pp-meta > div { display: grid; grid-template-columns: 78px minmax(0, 1fr); align-items: center; gap: 8px; font-size: 12px; color: #131a2b;
+  span { color: #8a93a5; font-size: 10.5px; } b { overflow: hidden; text-overflow: ellipsis; font-weight: 600; white-space: nowrap; } i { color: #5b6475; } }
+.pp-meta .with-icon { grid-template-columns: 16px minmax(0, 1fr); }
+
+.pp-tabs { display: flex; gap: 30px; padding: 0 26px; border-bottom: 1px solid #e8e8f2; background: #fff;
+  button { padding: 15px 0 13px; border: 0; border-bottom: 3px solid transparent; background: none; color: #8a93a5; font-size: 11.5px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; cursor: pointer;
+    &:hover { color: #131a2b; } &.on { border-bottom-color: #F3B34A; color: #131a2b; } } }
+
+.pp-body { display: grid; flex: 1; gap: 16px; align-content: start; min-height: 0; padding: 20px 26px 28px; overflow-y: auto; background: #f7f8fb; }
+.pp-card { border: 1px solid #e8e8f2; border-radius: 10px; background: #fff;
+  > h3 { margin: 0; padding: 14px 20px; border-bottom: 1px solid #f0f0f6; color: #131a2b; font-size: 13px; font-weight: 700; } }
+.pp-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 28px; margin: 0; padding: 18px 20px;
+  dt { margin: 0; color: #8a93a5; font-size: 11px; font-weight: 500; } dd { margin: 3px 0 0; overflow-wrap: anywhere; color: #131a2b; font-size: 12.5px; font-weight: 700; }
+  .wide { grid-column: 1 / -1; } .rich { font-weight: 500; line-height: 1.5; } }
+.pp-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;
+  > div { display: grid; justify-items: center; gap: 2px; padding: 14px 6px; border: 1px solid #e8e8f2; border-radius: 10px; background: #fff; }
+  b { color: #131a2b; font-size: 20px; } span { color: #8a93a5; font-size: 11px; } .ok b { color: #1f7a54; } .bad b { color: #c0322b; } }
+.pp-note { margin: 0; color: #8a93a5; font-size: 11.5px; }
+
+@media (max-width: 640px) {
+  .pp-head { flex-direction: column; align-items: flex-start; } .pp-meta, .pp-grid { grid-template-columns: 1fr; } .pp-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ===== Ribbon tabs (chevron-shaped, overlapping) ===== */
+.pp-ribbon { display: flex; flex-wrap: wrap; padding: 14px 26px 12px; gap: 0; border-bottom: 1px solid #e8e8f2; background: #fff; }
+.ribbon-tab { position: relative; display: inline-flex; align-items: center; gap: 7px; height: 38px; margin-right: -8px; padding: 0 26px 0 28px; border: 0; background: #e6e8f3; color: #5b6475; font-size: 12px; font-weight: 700; letter-spacing: .2px; cursor: pointer; white-space: nowrap;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%); transition: background .15s ease, color .15s ease;
+  &:first-child { padding-left: 20px; clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%); border-radius: 8px 0 0 8px; }
+  &:last-child { margin-right: 0; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 14px 50%); border-radius: 0 8px 8px 0; }
+  &:first-child:last-child { clip-path: none; border-radius: 8px; }
+  &:hover { background: #d9dcee; color: #131a2b; }
+  &.on { z-index: 1; background: linear-gradient(135deg, #080536, #3a3380); color: #fff; }
+  i { font-size: 14px; } }
+
+/* ===== Profile panel content: pills, progress, lists, timeline ===== */
+.pp-pill { display: inline-block; padding: 2px 10px; border-radius: 99px; background: #eef0f6; color: #5b6475; font-size: 11px; font-weight: 700;
+  &.ok { background: #e3f4ec; color: #1f7a54; } &.bad { background: #fdecea; color: #c0322b; } &.wait { background: #fff4e0; color: #b8730e; } &.info { background: #e6effc; color: #2f6bbd; } }
+.pp-stats.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.pp-course { padding: 16px 20px; display: grid; gap: 12px; }
+.pp-course-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; b { display: block; color: #131a2b; font-size: 13.5px; } small { color: #8a93a5; font-size: 11.5px; } }
+.pp-prog { position: relative; height: 12px; border-radius: 99px; background: #eceff6; box-shadow: inset 0 1px 2px rgba(20, 20, 60, .1);
+  i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(180deg, #7aa9e0, #3f6fc2); box-shadow: 0 2px 0 rgba(40, 40, 90, .15); transition: width .4s ease; }
+  b { position: absolute; top: -1px; right: 8px; color: #131a2b; font-size: 10.5px; line-height: 14px; } }
+.pp-link { justify-self: start; padding: 0; border: 0; background: none; color: #3a3380; font-size: 12px; font-weight: 700; cursor: pointer; &:hover { text-decoration: underline; } }
+.pp-list { display: grid; gap: 6px; &.pad { padding: 14px 20px 18px; } }
+.pp-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 9px 12px; border: 1px solid #ececf6; border-radius: 9px; background: #fafaff; font-size: 12px; color: #131a2b;
+  b { min-width: 36px; text-align: right; } }
+.pp-row-main { flex: 1; min-width: 120px; font-weight: 600; }
+.pp-row-note { flex-basis: 100%; color: #8a93a5; }
+.pp-date { min-width: 96px; font-weight: 600; }
+.pp-mini { position: relative; width: 90px; height: 7px; border-radius: 99px; background: #e6e9f2; i { display: block; height: 100%; border-radius: 99px; background: #4fb58a; } }
+.pp-grid.compact { padding: 0; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.pp-card h3 small { margin-left: 8px; color: #8a93a5; font-size: 11px; font-weight: 500; }
+.pp-timeline { display: grid; gap: 0; padding: 12px 20px 16px; }
+.pp-event { position: relative; display: flex; gap: 12px; padding: 0 0 16px 4px; border-left: 2px solid #e6e8f3; margin-left: 5px;
+  &:last-child { padding-bottom: 0; border-left-color: transparent; }
+  .pp-dot { position: absolute; left: -7px; top: 3px; width: 12px; height: 12px; border-radius: 50%; background: #5b93d8; box-shadow: 0 0 0 3px #e6effc; }
+  > div { margin-left: 14px; display: grid; gap: 2px; } b { color: #131a2b; font-size: 12.5px; } small { color: #8a93a5; font-size: 11.5px; } }
+.pp-note { margin: 0; color: #8a93a5; font-size: 12px; }
+
+/* ribbon stays on one line; it scrolls sideways only if the panel is too narrow */
+.pp-ribbon { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; padding: 14px 20px 12px; }
+.ribbon-tab { flex: 0 0 auto; padding: 0 20px 0 22px; font-size: 11.5px; &:first-child { padding-left: 16px; } i { font-size: 13px; } }
+
+/* ===== Role corner ribbon, top-left of a details panel (like a "test mode" sash) ===== */
+.pp { position: relative; overflow: hidden; }
+.pp-role-tag { position: absolute; z-index: 3; top: 0; left: 0; width: 104px; height: 104px; overflow: hidden; pointer-events: none;
+  i { position: absolute; top: 24px; left: -34px; width: 150px; padding: 4px 0 5px; background: #5a52a8; color: #fff; font-size: 10px; font-style: normal; font-weight: 800; letter-spacing: 1.1px; line-height: 1.2; text-align: center; text-transform: uppercase; white-space: nowrap; transform: rotate(-45deg); box-shadow: 0 3px 8px rgba(8, 5, 54, .3);
+    &.role-student { background: #1f9d6b; }
+    &.role-mentor { background: #e8a31d; color: #3a2300; }
+    &.role-admin { background: #080536; }
+    &.role-super-admin { background: #7c3aed; }
+    &.role-ob { background: #0e8a9c; }
+    &.role-trainer { background: #ee7a2f; }
+    &.role-member { background: #5b6b86; }
+    &.role-institution { background: #c0488f; } } }
+/* the top bar keeps its buttons on the right so the corner ribbon never covers one */
+.pp-bar { justify-content: flex-end; min-height: 58px; }
+
+/* Material overlays (file preview, forms) always open above the custom side panels (z-index 1040-1050) */
+.cdk-overlay-container { z-index: 1200; }

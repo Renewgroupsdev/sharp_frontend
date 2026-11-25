@@ -1,0 +1,147 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-people-fill"></i></div>
+      <div class="title-content">
+        <h2>
+          @switch (view()) {
+            @case ('status') { Status details — {{ student()?.name }} }
+            @case ('notify') { Send push notification }
+            @case ('feedback') { Add feedback }
+            @default { Students }
+          }
+        </h2>
+        <p>
+          @if (view() === 'list') {
+            {{ course()?.title }} · {{ rows().length }} enrolled student{{ rows().length === 1 ? '' : 's' }}
+          } @else {
+            {{ student()?.name }} ({{ student()?.sid }}) · {{ course()?.title }}
+          }
+        </p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div class="modal-body-custom">
+    @switch (view()) {
+      @case ('list') {
+        <div class="items-table-wrap">
+          <table class="items-table">
+            <thead><tr><th>Student</th><th>Phone</th><th>Email</th><th>Completion</th><th>Actions</th></tr></thead>
+            <tbody>
+              @for (r of rows(); track r.sid) {
+                <tr>
+                  <td><b class="lead">{{ r.name }}</b><small class="sub">{{ r.sid }}</small></td>
+                  <td>{{ r.phone }}</td>
+                  <td>{{ r.email }}</td>
+                  <td>
+                    <div class="progress" role="progressbar" [attr.aria-valuenow]="r.progress" aria-valuemin="0" aria-valuemax="100"><span [style.width.%]="r.progress"></span></div>
+                    <small class="sub">{{ r.progress }}%</small>
+                  </td>
+                  <td>
+                    <span class="row-actions">
+                      <button type="button" class="icon-btn" title="Status details" aria-label="Status details" (click)="go('status', r.sid)"><i class="bi bi-bar-chart-line"></i></button>
+                      @if (canEdit) {
+                        <button type="button" class="icon-btn" title="Notify" aria-label="Notify" (click)="go('notify', r.sid)"><i class="bi bi-bell"></i></button>
+                        <button type="button" class="icon-btn" title="Feedback" aria-label="Feedback" (click)="go('feedback', r.sid)"><i class="bi bi-chat-left-text"></i></button>
+                      }
+                    </span>
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="5" class="muted">No students are enrolled in this course yet. Enroll them from the Enrollment module.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @case ('status') {
+        @if (student(); as s) {
+          <p class="lead-text">Overall completion <b>{{ s.progress }}%</b> · {{ quizCount() }} quiz{{ quizCount() === 1 ? '' : 'zes' }} on this course</p>
+          <div class="items-table-wrap">
+            <table class="items-table">
+              <thead><tr><th>Topic</th><th>Topic status</th><th>Quiz status</th><th>Result</th><th>Feedback</th></tr></thead>
+              <tbody>
+                @for (t of topics(); track $index) {
+                  <tr>
+                    <td><b class="lead">{{ t.name }}</b><small class="sub">{{ t.chapter }}</small></td>
+                    <td>{{ t.status }}</td>
+                    <td>{{ t.quizStatus }}</td>
+                    <td>{{ t.result }}</td>
+                    <td>@for (f of t.feedback; track $index) { <div>{{ f }}</div> } @empty { <span class="muted">—</span> }</td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="5" class="muted">This course has no lessons yet.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          @if (overallFeedback().length) {
+            <h4 class="sec">Overall feedback</h4>
+            @for (f of overallFeedback(); track f.id) {
+              <div class="kv"><span>{{ f.text }}</span><b>{{ f.on }}</b></div>
+            }
+          }
+        }
+      }
+
+      @case ('notify') {
+        <form id="cs-form" (ngSubmit)="sendNotification()" novalidate>
+          <div class="form-field full-width">
+            <label for="cs-msg">Message <span>*</span></label>
+            <div class="input-wrap"><textarea id="cs-msg" name="msg" rows="4" required [(ngModel)]="model.msg" [class.is-invalid]="submitted() && !model.msg.trim()"></textarea></div>
+            @if (submitted() && !model.msg.trim()) { <small class="error-text">Message is required.</small> }
+          </div>
+        </form>
+      }
+
+      @case ('feedback') {
+        <form id="cs-form" (ngSubmit)="saveFeedback()" novalidate>
+          <div class="form-grid">
+            <div class="form-field full-width">
+              <label for="cs-topic">About</label>
+              <div class="input-wrap"><i class="bi bi-list-nested"></i>
+                <select id="cs-topic" name="topic" [(ngModel)]="model.topic">
+                  <option value="">Overall course</option>
+                  @for (l of lessonOptions(); track l.id) { <option [value]="l.id">{{ l.name }}</option> }
+                </select>
+                <i class="bi bi-chevron-down select-arrow"></i>
+              </div>
+            </div>
+            <div class="form-field full-width">
+              <label for="cs-text">Feedback <span>*</span></label>
+              <div class="input-wrap"><textarea id="cs-text" name="text" rows="4" required [(ngModel)]="model.text" [class.is-invalid]="submitted() && !model.text.trim()"></textarea></div>
+              @if (submitted() && !model.text.trim()) { <small class="error-text">Feedback is required.</small> }
+            </div>
+          </div>
+        </form>
+      }
+    }
+  </div>
+
+  <div class="modal-footer-custom">
+    @switch (view()) {
+      @case ('list') {
+        @if (canEdit) { <button type="button" class="save-btn" (click)="invite()"><i class="bi bi-envelope-paper"></i> Send invitation</button> }
+        <button type="button" class="cancel-btn" (click)="close()">Close</button>
+      }
+      @case ('status') {
+        @if (canEdit) {
+          <button type="button" class="save-btn" (click)="go('feedback')"><i class="bi bi-chat-left-text"></i> Add feedback</button>
+          <button type="button" class="cancel-btn" (click)="go('notify')"><i class="bi bi-bell"></i> Notify</button>
+        }
+        <button type="button" class="cancel-btn" (click)="go('list')"><i class="bi bi-arrow-left"></i> Back to students</button>
+      }
+      @case ('notify') {
+        <button type="button" class="cancel-btn" (click)="go('list')">Back</button>
+        <button type="submit" form="cs-form" class="save-btn"><i class="bi bi-send"></i> Send notification</button>
+      }
+      @case ('feedback') {
+        <button type="button" class="cancel-btn" (click)="go('status')">Back</button>
+        <button type="submit" form="cs-form" class="save-btn"><i class="bi bi-floppy"></i> Save feedback</button>
+      }
+    }
+  </div>
+</div>

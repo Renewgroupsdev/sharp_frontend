@@ -1,0 +1,121 @@
+<section class="st-page">
+  @if (error(); as err) {
+    <div class="st-card warn" role="alert">{{ err }}</div>
+    <a class="st-btn alt" routerLink="/app/learning"><i class="bi bi-arrow-left"></i> Back to My Learning</a>
+  } @else if (course(); as c) {
+    <div class="st-head">
+      <div>
+        <h2 class="page-title"><i class="bi bi-journal-richtext"></i> {{ c.title }}</h2>
+        <p class="st-sub">{{ c.category }} · {{ c.level }} · {{ c.hours }} hours</p>
+      </div>
+      <a class="st-btn alt" routerLink="/app/learning"><i class="bi bi-arrow-left"></i> My Learning</a>
+    </div>
+
+    @if (summary(); as s) {
+      <div class="st-card">
+        <div class="prog-line">
+          <b>{{ s.progress }}%</b>
+          <span class="mut">{{ s.lessons_done }} of {{ s.lessons_total }} lessons completed · {{ s.status }}</span>
+        </div>
+        <div class="bar" role="progressbar" [attr.aria-valuenow]="s.progress" aria-valuemin="0" aria-valuemax="100"><i [style.width.%]="s.progress"></i></div>
+      </div>
+    }
+
+    <div class="st-grid side">
+      <div class="st-card viewer-card">
+        @if (current(); as l) {
+          <div class="viewer-head">
+            <div>
+              <span class="t2">{{ l.module }}</span>
+              <h3 class="lesson-title">{{ l.name }}</h3>
+            </div>
+            <span class="pill" [class.g]="isDone()">{{ isDone() ? 'Completed' : l.dur + ' min' }}</span>
+          </div>
+
+          @switch (viewer()?.kind) {
+            @case ('embed') {
+              <div class="frame"><iframe [src]="$any(viewer()).url" title="Lesson video" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+            }
+            @case ('video') {
+              <video class="frame-video" controls controlsList="nodownload" [src]="$any(viewer()).url"></video>
+            }
+            @case ('text') {
+              <div class="rich" [innerHTML]="$any(viewer()).html"></div>
+            }
+            @default {
+              <div class="file-card">
+                <i class="bi" [class]="icon[l.host]"></i>
+                <b>{{ $any(viewer()).name }}</b>
+                <span class="t2">{{ hostLabel(l.host) }}{{ $any(viewer()).size ? ' · ' + $any(viewer()).size : '' }}</span>
+                <span class="t2">The file preview is not available in the app yet. Read it from the material your mentor shared, then mark the lesson complete.</span>
+              </div>
+            }
+          }
+
+          @if (l.desc) { <p class="desc">{{ l.desc }}</p> }
+
+          @if (isDone() && blockedNext(); as why) {
+            <p class="gate-note"><i class="bi bi-lock-fill"></i> {{ why }}</p>
+          }
+
+          <div class="viewer-foot">
+            @if (isDone()) {
+              <span class="pill g"><i class="bi bi-check-lg"></i> Completed</span>
+              @if (next()) { <button type="button" class="st-btn" (click)="select(next()!.id)">Next lesson <i class="bi bi-arrow-right"></i></button> }
+            } @else {
+              <button type="button" class="st-btn" [disabled]="saving()" (click)="complete()"><i class="bi bi-check-lg"></i> Mark complete</button>
+            }
+          </div>
+        } @else {
+          <p class="mut">This course has no lessons yet.</p>
+        }
+      </div>
+
+      <div class="st-card">
+        <h3>Modules</h3>
+        @for (ch of c.chapters; track ch.id; let i = $index) {
+          @let m = state(ch.id);
+          <div class="mod" [class.is-locked]="m?.locked">
+            <div class="mod-head">
+              <span class="t1">
+                @if (m?.locked) { <i class="bi bi-lock-fill" aria-label="Locked"></i> }
+                Module {{ i + 1 }} · {{ ch.name }}
+              </span>
+              @if (m?.complete) { <span class="pill g">Complete</span> }
+              @else if (m?.locked) { <span class="pill">Locked</span> }
+              @else if (m?.unlocked_early) { <span class="pill b">Opened by mentor</span> }
+            </div>
+            @if (m?.locked) { <span class="mod-reason">{{ m?.reason }}</span> }
+            @else if (ch.desc) { <span class="t2">{{ ch.desc }}</span> }
+
+            @for (l of ch.lessons; track l.id) {
+              <button type="button" class="st-row clickable" [class.active]="l.id === currentId()" [disabled]="m?.locked || lessonLocked(l.id, ch.id)" (click)="select(l.id)">
+                <span class="st-ico" [class.g]="done().has(l.id)" [class.solid]="l.id === currentId() && !done().has(l.id)">
+                  <i class="bi" [class]="done().has(l.id) ? 'bi-check-lg' : m?.locked || lessonLocked(l.id, ch.id) ? 'bi-lock' : icon[l.host]"></i>
+                </span>
+                <span class="grow"><span class="t1">{{ l.name }}</span><span class="t2">@if (lessonLocked(l.id, ch.id) && !m?.locked) { Complete the previous lesson to open this one } @else { {{ hostLabel(l.host) }} · {{ l.dur }} min }</span></span>
+              </button>
+            } @empty {
+              <span class="t2">No lessons yet.</span>
+            }
+
+            @for (q of m?.quizzes ?? []; track q.id) {
+              <div class="mod-quiz">
+                <span class="st-ico" [class.g]="q.passed" [class.w]="!q.passed"><i class="bi bi-patch-question"></i></span>
+                <span class="grow">
+                  <span class="t1">{{ q.title }}</span>
+                  <span class="t2">{{ q.passed ? 'Passed · ' + q.best_percent + '%' : q.best_percent !== null ? 'Best ' + q.best_percent + '% · pass mark ' + q.min_percent + '%' : 'Pass mark ' + q.min_percent + '%' }}</span>
+                </span>
+                @if (!m?.locked) { <a class="st-btn alt" [routerLink]="['/app/assessments', q.id, 'attempt']">{{ q.passed ? 'Review' : 'Take quiz' }}</a> }
+              </div>
+            }
+          </div>
+        } @empty {
+          <span class="t2">No modules yet.</span>
+        }
+      </div>
+    </div>
+  } @else {
+    <p class="mut">Loading…</p>
+  }
+</section>

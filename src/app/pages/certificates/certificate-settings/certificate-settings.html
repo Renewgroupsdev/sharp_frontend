@@ -1,0 +1,80 @@
+@if (loading()) {
+  <p class="muted">Loading settings…</p>
+} @else {
+  <form class="settings-card" (ngSubmit)="save()" (input)="touch()" (change)="touch()" novalidate>
+    <h3>Certificate settings</h3>
+    <p class="muted">Used for every certificate. A certificate that is already issued keeps the design and marks it was issued with.</p>
+
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="cs-template">Template</label>
+        <div class="input-wrap"><i class="bi bi-layout-text-window"></i>
+          <select id="cs-template" name="template" [(ngModel)]="model.template">@for (t of templates; track t) { <option [value]="t">{{ t }}</option> }</select>
+          <i class="bi bi-chevron-down select-arrow"></i>
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="cs-type">Certificate type</label>
+        <div class="input-wrap"><i class="bi bi-tag"></i>
+          <select id="cs-type" name="type" [(ngModel)]="model.type">@for (t of types; track t) { <option [value]="t">{{ t }}</option> }</select>
+          <i class="bi bi-chevron-down select-arrow"></i>
+        </div>
+      </div>
+      <div class="form-field full-width">
+        <label for="cs-title">Title <span>*</span></label>
+        <div class="input-wrap"><i class="bi bi-fonts"></i><input id="cs-title" name="title" required maxlength="120" [(ngModel)]="model.title" /></div>
+      </div>
+      <div class="form-field full-width">
+        <label for="cs-body">Wording</label>
+        <div class="input-wrap textarea-wrap"><i class="bi bi-text-paragraph"></i><textarea id="cs-body" name="body" rows="3" maxlength="1000" [(ngModel)]="model.body"></textarea></div>
+        <small class="hint">Placeholders: {{ '{student} {course} {score} {date} {no}' }}</small>
+      </div>
+
+      <div class="form-field">
+        <label for="cs-prefix">Number prefix</label>
+        <div class="input-wrap"><i class="bi bi-hash"></i><input id="cs-prefix" name="prefix" required maxlength="12" [(ngModel)]="model.prefix" /></div>
+        <small class="hint">Numbers look like {{ (model.prefix || 'SHARP').toUpperCase() }}-2026-00001</small>
+      </div>
+      <div class="form-field">
+        <label for="cs-att">Minimum attendance %</label>
+        <div class="input-wrap"><i class="bi bi-calendar-check"></i><input id="cs-att" type="number" name="min_attendance" min="0" max="100" [(ngModel)]="model.min_attendance" /></div>
+        <small class="hint">Students below this need an override to be issued a certificate.</small>
+      </div>
+      <div class="form-field">
+        <label for="cs-score">Minimum score %</label>
+        <div class="input-wrap"><i class="bi bi-percent"></i><input id="cs-score" type="number" name="min_score" min="0" max="100" [(ngModel)]="model.min_score" /></div>
+        <small class="hint">Average quiz result for the course. 0 means no minimum.</small>
+      </div>
+
+      <div class="form-field">
+        <label for="cs-signame">Signature name</label>
+        <div class="input-wrap"><i class="bi bi-pen"></i><input id="cs-signame" name="signature_name" maxlength="80" [(ngModel)]="model.signature_name" /></div>
+      </div>
+      <div class="form-field">
+        <label for="cs-sigrole">Signature designation</label>
+        <div class="input-wrap"><i class="bi bi-person-badge"></i><input id="cs-sigrole" name="signature_role" maxlength="80" [(ngModel)]="model.signature_role" /></div>
+      </div>
+      <div class="form-field full-width">
+        <label for="cs-sigimg">Signature image</label>
+        @if (model.signature_image && !removeSignature()) {
+          <div class="sig-row"><img class="sig-img" [src]="model.signature_image" alt="Current signature" /><button type="button" class="link-btn" (click)="clearSignature()">Remove</button></div>
+        }
+        <input id="cs-sigimg" class="file-input" type="file" accept="image/png,image/jpeg" (change)="onSignature($event)" />
+        <small class="hint">Optional. PNG or JPEG, 150 KB or smaller.</small>
+      </div>
+
+      <div class="form-field full-width checks">
+        <label class="check-row"><input type="checkbox" name="show_profile" [(ngModel)]="model.show_profile" /> <span>Show the student's initials</span></label>
+        <label class="check-row"><input type="checkbox" name="show_qr" [(ngModel)]="model.show_qr" /> <span>Show the verification QR code</span></label>
+      </div>
+    </div>
+
+    @if (serverError(); as err) { <p class="error-text" role="alert">{{ err }}</p> }
+    <div class="actions">
+      <button *appCan="'a_certs.edit'" type="submit" class="save-btn" [disabled]="saving()"><i class="bi bi-floppy"></i> {{ saving() ? 'Saving…' : 'Save settings' }}</button>
+    </div>
+  </form>
+
+  <h4 class="preview-title">Preview</h4>
+  <app-certificate-view [cert]="preview()" />
+}

@@ -1,0 +1,17 @@
+.role-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.role-chip {
+  border: 1px solid var(--primary-border-strong); border-radius: 99px; padding: 4px 14px;
+  background: var(--app-surface-solid); color: var(--text-dark); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
+  &.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+}
+.alert-banner strong { display: inline; margin-right: 6px; }
+.matrix-wrap { overflow: auto; border: 1px solid var(--border-soft); border-radius: 12px; background: var(--app-surface-solid); }
+.matrix {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+  th { background: var(--primary-soft); color: var(--primary-dark); text-align: center; padding: 8px; font-size: 11px; }
+  th:first-child, td:first-child { text-align: left; padding-left: 12px; }
+  td { padding: 8px; text-align: center; border-top: 1px solid var(--border-soft); color: var(--text-dark); }
+  td i { color: var(--primary); margin-right: 4px; }
+  input { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+  input:disabled { cursor: not-allowed; }
+}

@@ -1,0 +1,29 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-person-plus"></i></div>
+      <div class="title-content">
+        <h2>Add members</h2>
+        <p>{{ group.title }} · {{ group.members_total }} members now</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div class="modal-body-custom">
+    @if (people().length) {
+      <app-community-member-picker [users]="people()" [(selected)]="picked"></app-community-member-picker>
+    } @else {
+      <p class="empty">Every active user is already a member of this group.</p>
+    }
+    @if (serverError(); as err) { <p class="error-text" role="alert">{{ err }}</p> }
+  </div>
+
+  <div class="modal-footer-custom">
+    <span class="footer-note">{{ picked().length }} selected</span>
+    <button type="button" class="cancel-btn" (click)="close()">Back to group</button>
+    @if (people().length) {
+      <button type="button" class="save-btn" [disabled]="saving()" (click)="save()"><i class="bi bi-check-lg"></i> {{ saving() ? 'Adding…' : 'Add selected' }}</button>
+    }
+  </div>
+</div>

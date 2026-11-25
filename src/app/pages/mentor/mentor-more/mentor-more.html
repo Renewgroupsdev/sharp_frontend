@@ -1,0 +1,70 @@
+<div class="m-page">
+  <div>
+    <h1 class="page-title"><i class="bi bi-three-dots"></i> More · Mentor</h1>
+    <p class="m-sub">Profile, schedule and announcements.</p>
+  </div>
+
+  <div class="m-two">
+    <div class="m-card">
+      <h3>Class schedule</h3>
+      <div class="m-scroll">
+        <table class="m-table">
+          <thead><tr><th>Date</th><th>Time</th><th>Session</th><th>Venue</th><th>Trainer</th></tr></thead>
+          <tbody>
+            @for (s of schedule; track s.dt) {
+              <tr>
+                <td><b>{{ s.d }}</b> {{ s.dt }}</td>
+                <td>{{ s.t }}</td>
+                <td>{{ s.ttl }} @if (s.st === 'today') { <span class="pill g">Today</span> } @else if (s.st === 'next') { <span class="pill b">Next</span> }</td>
+                <td>{{ s.room }}</td>
+                <td>{{ s.tr }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <h3 style="margin-top:20px">Announcements</h3>
+      @for (a of announcements; track a.t) {
+        <div style="border-top:1px solid var(--table-border);padding:10px 0">
+          <div class="m-inline" style="justify-content:space-between">
+            <b>{{ a.t }}</b>
+            <span class="pill" [class.w]="a.k === 'w'" [class.b]="a.k === 'b'" [class.g]="a.k === 'g'" [class.n]="a.k === 'n'">{{ a.tag }}</span>
+          </div>
+          <div class="m-sub">{{ a.b }}</div>
+          <div class="m-sub">{{ a.by }} · {{ a.w }}</div>
+        </div>
+      }
+    </div>
+
+    <div>
+      <div class="m-card" style="margin-bottom:14px">
+        <h3>Mentor profile</h3>
+        <div class="m-who">
+          <span class="m-av" [style.background]="me().col">{{ mentor.init }}</span>
+          <div><b>{{ me().n }}</b><small>{{ mentor.role }}</small></div>
+        </div>
+        <table class="m-table" style="margin-top:10px">
+          <tbody>
+            <tr><td>Mentor ID</td><td>{{ me().id }}</td></tr>
+            <tr><td>Organisation</td><td>{{ me().org }}</td></tr>
+            <tr><td>Batch</td><td>{{ me().b }}</td></tr>
+            <tr><td>Phone</td><td>{{ me().ph }}</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="m-card">
+        <h3>Shortcuts</h3>
+        <div class="m-grid one">
+          @for (a of links; track a.link) {
+            <a class="m-tile" [routerLink]="a.link">
+              <span class="ic"><i class="bi" [class]="a.icon"></i></span>
+              <span><b>{{ a.title }}</b><small>{{ a.sub }}</small></span>
+              <i class="bi bi-chevron-right go"></i>
+            </a>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

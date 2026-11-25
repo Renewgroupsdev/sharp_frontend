@@ -1,0 +1,86 @@
+<section class="st-page">
+  <div class="st-head">
+    <div>
+      <h2 class="page-title"><i class="bi bi-calendar-check"></i> My Attendance</h2>
+      <p class="st-sub">Report Present or Absent each day. The programme office marks it and your calendar updates.</p>
+    </div>
+  </div>
+
+  <div class="st-grid cols-4 sum">
+    <div class="st-card sum-tile"><span class="sum-ico g"><i class="bi bi-graph-up-arrow"></i></span><div><b>{{ rate() }}%</b><span>Attendance rate</span></div></div>
+    <div class="st-card sum-tile"><span class="sum-ico g"><i class="bi bi-person-check"></i></span><div><b>{{ month().present }}</b><span>Present this month</span></div></div>
+    <div class="st-card sum-tile"><span class="sum-ico d"><i class="bi bi-person-x"></i></span><div><b>{{ month().absent }}</b><span>Absent this month</span></div></div>
+    <div class="st-card sum-tile"><span class="sum-ico w"><i class="bi bi-hourglass-split"></i></span><div><b>{{ waiting() }}</b><span>Waiting to be marked</span></div></div>
+  </div>
+
+  <div class="st-card today" [class.is-present]="today()?.outcome === 'Present'" [class.is-absent]="today()?.outcome === 'Absent'" [class.is-waiting]="today()?.outcome === 'Pending'">
+    <div class="today-info">
+      <span class="today-date">{{ todayLabel() }}</span>
+      @if (today(); as t) {
+        @if (t.outcome === 'Pending') {
+          <b>You reported {{ t.requested }}. Waiting for the programme office.</b>
+          <span class="t2">@if (t.reason) { Reason: {{ t.reason }}. } You can change it until it is marked.</span>
+        } @else {
+          <b>Marked {{ t.outcome }}{{ t.by ? ' by ' + t.by : '' }}</b>
+          <span class="t2">@if (t.resolution) { {{ t.resolution }} } @else if (t.reason) { Reason: {{ t.reason }} } @else { Your attendance for today is recorded. }</span>
+        }
+      } @else {
+        <b>Report your attendance for today</b>
+        <span class="t2">Press Present, or Absent with a reason. The programme office reviews your report and marks it.</span>
+      }
+    </div>
+    @if (!today() || today()!.outcome === 'Pending') {
+      <div class="today-actions">
+        <button type="button" class="st-btn" [disabled]="saving()" (click)="reportPresent()"><i class="bi bi-check-lg"></i> Present</button>
+        <button type="button" class="st-btn alt" (click)="reportAbsent()"><i class="bi bi-x-lg"></i> Absent</button>
+      </div>
+    } @else if (today(); as t) {
+      <span class="pill" [class.g]="t.outcome === 'Present'" [class.d]="t.outcome === 'Absent'">{{ t.outcome }}</span>
+    }
+  </div>
+
+  <div class="st-grid side">
+    <div class="st-card cal">
+      <div class="cal-head">
+        <button type="button" class="cal-nav" aria-label="Previous month" (click)="shift(-1)"><i class="bi bi-chevron-left"></i></button>
+        <h3>{{ monthLabel() }}</h3>
+        <button type="button" class="cal-nav" aria-label="Next month" [disabled]="!canGoNext()" (click)="shift(1)"><i class="bi bi-chevron-right"></i></button>
+      </div>
+
+      <div class="cal-grid" role="grid" [attr.aria-label]="'Attendance for ' + monthLabel()">
+        @for (w of weekdays; track w) { <span class="cal-dow">{{ w }}</span> }
+        @for (c of cells(); track $index) {
+          @if (c.day === null) {
+            <span class="cal-cell blank"></span>
+          } @else {
+            <span class="cal-cell" [class]="c.info?.kind ?? ''" [class.today]="c.today" [class.future]="c.future" [title]="tip(c)" [attr.aria-label]="tip(c)">
+              <b>{{ c.day }}</b>
+              @if (c.info) { <i class="bi" [class.bi-check-lg]="c.info.kind === 'present'" [class.bi-x-lg]="c.info.kind === 'absent'" [class.bi-hourglass-split]="c.info.kind === 'waiting'"></i> }
+            </span>
+          }
+        }
+      </div>
+
+      <div class="cal-legend">
+        <span><i class="dot g"></i> Present</span>
+        <span><i class="dot d"></i> Absent</span>
+        <span><i class="dot w"></i> Waiting</span>
+        <span><i class="dot ring"></i> Today</span>
+      </div>
+    </div>
+
+    <div class="st-card">
+      <h3>Recent activity</h3>
+      @for (r of recent(); track r.key) {
+        <div class="st-row">
+          <span class="st-ico" [class.g]="r.kind === 'present'" [class.d]="r.kind === 'absent'" [class.w]="r.kind === 'waiting'">
+            <i class="bi" [class.bi-check-lg]="r.kind === 'present'" [class.bi-x-lg]="r.kind === 'absent'" [class.bi-hourglass-split]="r.kind === 'waiting'"></i>
+          </span>
+          <span class="grow"><span class="t1">{{ r.date }}</span><span class="t2">{{ r.label }}@if (r.note) { · {{ r.note }} }</span></span>
+        </div>
+      } @empty {
+        <span class="t2">No attendance recorded yet.</span>
+      }
+    </div>
+  </div>
+</section>

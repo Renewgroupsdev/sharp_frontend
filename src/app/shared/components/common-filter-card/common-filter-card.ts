@@ -1,0 +1,171 @@
+import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CommonFilterState, ExportFormat, FilterOption } from '../../models/common-components.model';
+
+@Component({
+  selector: 'app-common-filter-card',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './common-filter-card.html',
+  styleUrl: './common-filter-card.scss',
+})
+export class CommonFilterCard {
+  @Input() searchPlaceholder = 'Search...';
+  @Input() filters: FilterOption[] = [];
+  @Input() showExport = true;
+  @Output() searchChange = new EventEmitter<string>();
+  @Output() filtersChange = new EventEmitter<CommonFilterState>();
+  @Output() filterClick = new EventEmitter<string>();
+  /** Emits which file format the caller should ask the backend to generate. */
+  @Output() exportClick = new EventEmitter<ExportFormat>();
+
+  readonly exportOptions: { format: ExportFormat; label: string; icon: string }[] = [
+    { format: 'csv', label: 'CSV', icon: 'bi-filetype-csv' },
+    { format: 'xlsx', label: 'Excel', icon: 'bi-filetype-xlsx' },
+    { format: 'pdf', label: 'PDF', icon: 'bi-filetype-pdf' },
+  ];
+
+  searchValue = '';
+  openFilterKey: string | null = null;
+  isExportMenuOpen = false;
+
+  filterValues: CommonFilterState = this.emptyState();
+  draftValues: CommonFilterState = this.emptyState();
+
+  onSearchInput(): void {
+    this.searchChange.emit(this.searchValue);
+  }
+
+  toggleFilter(key: string): void {
+    if (this.openFilterKey === key) {
+      this.openFilterKey = null;
+      return;
+    }
+
+    this.openFilterKey = key;
+    this.draftValues = this.cloneState(this.filterValues);
+    this.filterClick.emit(key);
+  }
+
+  isOpen(key: string): boolean {
+    return this.openFilterKey === key;
+  }
+
+  isMultiSelected(branch: string): boolean {
+    return this.draftValues.branch.includes(branch);
+  }
+
+  /** Single-select options apply straight away and close their menu. */
+  selectSingle(key: string, value: string): void {
+    if (key === 'status' || key === 'source' || key === 'telecaller' || key === 'type') {
+      this.draftValues[key] = value || null;
+      this.applyFilter(true);
+    }
+  }
+
+  /** Checkbox lists apply on every tick and stay open so several options can be picked. */
+  toggleBranch(branch: string): void {
+    if (this.draftValues.branch.includes(branch)) {
+      this.draftValues.branch = this.draftValues.branch.filter((item: string) => item !== branch);
+    } else {
+      this.draftValues.branch = [...this.draftValues.branch, branch];
+    }
+    this.applyFilter();
+  }
+
+  setDate(type: 'from' | 'to', value: string): void {
+    if (type === 'from') {
+      this.draftValues.dateFrom = value || null;
+    } else {
+      this.draftValues.dateTo = value || null;
+    }
+    this.applyFilter();
+  }
+
+  /** Publishes the current selection; a reversed date range is swapped so it never matches nothing. */
+  applyFilter(closeMenu = false): void {
+    const next = this.cloneState(this.draftValues);
+    if (next.dateFrom && next.dateTo && next.dateFrom > next.dateTo) {
+      [next.dateFrom, next.dateTo] = [next.dateTo, next.dateFrom];
+    }
+
+    this.filterValues = next;
+    this.filtersChange.emit(this.cloneState(next));
+    if (closeMenu) this.openFilterKey = null;
+  }
+
+  clearFilter(): void {
+    this.draftValues = this.emptyState();
+    this.filterValues = this.emptyState();
+    this.filtersChange.emit(this.cloneState(this.filterValues));
+    this.openFilterKey = null;
+  }
+
+  clearAll(): void {
+    this.searchValue = '';
+    this.searchChange.emit('');
+    this.clearFilter();
+  }
+
+  getSelectedText(filter: FilterOption): string {
+    if (filter.key === 'branch') {
+      const count = this.draftValues.branch.length;
+      return count ? `${count} selected` : `All ${filter.label}`;
+    }
+
+    if (filter.key === 'date') {
+      if (!this.draftValues.dateFrom && !this.draftValues.dateTo) return 'All Dates';
+      return `${this.draftValues.dateFrom || 'Start'} - ${this.draftValues.dateTo || 'End'}`;
+    }
+
+    const value = this.getSingleValue(filter.key);
+    return value || `All ${filter.label}`;
+  }
+
+  hasValue(key: string): boolean {
+    if (key === 'branch') return this.filterValues.branch.length > 0;
+    if (key === 'date') return !!this.filterValues.dateFrom || !!this.filterValues.dateTo;
+    return !!this.getSingleValueFromState(this.filterValues, key);
+  }
+
+  toggleExportMenu(): void {
+    this.isExportMenuOpen = !this.isExportMenuOpen;
+  }
+
+  selectExport(format: ExportFormat): void {
+    this.isExportMenuOpen = false;
+    this.exportClick.emit(format);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.filter-card')) {
+      this.openFilterKey = null;
+    }
+    if (!target.closest('.export-wrapper')) {
+      this.isExportMenuOpen = false;
+    }
+  }
+
+  private getSingleValue(key: string): string | null {
+    return this.getSingleValueFromState(this.draftValues, key);
+  }
+
+  private getSingleValueFromState(state: CommonFilterState, key: string): string | null {
+    if (key === 'status') return state.status;
+    if (key === 'source') return state.source;
+    if (key === 'telecaller') return state.telecaller;
+    if (key === 'type') return state.type ?? null;
+    return null;
+  }
+
+  private emptyState(): CommonFilterState {
+    return { status: null, source: null, branch: [], telecaller: null, dateFrom: null, dateTo: null, type: null };
+  }
+
+  private cloneState(state: CommonFilterState): CommonFilterState {
+    return { ...state, branch: [...state.branch] };
+  }
+}

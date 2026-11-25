@@ -1,0 +1,40 @@
+<div class="purchase-page container-fluid px-0">
+  <div class="page-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+    <div>
+      <h6 class="page-title"><i class="bi bi-bell"></i> Notification Management</h6>
+      <p class="page-subtitle">Automatic notifications (who gets them and the wording) and messages you write by hand. Each one reaches the person's bell the moment it is sent.</p>
+    </div>
+    <div class="header-actions">
+      <button *appCan="'a_notif.create'" type="button" class="add-lead-btn" (click)="send()"><i class="bi bi-send"></i> Send notification</button>
+    </div>
+  </div>
+
+  <app-count-ribbon class="d-block mb-2" [items]="stats()" [activeKeys]="activeRibbonKeys" (select)="onRibbonSelect($event)" />
+
+  <app-common-filter-card
+    searchPlaceholder="Search by event, audience or wording..."
+    [filters]="filters"
+    (exportClick)="onExport($event)"
+    (searchChange)="onSearch($event)"
+    (filtersChange)="onFiltersChange($event)"
+  ></app-common-filter-card>
+
+  <div class="table-col">
+    <app-common-table-card
+      title="Notification rules"
+      [recordCountText]="recordCountText"
+      [columns]="columns"
+      [rows]="rows"
+      [totalRecords]="totalRecords"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [currentPage]="currentPage"
+      [pageInfoText]="pageInfoText"
+      [sortActive]="sortActive"
+      [sortDirection]="sortDirection"
+      (pageChange)="onPageChange($event)"
+      (sortChange)="onSortChange($event)"
+      (quickActionClick)="onQuickAction($event)"
+    ></app-common-table-card>
+  </div>
+</div>

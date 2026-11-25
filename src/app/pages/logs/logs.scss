@@ -1,0 +1,10 @@
+.filters { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; .search { min-width: 240px; } .count { color: var(--text-muted); font-size: 12px; margin-left: auto; } }
+.table-wrap { flex: 1 1 auto; min-height: 0; overflow: auto; border: 1px solid var(--border-soft); border-radius: 12px; background: var(--app-surface-solid); }
+.log-table {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+  th { position: sticky; top: 0; background: var(--primary-soft); color: var(--primary-dark); text-align: left; padding: 8px 12px; font-size: 11px; }
+  td { padding: 8px 12px; border-top: 1px solid var(--border-soft); color: var(--text-dark); }
+  .when { white-space: nowrap; color: var(--text-muted); }
+  .empty { text-align: center; color: var(--text-muted); padding: 24px; }
+}
+.pill { display: inline-block; padding: 2px 10px; border-radius: 99px; background: var(--primary-soft); color: var(--primary-dark); font-weight: 600; font-size: 11px; }

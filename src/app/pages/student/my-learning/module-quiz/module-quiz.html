@@ -1,0 +1,51 @@
+<div class="quiz">
+  <button type="button" class="back-link" (click)="closed.emit()"><i class="bi bi-arrow-left"></i> Back to module</button>
+
+  @if (!submitted()) {
+    <div class="st-card green">
+      <span class="t1">{{ mod().title }} assessment</span>
+      <span class="t2">{{ questions().length }} questions · pass mark {{ passMark }}% · two attempts. Your result is recorded against Module {{ mod().id }}.</span>
+    </div>
+    @for (q of questions(); track $index; let qi = $index) {
+      <div class="st-card">
+        <div class="eyebrow">Question {{ $index + 1 }} of {{ questions().length }}</div>
+        <p class="qt">{{ q.q }}</p>
+        @for (o of q.o; track $index; let j = $index) {
+          <button type="button" class="opt" [class.sel]="answers()[qi] === j" (click)="pick(qi, j)">
+            <span class="k">{{ letters[j] }}</span><span>{{ o }}</span>
+          </button>
+        }
+      </div>
+    }
+    <div><button type="button" class="st-btn" [disabled]="answered() !== questions().length" (click)="submit()">
+      {{ answered() === questions().length ? 'Submit assessment' : 'Answer all questions (' + answered() + '/' + questions().length + ')' }}
+    </button></div>
+  } @else {
+    <div class="st-card result">
+      <span class="st-ico" [class.g]="passed()" [class.d]="!passed()" style="width:64px;height:64px;flex-basis:64px;font-size:30px;margin:0 auto;border-radius:20px">
+        <i class="bi" [class.bi-check-lg]="passed()" [class.bi-x-lg]="!passed()"></i>
+      </span>
+      <div class="t1" style="font-size:19px;margin-top:10px">{{ passed() ? 'Passed' : 'Not passed' }}</div>
+      <span class="t2">You scored {{ score() }} of {{ questions().length }} — {{ pct() }}%. Pass mark is {{ passMark }}%.</span>
+    </div>
+    @for (q of questions(); track $index; let qi = $index) {
+      <div class="st-card">
+        <div class="eyebrow">Question {{ $index + 1 }}</div>
+        <p class="qt">{{ q.q }}</p>
+        @for (o of q.o; track $index; let j = $index) {
+          <div class="opt" [class.right]="j === q.a" [class.wrong]="j !== q.a && answers()[qi] === j">
+            <span class="k">{{ letters[j] }}</span><span>{{ o }}</span>
+          </div>
+        }
+      </div>
+    }
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      @if (passed()) {
+        <button type="button" class="st-btn" (click)="proceed()">Continue{{ nextModule() !== mod().id ? ' — unlock Module ' + nextModule() : '' }}</button>
+      } @else {
+        <button type="button" class="st-btn" (click)="retry()">Try again</button>
+      }
+      <button type="button" class="st-btn alt" (click)="closed.emit()">Back to module</button>
+    </div>
+  }
+</div>

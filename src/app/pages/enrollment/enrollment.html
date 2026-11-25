@@ -1,0 +1,131 @@
+<div class="purchase-page container-fluid px-0">
+  <div class="page-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+    <div>
+      <h6 class="page-title"><i class="bi bi-person-plus"></i> Enrollment</h6>
+      <p class="page-subtitle">Each course run for a batch: its dates, the students enrolled and the mentors teaching it.</p>
+    </div>
+    <div class="header-actions en-actions">
+      <button *appCan="'a_enroll.create'" type="button" class="cancel-btn" (click)="openImport()"><i class="bi bi-file-earmark-arrow-up"></i> Import CSV</button>
+      <button *appCan="'a_enroll.create'" type="button" class="add-lead-btn" (click)="addEnrollment()"><i class="bi bi-plus-lg"></i> New enrollment</button>
+    </div>
+  </div>
+
+  <div class="segment en-view" role="tablist" aria-label="Enrollment view">
+    @for (v of views; track v.key) {
+      <button type="button" role="tab" [class.active]="view() === v.key" [attr.aria-selected]="view() === v.key" (click)="setView(v.key)"><i class="bi" [class]="v.icon"></i> {{ v.label }}</button>
+    }
+  </div>
+
+  @if (view() !== 'history') {
+    <app-count-ribbon class="d-block mb-2" [items]="stats()" [activeKeys]="activeRibbonKeys" (select)="onRibbonSelect($event)" />
+
+    <app-common-filter-card
+      searchPlaceholder="Search course or batch"
+      [filters]="filters"
+      (exportClick)="onExport($event)"
+      (searchChange)="onSearch($event)"
+      (filtersChange)="onFiltersChange($event)"
+    ></app-common-filter-card>
+
+    @if (selected().length) {
+      <div class="en-bulk" role="region" aria-label="Bulk actions">
+        <b>{{ selected().length }} selected</b>
+        <span class="grow"></span>
+        <button *appCan="'a_enroll.create'" type="button" class="cancel-btn" (click)="copySelected()"><i class="bi bi-copy"></i> Copy to batches</button>
+        <button *appCan="'a_enroll.delete'" type="button" class="cancel-btn danger" (click)="removeSelected()"><i class="bi bi-trash3"></i> Remove</button>
+        <button type="button" class="cancel-btn" (click)="clearSelection()">Clear</button>
+      </div>
+    }
+  }
+
+  @switch (view()) {
+    @case ('list') {
+      <div class="table-col">
+        <app-common-table-card
+          title="Enrollments"
+          [recordCountText]="recordCountText"
+          [columns]="columns"
+          [rows]="rows"
+          [totalRecords]="totalRecords"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="pageSizeOptions"
+          [currentPage]="currentPage"
+          [pageInfoText]="pageInfoText"
+          [sortActive]="sortActive"
+          [sortDirection]="sortDirection"
+          [selectedIds]="selected()"
+          (selectionChange)="selected.set($event)"
+          (pageChange)="onPageChange($event)"
+          (sortChange)="onSortChange($event)"
+          (quickActionClick)="onQuickAction($event)"
+          (cellClick)="onCell($event)"
+          (profileClick)="open($event)"
+        ></app-common-table-card>
+      </div>
+    }
+
+    @case ('cards') {
+      @let all = cards;
+      <div class="en-grid">
+        @for (e of shownCards; track e.id) {
+          <article class="en-card" [class.picked]="isSelected(e.id)">
+            <header>
+              <label class="en-pick"><input type="checkbox" class="row-check" [checked]="isSelected(e.id)" (change)="toggleSelect(e.id, $any($event.target).checked)" [attr.aria-label]="'Select ' + e.course + ' for ' + e.batch" /></label>
+              <button type="button" class="en-title" (click)="openDetail(e.id)">
+                <h4 [title]="e.course">{{ e.course }}</h4>
+                <small>{{ e.code }}</small>
+              </button>
+              <span class="en-status" [ngClass]="'st-' + e.status.toLowerCase()">{{ e.status }}</span>
+            </header>
+
+            <ul class="en-meta">
+              <li><i class="bi bi-collection"></i><span>{{ e.batch }}</span></li>
+              <li><i class="bi bi-calendar-range"></i><span>{{ e.start || '—' }} – {{ e.end || '—' }}</span></li>
+            </ul>
+
+            <div class="en-counts">
+              <button type="button" [disabled]="!e.students" (click)="openMembers(e.id, 'students')" [attr.aria-label]="e.students + ' students, open the list'">
+                <i class="bi bi-mortarboard-fill"></i><b>{{ e.students }}</b><span>Students</span>
+              </button>
+              <button type="button" [disabled]="!e.mentors" (click)="openMembers(e.id, 'mentors')" [attr.aria-label]="e.mentors + ' mentors, open the list'">
+                <i class="bi bi-person-workspace"></i><b>{{ e.mentors }}</b><span>Mentors</span>
+              </button>
+            </div>
+
+            <footer>
+              <button type="button" class="en-link" (click)="openDetail(e.id)"><i class="bi bi-box-arrow-up-right"></i> Details</button>
+              <button *appCan="'a_enroll.delete'" type="button" class="en-remove" (click)="remove(e.id)"><i class="bi bi-trash3"></i> Remove</button>
+            </footer>
+          </article>
+        } @empty {
+          <div class="en-empty">No enrollments match. Map a batch to a course with <b>New enrollment</b>.</div>
+        }
+      </div>
+
+      @if (all.length > shown()) {
+        <div class="en-more">
+          <span>Showing {{ shown() }} of {{ all.length }}</span>
+          <button type="button" class="cancel-btn" (click)="shown.set(shown() + 12)">Show more</button>
+        </div>
+      }
+    }
+
+    @case ('calendar') {
+      <app-enrollment-calendar [items]="cards" (openEnrollment)="openDetail($event)"></app-enrollment-calendar>
+    }
+
+    @case ('history') {
+      <div class="en-history">
+        <div class="en-history-head">
+          <h3>History</h3>
+          <span class="muted">Courses added to and removed from batches, whichever screen made the change.</span>
+        </div>
+        @if (!historyLoaded()) {
+          <p class="muted">Loading…</p>
+        } @else {
+          <app-enrollment-timeline [events]="history()" [showCourse]="true"></app-enrollment-timeline>
+        }
+      </div>
+    }
+  }
+</div>

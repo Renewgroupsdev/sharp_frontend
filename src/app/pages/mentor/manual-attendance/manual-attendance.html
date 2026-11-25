@@ -1,0 +1,82 @@
+<div class="m-page">
+  <div>
+    <h1 class="page-title"><i class="bi bi-clock-history"></i> Manual Attendance</h1>
+    <p class="m-sub">Mark students of your batch present, and review their attendance requests.</p>
+  </div>
+
+  <div class="m-note">
+    <i class="bi bi-exclamation-triangle"></i>
+    <div><b>Every manual entry is logged.</b> Your name, the reason and the timestamp are stored against the student record and visible to the programme office.</div>
+  </div>
+
+  <div class="m-two">
+    <div class="m-card">
+      <h3>Today · {{ todayLabel }}</h3>
+      <div class="m-scroll">
+        <table class="m-table">
+          <thead><tr><th>Student</th><th>Status</th><th>Detail</th><th></th></tr></thead>
+          <tbody>
+            @for (r of rows(); track r.m.id) {
+              <tr>
+                <td><div class="m-who"><span class="m-av" [style.background]="r.m.col">{{ r.m.i }}</span><div><b>{{ r.m.n }}</b><small>{{ r.m.id }}</small></div></div></td>
+                <td>
+                  @if (r.rec?.status === 'Present') { <span class="pill g">Present</span> }
+                  @else if (r.rec) { <span class="pill d">{{ r.rec.status }}</span> }
+                  @else { <span class="pill n">Not marked</span> }
+                </td>
+                <td>{{ r.rec ? (r.rec.mode === 'Manual' ? 'Manual · ' + (r.rec.remarks || r.rec.method) : r.rec.method) : 'No location entry' }}</td>
+                <td>
+                  @if (r.rec?.status !== 'Present') {
+                    <button class="m-btn" type="button" (click)="picking.set(r.m)"><i class="bi bi-check2"></i> Mark present</button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="m-empty">No students assigned to your batch.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="m-card">
+      <h3>Attendance requests <span class="pill w">{{ pending().length }} pending</span></h3>
+      @for (q of pending(); track q.id) {
+        <div style="border-top:1px solid var(--table-border);padding:10px 0">
+          <b>{{ q.name }}</b>
+          <div class="m-sub">{{ q.date }} · reported <b>{{ q.requested }}</b>@if (q.reason) { · “{{ q.reason }}” }</div>
+          <div class="m-inline" style="margin-top:8px">
+            <button class="m-btn" type="button" (click)="resolve(q.id, 'Present')"><i class="bi bi-check2"></i> Mark present</button>
+            <button class="m-btn red" type="button" (click)="resolve(q.id, 'Absent')"><i class="bi bi-x"></i> Mark absent</button>
+          </div>
+        </div>
+      } @empty {
+        <div class="m-empty">No pending requests from your students.</div>
+      }
+      @if (resolved().length) {
+        <h3 style="margin-top:14px">Resolved</h3>
+        @for (q of resolved(); track q.id) {
+          <div class="m-inline" style="justify-content:space-between;border-top:1px solid var(--table-border);padding:8px 0">
+            <span><b>{{ q.name }}</b><br><small class="m-sub">{{ q.date }} · reported {{ q.requested }}@if (q.reason) { · {{ q.reason }} }</small></span>
+            <span class="pill" [class.g]="q.outcome === 'Present'" [class.d]="q.outcome === 'Absent'">{{ q.outcome }}</span>
+          </div>
+        }
+      }
+    </div>
+  </div>
+</div>
+
+@if (picking(); as p) {
+  <div class="m-backdrop" (click)="picking.set(null)">
+    <div class="m-dialog" (click)="$event.stopPropagation()">
+      <h4>Manual attendance</h4>
+      <p class="m-sub">{{ p.n }} · {{ todayLabel }}</p>
+      <div class="m-reasons">
+        @for (r of reasons; track r) {
+          <button type="button" (click)="mark(p, r)">{{ r }}</button>
+        }
+      </div>
+      <div style="margin-top:12px"><button class="m-btn alt" type="button" (click)="picking.set(null)">Cancel</button></div>
+    </div>
+  </div>
+}

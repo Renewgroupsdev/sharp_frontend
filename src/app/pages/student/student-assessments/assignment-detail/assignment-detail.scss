@@ -1,0 +1,19 @@
+.assignment-panel { margin-bottom: 1rem; padding: 1.25rem; }
+.assignment-panel h3 { margin: 0 0 .85rem; font-size: 1.05rem; }
+.assignment-panel textarea { display:block; width:100%; margin:.45rem 0 1rem; padding:.75rem; border:1px solid var(--bs-border-color,#d8dee8); border-radius:.6rem; resize:vertical; }
+.assignment-panel input[type=file] { display:block; margin:.45rem 0 1rem; max-width:100%; }
+.assignment-panel label { display:block; font-weight:600; }
+.facts { display:flex; flex-wrap:wrap; gap:1.5rem; margin-bottom:1rem; color:var(--bs-secondary-color); }
+.instructions { white-space:pre-wrap; }
+.muted { color:var(--bs-secondary-color); font-size:.875rem; }
+.back-link { display:inline-block; margin-bottom:.5rem; text-decoration:none; }
+.submission-version { display:grid; grid-template-columns:1fr auto; gap:.5rem; padding:1rem 0; border-top:1px solid var(--bs-border-color,#e5e7eb); }
+.submission-version p,.submission-version ul { grid-column:1/-1; margin:0; }
+.status { display:inline-block; margin-left:.75rem; padding:.2rem .55rem; border-radius:1rem; background:#eef2f7; font-size:.75rem; }
+.status[data-status=graded] { background:#dcfce7; color:#166534; }
+.status[data-status=returned] { background:#fef3c7; color:#92400e; }
+.feedback { white-space:pre-wrap; }
+
+.submission-version .danger { grid-column:1/-1; justify-self:start; background:#fee2e2; color:#991b1b; border:1px solid #fecaca; }
+.file-link { border:0; padding:0; background:transparent; color:var(--bs-link-color,#2563eb); text-decoration:underline; }
+.submission-content { grid-column:1/-1; white-space:pre-wrap; margin:0; }

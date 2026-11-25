@@ -1,0 +1,55 @@
+<div class="cal-wrap">
+  <div class="cal-card">
+    <div class="cal-head">
+      <button type="button" class="cal-nav" aria-label="Previous month" (click)="shift(-1)"><i class="bi bi-chevron-left"></i></button>
+      <h3>{{ label() }}</h3>
+      <button type="button" class="cal-nav" aria-label="Next month" (click)="shift(1)"><i class="bi bi-chevron-right"></i></button>
+      <button type="button" class="cal-today" (click)="goToday()">Today</button>
+    </div>
+
+    <div class="cal-grid" role="grid" [attr.aria-label]="'Course runs in ' + label()">
+      @for (w of weekdays; track w) { <span class="cal-dow">{{ w }}</span> }
+      @for (c of cells(); track $index) {
+        @if (c.day === null) {
+          <span class="cal-cell blank"></span>
+        } @else {
+          <button type="button" class="cal-cell" [class.today]="c.today" [class.picked]="c.iso === picked()" [class.busy]="c.running.length" (click)="picked.set(c.iso)"
+            [attr.aria-label]="c.day + ' ' + label() + ': ' + c.running.length + ' running, ' + c.starts.length + ' starting, ' + c.ends.length + ' ending'">
+            <b>{{ c.day }}</b>
+            <span class="marks">
+              @if (c.starts.length) { <i class="mk start" [title]="c.starts.length + ' starting'">{{ c.starts.length }}</i> }
+              @if (c.ends.length) { <i class="mk end" [title]="c.ends.length + ' ending'">{{ c.ends.length }}</i> }
+            </span>
+            @if (c.running.length) { <small>{{ c.running.length }} running</small> }
+          </button>
+        }
+      }
+    </div>
+
+    <div class="cal-legend">
+      <span><i class="mk start">n</i> course starts</span>
+      <span><i class="mk end">n</i> course ends</span>
+      <span><i class="sw busy"></i> something is running</span>
+    </div>
+  </div>
+
+  <div class="cal-side">
+    <h4>{{ dayLabel() }}</h4>
+    @if (day(); as d) {
+      @for (group of [{ t: 'Starting', list: d.starts, c: 'start' }, { t: 'Ending', list: d.ends, c: 'end' }, { t: 'Running', list: d.running, c: 'run' }]; track group.t) {
+        @if (group.list.length) {
+          <section>
+            <h5 [ngClass]="group.c">{{ group.t }} · {{ group.list.length }}</h5>
+            @for (e of group.list; track e.id) {
+              <button type="button" class="run" (click)="openEnrollment.emit(e.id)">
+                <b>{{ e.course }}</b>
+                <small>{{ e.batch }} · {{ e.start || '—' }} – {{ e.end || '—' }} · {{ e.students }} students</small>
+              </button>
+            }
+          </section>
+        }
+      } @empty { }
+      @if (!d.running.length && !d.starts.length && !d.ends.length) { <p class="none">No course runs on this day.</p> }
+    }
+  </div>
+</div>

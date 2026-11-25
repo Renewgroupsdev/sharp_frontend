@@ -1,0 +1,35 @@
+<div class="m-page">
+  <div>
+    <h1 class="page-title"><i class="bi bi-bar-chart-line"></i> Group Progress</h1>
+    <p class="m-sub">Module and assessment status per member of {{ group.teamName }}.</p>
+  </div>
+
+  <div class="m-card">
+    <div class="m-scroll">
+      <table class="m-table">
+        <thead>
+          <tr><th>Student</th><th>Institute</th><th>Modules passed</th><th>Progress</th></tr>
+        </thead>
+        <tbody>
+          @for (m of group.members(); track m.id) {
+            <tr>
+              <td><div class="m-who"><span class="m-av" [style.background]="m.col">{{ m.i }}</span><div><b>{{ m.n }}</b><small>{{ m.r }}</small></div></div></td>
+              <td>{{ m.c }}</td>
+              <td>
+                <div class="m-mods">
+                  @for (x of modules; track x.id) {
+                    <span class="m-mod" [class.on]="m.done.includes(x.id)" [title]="x.title">{{ x.id }}</span>
+                  }
+                </div>
+              </td>
+              <td><div class="m-inline"><div class="m-bar" style="flex:1"><i [style.width.%]="m.p" [style.background]="m.col"></i></div><b>{{ m.p }}%</b></div></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="m-empty">No students assigned to your batch.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="m-sub" style="margin-top:12px">Shaded numbers are modules with a passed assessment.</p>
+  </div>
+</div>

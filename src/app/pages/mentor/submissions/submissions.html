@@ -1,0 +1,212 @@
+<div class="purchase-page container-fluid px-0">
+  <div class="page-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+    <div>
+      <h6 class="page-title"><i class="bi bi-journal-check"></i> Assignment submissions</h6>
+      <p class="page-subtitle">Every student who handed in an assignment, with their score and review. Open a row to read the answer and grade it.</p>
+    </div>
+  </div>
+
+  @if (error(); as err) { <div class="sb-alert" role="alert">{{ err }}</div> }
+
+  <app-count-ribbon class="d-block mb-2" ariaLabel="Submissions by status" [items]="stats()" [activeKeys]="activeRibbonKeys" (select)="onRibbonSelect($event)" />
+
+  <app-common-filter-card
+    searchPlaceholder="Search student, ID, assessment or review"
+    [filters]="filters"
+    (exportClick)="onExport($event)"
+    (searchChange)="onSearch($event)"
+    (filtersChange)="onFiltersChange($event)"
+  ></app-common-filter-card>
+
+  <div class="table-col">
+    <app-common-table-card
+      title="Submissions"
+      [loading]="loading()"
+      [recordCountText]="recordCountText"
+      [columns]="columns"
+      [rows]="rows"
+      [totalRecords]="totalRecords"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [currentPage]="currentPage"
+      [pageInfoText]="pageInfoText"
+      [sortActive]="sortActive"
+      [sortDirection]="sortDirection"
+      (pageChange)="onPageChange($event)"
+      (sortChange)="onSortChange($event)"
+      (quickActionClick)="onQuickAction($event)"
+      (profileClick)="open($event)"
+    ></app-common-table-card>
+  </div>
+
+  @if (selected(); as item) {
+    <div class="sb-backdrop" (click)="close()"></div>
+    <aside class="sb-panel" role="dialog" aria-label="Submission details" (keydown.escape)="close()">
+      <div class="pp">
+        <span class="pp-role-tag"><i [ngClass]="sash()">{{ statusLabel(item.status) }}</i></span>
+
+        <div class="pp-bar">
+          <button type="button" class="pp-icon-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div class="pp-head">
+          <span class="pp-avatar">{{ initials(item.student?.name) }}</span>
+          <div class="pp-who">
+            <div>
+              <h2 class="pp-title">{{ item.student?.name }}</h2>
+              <div class="pp-sub">
+                <span class="pp-badge" [ngClass]="badgeTone(item.status)">{{ statusLabel(item.status) }}</span>
+                <span>· {{ item.student?.public_id }}</span><span>· Version {{ item.submission_no }}</span>
+              </div>
+            </div>
+            <div class="pp-meta">
+              <div><span>Assessment</span><b [title]="item.assessment?.title || ''">{{ item.assessment?.title || '—' }}</b></div>
+              <div class="with-icon"><i class="bi bi-calendar-event"></i><b>Due {{ item.assessment?.due_date ? (item.assessment?.due_date | date:'d MMM y') : '—' }}</b></div>
+              <div><span>Course</span><b [title]="item.assessment?.course || ''">{{ item.assessment?.course || '—' }}</b></div>
+              <div class="with-icon"><i class="bi bi-send-check"></i><b>Submitted {{ item.submitted_at | date:'d MMM y' }}</b></div>
+            </div>
+          </div>
+        </div>
+
+        <nav class="pp-ribbon" role="tablist" aria-label="Submission sections">
+          <button type="button" role="tab" class="ribbon-tab" [class.on]="panelTab() === 'details'" (click)="panelTab.set('details')"><i class="bi bi-file-earmark-text"></i>Details</button>
+          <button type="button" role="tab" class="ribbon-tab" [class.on]="panelTab() === 'attachments'" (click)="panelTab.set('attachments')"><i class="bi bi-paperclip"></i>Attachments <span class="sb-pill">{{ fileRows().length }}</span></button>
+          <button type="button" role="tab" class="ribbon-tab" [class.on]="panelTab() === 'history'" (click)="panelTab.set('history')"><i class="bi bi-clock-history"></i>Review history <span class="sb-pill">{{ comments().length }}</span></button>
+          <button type="button" role="tab" class="ribbon-tab" [class.on]="panelTab() === 'review'" (click)="panelTab.set('review')"><i class="bi bi-pencil-square"></i>Add grade &amp; review</button>
+          <button type="button" role="tab" class="ribbon-tab" [class.on]="panelTab() === 'logs'" (click)="panelTab.set('logs')"><i class="bi bi-list-check"></i>Logs</button>
+        </nav>
+
+        <div class="pp-body">
+          @if (panelTab() === 'details') {
+            <section class="pp-card">
+              <h3>Submission Information</h3>
+              <dl class="pp-grid">
+                <div><dt>Assessment</dt><dd>{{ item.assessment?.title || '—' }}</dd></div>
+                <div><dt>Course</dt><dd>{{ item.assessment?.course || '—' }}</dd></div>
+                <div><dt>Due date</dt><dd>{{ item.assessment?.due_date ? (item.assessment?.due_date | date:'d MMMM y') : '—' }}</dd></div>
+                <div><dt>Submitted on</dt><dd>{{ item.submitted_at | date:'d MMMM y, h:mm a' }}</dd></div>
+                <div><dt>Score</dt><dd>{{ item.marks_obtained !== null && item.marks_obtained !== '' ? item.marks_obtained + ' / ' + item.assessment?.max_marks : '—' }}</dd></div>
+                <div><dt>Reviewed by</dt><dd>{{ item.grader?.name || '—' }}</dd></div>
+              </dl>
+            </section>
+
+            <section class="pp-card">
+              <h3>Student answer</h3>
+              @if (answerComment(); as c) {
+                <div class="sb-comments">
+                  <div class="sb-comment">
+                    <i class="sb-cav">{{ initials(c.name) }}</i>
+                    <div class="sb-cbody">
+                      <div class="sb-chead"><b>{{ c.name }}</b><span class="sb-role student">Student</span><span class="sb-ver-tag">v{{ c.version }}</span><time>{{ c.at | date:'d MMM y, h:mm a' }}</time></div>
+                      @if (editing() && c.id === item.id) {
+                        <textarea class="sb-edit" rows="6" [ngModel]="draft()" (ngModelChange)="draft.set($event)" aria-label="Student answer"></textarea>
+                        <div class="sb-admin">
+                          <button type="button" class="sb-abtn" [disabled]="saving()" (click)="saveEdit()"><i class="bi bi-check-lg"></i> Save</button>
+                          <button type="button" class="sb-abtn" (click)="editing.set(false)">Cancel</button>
+                        </div>
+                      } @else {
+                        <p>{{ c.text }}</p>
+                        @if (canManage() && c.id === item.id) {
+                          <div class="sb-admin">
+                            <button type="button" class="sb-abtn" (click)="startEdit()"><i class="bi bi-pencil-square"></i> Edit</button>
+                            <button type="button" class="sb-abtn danger" (click)="deleteSubmission()"><i class="bi bi-trash3"></i> Delete</button>
+                          </div>
+                        }
+                      }
+                      @for (f of item.attachments; track f.id) {
+                        <span class="sb-file"><i class="bi bi-paperclip"></i><span class="sb-file-name" [title]="f.name">{{ f.name }}</span><small>{{ sizeOf(f) }}</small><button type="button" (click)="view(f)"><i class="bi bi-eye"></i> View</button></span>
+                      }
+                      <div class="sb-cmeta"><span><i class="bi bi-text-paragraph"></i> {{ words(item.content) }} words</span></div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </section>
+
+
+          }
+
+          @if (panelTab() === 'attachments') {
+            <section class="pp-card sb-attach">
+              <div class="sb-attach-head">
+                <h4><i class="bi bi-paperclip"></i> Attachment ({{ fileRows().length }})</h4>
+                @if (canManage() && fileRows().length) { <button type="button" class="sb-dlall" (click)="downloadAll()"><i class="bi bi-download"></i> Download All</button> }
+              </div>
+              @for (g of fileGroups(); track g.version) {
+                <div class="sb-vlabel"><span class="sb-ver">v{{ g.version }}</span> {{ g.at | date:'d MMM y, h:mm a' }}</div>
+                <div class="sb-fcards">
+                  @for (f of g.files; track f.id) {
+                    <div class="sb-fcard" role="button" tabindex="0" [title]="'View ' + f.name" (click)="view(f)" (keydown.enter)="view(f)">
+                      <span class="sb-ftile" [ngClass]="fileKind(f)"><i class="bi" [class]="fileIcon(f)"></i></span>
+                      <span class="sb-ftext"><b>{{ f.name }}</b><small>{{ sizeOf(f) }}@if (canManage()) { <span>•</span> <a href="javascript:void(0)" (click)="$event.stopPropagation(); download(f)">Download</a> }</small></span>
+                    </div>
+                  }
+                </div>
+              } @empty { <p class="pp-note pad">No files were attached to this submission.</p> }
+              @if (fileError(); as err) { <p class="sb-alert">{{ err }}</p> }
+            </section>
+          }
+
+          @if (panelTab() === 'history') {
+            <section class="pp-card">
+              <h3>Comments <small>student submissions and mentor / admin reviews, oldest first</small></h3>
+              <div class="sb-comments">
+                @for (c of comments(); track c.key) {
+                  <div class="sb-comment">
+                    <i class="sb-cav" [class.mentor]="c.kind === 'mentor'">{{ initials(c.name) }}</i>
+                    <div class="sb-cbody">
+                      <div class="sb-chead">
+                        <b>{{ c.name }}</b><span class="sb-role" [ngClass]="c.kind">{{ c.role }}</span><span class="sb-ver-tag">v{{ c.version }}</span>
+                        <time>{{ c.at | date:'d MMM y, h:mm a' }}</time>
+                      </div>
+                      <p>{{ c.text }}</p>
+                      @if (c.kind === 'mentor') {
+                        <div class="sb-cmeta">@if (c.marks !== null) { <span class="sb-score"><i class="bi bi-star-fill"></i> {{ c.marks }} / {{ c.max }}</span> }<span class="sb-state">{{ statusLabel(c.status) }}</span></div>
+                      }
+                    </div>
+                  </div>
+                } @empty { <p class="pp-note pad">No comments yet.</p> }
+              </div>
+            </section>
+          }
+
+          @if (panelTab() === 'review') {
+            <section class="pp-card">
+              <h3>Add grade &amp; review</h3>
+              <div class="sb-grade">
+                <label for="marks">Score <span class="pp-note">(out of {{ item.assessment?.max_marks }})</span></label>
+                <input id="marks" type="number" min="0" [max]="item.assessment?.max_marks ?? 10000" [ngModel]="marks()" (ngModelChange)="marks.set($event === '' ? null : +$event)" />
+                <label for="feedback">Review</label>
+                <textarea id="feedback" rows="6" placeholder="What went well, what to improve…" [ngModel]="feedback()" (ngModelChange)="feedback.set($event)"></textarea>
+                <span class="sb-label" id="review-status-label">Review status</span>
+                <div class="sb-radios" role="radiogroup" aria-labelledby="review-status-label">
+                  @for (o of statusOptions; track o.value) {
+                    <label class="sb-radio" [class.on]="reviewStatus() === o.value" [ngClass]="'t-' + o.value">
+                      <input type="radio" name="reviewStatus" [value]="o.value" [checked]="reviewStatus() === o.value" (change)="reviewStatus.set(o.value)" />
+                      <span class="sb-dot"></span>
+                      <span class="sb-radio-text"><b>{{ o.label }}</b><small>{{ o.hint }}</small></span>
+                    </label>
+                  }
+                </div>
+                <div class="sb-actions">
+                  <button type="button" class="primary" [disabled]="saving()" (click)="saveReview()"><i class="bi bi-check2-circle"></i> {{ saving() ? 'Saving…' : 'Update status' }}</button>
+                </div>
+              </div>
+            </section>
+          }
+
+          @if (panelTab() === 'logs') {
+            <section class="pp-card">
+              <h3>Logs <small>every version of this submission</small></h3>
+              <div class="pp-timeline">
+                @for (a of activity(); track $index) {
+                  <div class="pp-event"><i class="pp-dot"></i><div><b>{{ a.text }}</b><small>{{ a.by }} · {{ a.at | date:'d MMM y, h:mm a' }}</small></div></div>
+                }
+              </div>
+            </section>
+          }
+        </div>
+      </div>
+    </aside>
+  }
+</div>

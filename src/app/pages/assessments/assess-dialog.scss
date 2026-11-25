@@ -1,0 +1,127 @@
+// Extras shared by the quiz / question / certificate dialogs (checkbox grids, option rows, notes).
+.check-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 12px;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--text-dark);
+  cursor: pointer;
+
+  input { accent-color: var(--primary); }
+  small { color: var(--text-muted); }
+}
+
+.opt-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+
+  input[type='checkbox'] { accent-color: var(--primary); flex: 0 0 auto; }
+  .input-wrap { flex: 1 1 auto; }
+}
+
+.note {
+  padding: 8px 10px;
+  border: 1px solid var(--primary-border);
+  border-radius: 8px;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  font-size: 11px;
+}
+
+.hint {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.file-input {
+  width: 100%;
+  font-size: 12px;
+}
+
+.thumb {
+  display: block;
+  max-height: 64px;
+  max-width: 160px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-soft);
+}
+
+.modal-body-custom { position: relative; }
+
+@media (max-width: 700px) {
+  .check-grid { grid-template-columns: 1fr; }
+}
+
+// Sectioned assignment / assessment / quiz form.
+.as-sec {
+  margin-top: 12px;
+  padding: 12px 14px 14px;
+  border: 1px solid var(--primary-border);
+  border-radius: 12px;
+  background: var(--app-surface-solid);
+
+  &:first-child { margin-top: 0; }
+}
+
+.as-sec-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+
+  > i {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+    font-size: 15px;
+  }
+
+  h4 { margin: 0; font-size: 13px; font-weight: 700; color: var(--text-dark); }
+  p { margin: 0; font-size: 11px; color: var(--text-muted); }
+}
+
+.form-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.file-drop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px dashed var(--primary-border-strong);
+  border-radius: 10px;
+  background: var(--primary-soft);
+
+  > i { font-size: 26px; color: var(--primary); }
+  > div { flex: 1; min-width: 0; }
+}
+
+.as-pick {
+  padding: 7px 10px;
+  border: 1px solid var(--border-soft-strong);
+  border-radius: 10px;
+  transition: background .15s, border-color .15s;
+
+  &.on { background: var(--primary-soft); border-color: var(--primary); }
+}
+
+.as-note { margin-top: 10px; }
+
+@media (max-width: 700px) {
+  .form-grid.three { grid-template-columns: 1fr; }
+}

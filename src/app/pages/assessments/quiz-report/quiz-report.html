@@ -1,0 +1,29 @@
+<div class="purchase-page container-fluid px-0">
+  <app-count-ribbon class="d-block mb-2" [items]="stats()" [activeKeys]="activeRibbonKeys" (select)="onRibbonSelect($event)" />
+
+  <app-common-filter-card
+    searchPlaceholder="Search student, ID or quiz"
+    [filters]="filters"
+    (exportClick)="onExport($event)"
+    (searchChange)="onSearch($event)"
+    (filtersChange)="onFiltersChange($event)"
+  ></app-common-filter-card>
+
+  <div class="table-col">
+    <app-common-table-card
+      title="Quiz report"
+      [recordCountText]="recordCountText"
+      [columns]="columns"
+      [rows]="rows"
+      [totalRecords]="totalRecords"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [currentPage]="currentPage"
+      [pageInfoText]="pageInfoText"
+      [sortActive]="sortActive"
+      [sortDirection]="sortDirection"
+      (pageChange)="onPageChange($event)"
+      (sortChange)="onSortChange($event)"
+    ></app-common-table-card>
+  </div>
+</div>

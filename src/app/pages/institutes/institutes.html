@@ -1,0 +1,57 @@
+<div class="purchase-page container-fluid px-0">
+  <div class="page-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+    <div>
+      <h6 class="page-title"><i class="bi bi-bank"></i> Institute Management</h6>
+      <p class="page-subtitle">
+        {{ tab() === 'inst' ? 'Colleges and institutes on the programme, with their contacts and student counts.' : 'Batch details — schedule, seats, mentors and participating institutes.' }}
+      </p>
+    </div>
+    <div class="header-actions">
+      @if (tab() === 'inst') {
+        <button *appCan="'a_orgs.create'" type="button" class="add-lead-btn" (click)="addInstitute()"><i class="bi bi-plus-lg"></i> Add college / institute</button>
+      } @else {
+        <button *appCan="'a_orgs.create'" type="button" class="add-lead-btn" (click)="addBatch()"><i class="bi bi-plus-lg"></i> Add batch</button>
+      }
+    </div>
+  </div>
+
+  <div class="segment" role="tablist" aria-label="Institute views">
+    @for (t of tabs; track t.key) {
+      <button type="button" role="tab" [class.active]="tab() === t.key" [attr.aria-selected]="tab() === t.key" (click)="setTab(t.key)">{{ t.label }}</button>
+    }
+  </div>
+
+  <app-count-ribbon class="d-block mb-2" [items]="stats()" />
+
+  <!-- Re-created per tab so the filter card's own search / filter state starts clean. -->
+  @for (t of [tab()]; track t) {
+    <app-common-filter-card
+      [searchPlaceholder]="searchPlaceholder"
+      [filters]="filters"
+      [showExport]="true"
+      (exportClick)="onExport($event)"
+      (searchChange)="onSearch($event)"
+      (filtersChange)="onFiltersChange($event)"
+    ></app-common-filter-card>
+  }
+
+  <div class="table-col">
+    <app-common-table-card
+      [title]="title"
+      [recordCountText]="recordCountText"
+      [columns]="columns"
+      [rows]="rows"
+      [totalRecords]="totalRecords"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [currentPage]="currentPage"
+      [pageInfoText]="pageInfoText"
+      [sortActive]="sortActive"
+      [sortDirection]="sortDirection"
+      (pageChange)="onPageChange($event)"
+      (sortChange)="onSortChange($event)"
+      (quickActionClick)="onQuickAction($event)"
+      (profileClick)="open($event)"
+    ></app-common-table-card>
+  </div>
+</div>

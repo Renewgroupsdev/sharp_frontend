@@ -1,0 +1,9 @@
+:host { overflow: auto; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 8px; align-items: start; }
+.card { padding: 12px; border: 1px solid var(--border-soft); border-radius: 12px; background: var(--app-surface-solid); h4 { margin: 0 0 8px; font-size: 13px; color: var(--text-dark); } }
+.muted { color: var(--text-muted); font-size: 12px; }
+.about { margin: 0 0 4px; font-size: 13px; color: var(--text-dark); }
+.field { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--border-soft); .lbl { font-size: 12px; color: var(--text-dark); } }
+.swatches { display: flex; align-items: center; gap: 6px; }
+.swatch { width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; &.active { border-color: var(--text-dark); } }
+.picker { width: 26px; height: 26px; padding: 0; border: 0; background: none; cursor: pointer; }

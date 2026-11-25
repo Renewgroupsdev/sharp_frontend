@@ -1,0 +1,33 @@
+<div class="step-head">
+  <p class="step-hint">{{ hint() }}</p>
+  <button type="button" class="save-btn" (click)="open()"><i class="bi bi-plus-lg"></i> Add {{ noun() }}</button>
+</div>
+
+<div class="items-table-wrap">
+  <table class="items-table">
+    <thead>
+      <tr>
+        <th>Title</th><th>Module · topic</th><th>{{ isQuiz() ? 'Questions' : 'Submit date' }}</th><th>Marks / min %</th><th>Status</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (r of rows(); track r.id) {
+        <tr>
+          <td><b class="lead">{{ r.title }}</b><small class="sub">{{ r.id }}</small></td>
+          <td>{{ r.module }}<small class="sub">{{ r.topic }}</small></td>
+          <td>{{ r.detail }}</td>
+          <td>{{ r.marks }} marks<small class="sub">{{ isQuiz() ? 'pass' : 'min' }} {{ r.minp }}%</small></td>
+          <td>{{ r.status }}</td>
+          <td>
+            <span class="row-actions">
+              <button type="button" class="icon-btn" title="Edit" aria-label="Edit" (click)="open(r.id)"><i class="bi bi-pencil-square"></i></button>
+              <button type="button" class="icon-btn" title="Delete" aria-label="Delete" (click)="remove(r.id, r.title)"><i class="bi bi-trash3"></i></button>
+            </span>
+          </td>
+        </tr>
+      } @empty {
+        <tr><td colspan="6" class="muted">No {{ noun() }}s for this course yet — use “Add {{ noun() }}”.</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

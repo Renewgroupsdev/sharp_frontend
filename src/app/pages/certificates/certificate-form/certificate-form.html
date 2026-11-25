@@ -1,0 +1,47 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-award"></i></div>
+      <div class="title-content">
+        <h2>Create certificate</h2>
+        <p>Students who finish a course get one automatically. Use this for anyone else.</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <form (ngSubmit)="save()" novalidate>
+    <div class="modal-body-custom">
+      <div class="form-grid">
+        <div class="form-field full-width">
+          <label for="cf-student">Student <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-person"></i>
+            <select id="cf-student" name="studentId" [(ngModel)]="model.studentId" [class.is-invalid]="submitted() && !model.studentId">
+              <option value="">Select a student</option>
+              @for (s of students; track s.id) { <option [value]="s.id">{{ s.n }} ({{ s.id }})</option> }
+            </select>
+            <i class="bi bi-chevron-down select-arrow"></i>
+          </div>
+          @if (submitted() && !model.studentId) { <small class="error-text">Choose a student.</small> }
+        </div>
+        <div class="form-field full-width">
+          <label for="cf-course">Course <span>*</span></label>
+          <div class="input-wrap"><i class="bi bi-journal-bookmark"></i>
+            <select id="cf-course" name="courseId" [(ngModel)]="model.courseId" [class.is-invalid]="submitted() && !model.courseId">
+              <option value="">Select a course</option>
+              @for (c of courses; track c.id) { <option [value]="c.id">{{ c.title }}</option> }
+            </select>
+            <i class="bi bi-chevron-down select-arrow"></i>
+          </div>
+          @if (submitted() && !model.courseId) { <small class="error-text">Choose a course.</small> }
+        </div>
+      </div>
+      @if (serverError(); as err) { <p class="error-text" role="alert">{{ err }}</p> }
+    </div>
+
+    <div class="modal-footer-custom">
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+      <button type="submit" class="save-btn" [disabled]="saving()"><i class="bi bi-floppy"></i> {{ saving() ? 'Saving…' : 'Create' }}</button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,39 @@
+<div class="purchase-page container-fluid px-0">
+  <div class="page-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+    <div>
+      <h6 class="page-title"><i class="bi bi-chat-dots"></i> SHARP Community</h6>
+      <p class="page-subtitle">Common Floor, course and custom chat groups, announcement groups, personal messages and every user's conversations.</p>
+    </div>
+    <div class="d-flex gap-2">
+      @if (tab() === 'Chat' || tab() === 'Announcement') {
+        <button *appCan="'a_comms.create'" type="button" class="add-lead-btn" (click)="createGroup()"><i class="bi bi-plus-lg"></i> Create {{ tab() === 'Chat' ? 'chat' : 'announcement' }} group</button>
+      } @else if (tab() === 'dm') {
+        <button *appCan="'a_comms.create'" type="button" class="add-lead-btn" (click)="newMessage()"><i class="bi bi-envelope"></i> New personal message</button>
+      }
+    </div>
+  </div>
+
+  <div class="tab-bar" role="tablist">
+    <button type="button" role="tab" class="tab-btn" [class.active]="tab() === 'Chat'" [attr.aria-selected]="tab() === 'Chat'" (click)="tab.set('Chat')">
+      <i class="bi bi-chat-dots"></i> Chat groups <b class="tab-count">{{ store.chatGroups().length }}</b>
+    </button>
+    <button type="button" role="tab" class="tab-btn" [class.active]="tab() === 'Announcement'" [attr.aria-selected]="tab() === 'Announcement'" (click)="tab.set('Announcement')">
+      <i class="bi bi-megaphone"></i> Announcement groups <b class="tab-count">{{ store.announcementGroups().length }}</b>
+    </button>
+    <button type="button" role="tab" class="tab-btn" [class.active]="tab() === 'dm'" [attr.aria-selected]="tab() === 'dm'" (click)="tab.set('dm')">
+      <i class="bi bi-envelope"></i> Personal messages <b class="tab-count">{{ store.dms().length }}</b>
+    </button>
+    <button type="button" role="tab" class="tab-btn" [class.active]="tab() === 'people'" [attr.aria-selected]="tab() === 'people'" (click)="tab.set('people')">
+      <i class="bi bi-person-lines-fill"></i> Conversations by person
+    </button>
+  </div>
+
+  <div class="tab-panel">
+    @switch (tab()) {
+      @case ('Chat') { <app-group-list kind="Chat" /> }
+      @case ('Announcement') { <app-group-list kind="Announcement" /> }
+      @case ('dm') { <app-dm-list /> }
+      @case ('people') { <app-person-view /> }
+    }
+  </div>
+</div>

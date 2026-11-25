@@ -1,0 +1,43 @@
+<section class="purchase-page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title"><i class="bi bi-gear"></i> Settings</h2>
+      <p class="page-subtitle">Appearance, demo data and about.</p>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h4>Appearance</h4>
+      <div class="field">
+        <span class="lbl">Theme</span>
+        <div class="segment">
+          @for (t of themes; track t.value) {
+            <button type="button" [class.active]="nav.theme() === t.value" (click)="nav.setTheme(t.value)">{{ t.label }}</button>
+          }
+        </div>
+      </div>
+      <div class="field">
+        <span class="lbl">Primary colour</span>
+        <div class="swatches">
+          @for (c of colors; track c.value) {
+            <button type="button" class="swatch" [class.active]="nav.primaryColor() === c.value" [style.background]="c.hex" [attr.aria-label]="c.value" (click)="nav.setPrimaryColor(c.value)"></button>
+          }
+          <input type="color" class="picker" [value]="nav.primaryHex()" aria-label="Custom colour" (input)="customColor($event)" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4>Demo data</h4>
+      <p class="muted">Data lives in this browser only. Reset to restore the sample users, institutes, batches, permissions and logs.</p>
+      <button type="button" class="ghost-btn" (click)="resetDemoData()"><i class="bi bi-arrow-counterclockwise"></i> Reset demo data</button>
+    </div>
+
+    <div class="card">
+      <h4>About</h4>
+      <p class="about"><b>SHARP</b> v0.9 prototype · TNCCI</p>
+      <p class="muted">Signed in as {{ auth.actor().n }} ({{ auth.role() }}).</p>
+    </div>
+  </div>
+</section>

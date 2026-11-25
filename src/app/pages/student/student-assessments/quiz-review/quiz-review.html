@@ -1,0 +1,42 @@
+<section class="st-page qa">
+  <a class="back-link" [routerLink]="['/app/assessments', id, 'attempt']"><i class="bi bi-arrow-left"></i> Back to the quiz</a>
+
+  @if (error(); as err) {
+    <div class="st-card warn" role="alert">{{ err }}</div>
+  } @else if (review(); as r) {
+    <div class="st-card qr-head">
+      <h2 class="qa-title">Review · attempt {{ r.attempt.attempt_no }}</h2>
+      @if (r.attempt.show_score) {
+        <span class="pill" [class.g]="r.attempt.passed" [class.d]="!r.attempt.passed">{{ r.attempt.result_percent }}% · {{ r.attempt.marks }} of {{ r.attempt.total }} marks · {{ r.attempt.passed ? 'Passed' : 'Not passed' }}</span>
+      }
+    </div>
+
+    @for (q of r.questions; track q.id; let i = $index) {
+      <div class="st-card qa-q">
+        <div class="qa-q-head">
+          <span class="qa-num">{{ i + 1 }}</span>
+          <span class="pill" [class]="tone(q)">{{ label(q) }}</span>
+        </div>
+        <p class="qa-text">{{ q.text }}</p>
+        @if (q.image) { <img class="qa-img" [src]="q.image" alt="" /> }
+
+        <div class="qr-cols">
+          <div class="qr-box" [class.bad]="q.correct === false" [class.ok]="q.correct === true">
+            <span class="eyebrow">Your answer</span>
+            @for (l of yours(q); track $index) { <span class="qr-line">{{ l }}</span> }
+          </div>
+          @if (hasAnswer(q)) {
+            <div class="qr-box right">
+              <span class="eyebrow">{{ q.type === 'long_answer' ? 'Marking guide' : 'Right answer' }}</span>
+              @for (l of lines(q, q.correct_answer); track $index) { <span class="qr-line">{{ l }}</span> }
+            </div>
+          }
+        </div>
+
+        @if (q.explanation) { <p class="qr-expl"><i class="bi bi-lightbulb"></i> {{ q.explanation }}</p> }
+      </div>
+    }
+  } @else {
+    <p class="mut">Loading…</p>
+  }
+</section>

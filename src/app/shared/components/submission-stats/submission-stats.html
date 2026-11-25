@@ -1,0 +1,16 @@
+@if (stats()) {
+  <section class="ss" aria-label="Submission counts">
+    <h2 class="ss-title">{{ title() }}</h2>
+    <div class="ss-grid">
+      @for (c of cards(); track c.key) {
+        <article class="ss-card">
+          <header>
+            <span class="ss-icon"><i class="bi" [class]="c.icon"></i></span>
+            <h3>{{ c.title }}</h3>
+          </header>
+          <app-pie-chart [slices]="c.slices" [unit]="c.unit" emptyText="Nothing yet" />
+        </article>
+      }
+    </div>
+  </section>
+}

@@ -1,0 +1,36 @@
+<div class="purchase-page container-fluid px-0">
+  <app-count-ribbon class="d-block mb-2" [items]="stats()" />
+
+  <p class="hint">
+    @if (kind === 'Chat') { The <b>Common Floor</b> is for every user in the organization: what is posted there shows to all users. }
+    @else { <b>All users</b> announcements reach everyone in the organization. }
+    A course group is created automatically when a batch takes a course. <b>Admin, Super Admin and OB</b> are in every group. Staff, members and institutions can create a group with the people they choose.
+  </p>
+
+  <app-common-filter-card
+    searchPlaceholder="Search groups"
+    [filters]="filters"
+    [showExport]="false"
+    (searchChange)="onSearch($event)"
+    (filtersChange)="onFiltersChange($event)"
+  ></app-common-filter-card>
+
+  <div class="table-col">
+    <app-common-table-card
+      [title]="kind === 'Chat' ? 'Chat groups' : 'Announcement groups'"
+      [recordCountText]="recordCountText"
+      [columns]="columns"
+      [rows]="rows"
+      [totalRecords]="totalRecords"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [currentPage]="currentPage"
+      [pageInfoText]="pageInfoText"
+      [sortActive]="sortActive"
+      [sortDirection]="sortDirection"
+      (pageChange)="onPageChange($event)"
+      (sortChange)="onSortChange($event)"
+      (quickActionClick)="onQuickAction($event)"
+    ></app-common-table-card>
+  </div>
+</div>

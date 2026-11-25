@@ -1,0 +1,92 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-clipboard-data"></i></div>
+      <div class="title-content">
+        <h2>Quiz attempt</h2>
+        <p>{{ attempt() ? '#' + attempt()!.id + ' · attempt ' + attempt()!.attempt_no : 'Loading…' }}</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div class="modal-body-custom">
+    @if (loading()) {
+      <p class="qd-muted">Loading attempt…</p>
+    } @else if (error(); as err) {
+      <div class="error-text" role="alert">{{ err }}</div>
+    } @else if (attempt(); as a) {
+      <div class="qd-hero">
+        <div class="qd-who">
+          <b>{{ a.student?.name }}</b>
+          <span>{{ a.student?.public_id }} · {{ a.assessment?.title }} · {{ a.assessment?.course }}</span>
+        </div>
+        <span class="qd-pill" [class]="'o-' + a.outcome">{{ outcomeLabel[a.outcome] }}</span>
+      </div>
+
+      <div class="qd-stats">
+        <div><span>Marks</span><b>{{ a.submitted_at ? a.marks + ' / ' + a.total : '—' }}</b></div>
+        <div><span>Result</span><b>{{ a.submitted_at ? a.result_percent + '%' : '—' }}</b><small>pass {{ a.assessment?.min_percent }}%</small></div>
+        <div><span>Time taken</span><b>{{ time(a.time_taken_sec) }}</b></div>
+        <div><span>Questions</span><b>{{ a.question_count }}</b></div>
+        <div class="wide"><span>Started</span><b>{{ when(a.started_at) }}</b></div>
+        <div class="wide"><span>{{ a.outcome === 'timed_out' ? 'Closed (time ran out)' : 'Submitted' }}</span><b>{{ when(a.submitted_at) }}</b></div>
+      </div>
+
+      <div class="qd-tally" aria-label="Questions by result">
+        @for (v of verdicts; track v) {
+          @if (tally()[v]) { <span [class]="'v-' + v">{{ tally()[v] }} {{ verdictLabel[v].toLowerCase() }}</span> }
+        }
+      </div>
+
+      <h3 class="qd-sec">Questions served to this student</h3>
+      @for (q of questions(); track q.id) {
+        <article class="qd-q" [class]="'v-' + verdict(q)">
+          <header>
+            <span class="qd-num">{{ q.position }}</span>
+            <span class="qd-text">{{ q.text }}</span>
+            <span class="qd-marks">{{ q.marks_awarded }} / {{ q.marks }}</span>
+          </header>
+          @if (q.image) { <img class="qd-img" [src]="q.image" alt="" /> }
+          <div class="qd-cols">
+            <div>
+              <h4>Student's answer · {{ verdictLabel[verdict(q)] }}</h4>
+              @for (l of lines(q, q.your_answer); track $index) { <p>{{ l }}</p> } @empty { <p class="qd-muted">No answer given.</p> }
+            </div>
+            <div>
+              <h4>Correct answer</h4>
+              @for (l of lines(q, q.correct_answer); track $index) { <p>{{ l }}</p> } @empty { <p class="qd-muted">Marked by a mentor.</p> }
+            </div>
+          </div>
+          @if (q.type === 'long_answer') {
+            @if (markable(q) && canMark) {
+              <form class="qd-mark" (ngSubmit)="saveMarks(q)">
+                <h4>{{ q.marked ? 'Marked by ' + q.marked_by + ' · update marks' : 'Mark this answer' }}</h4>
+                <div class="qd-mark-row">
+                  <label>Marks <small>(0 – {{ q.marks }})</small>
+                    <input type="number" name="marks" min="0" [max]="q.marks" step="1" [ngModel]="drafts()[q.id]?.marks" (ngModelChange)="setMarks(q.id, $event)" />
+                  </label>
+                  <label class="grow">Feedback to the student <small>(optional)</small>
+                    <textarea name="feedback" rows="2" maxlength="500" [ngModel]="drafts()[q.id]?.feedback" (ngModelChange)="setFeedback(q.id, $event)"></textarea>
+                  </label>
+                  <button type="submit" class="save-btn" [disabled]="savingId() === q.id"><i class="bi bi-check2-circle"></i> {{ savingId() === q.id ? 'Saving...' : (q.marked ? 'Update marks' : 'Save marks') }}</button>
+                </div>
+              </form>
+            } @else if (q.marked) {
+              <p class="qd-feedback"><i class="bi bi-person-check"></i> Marked by {{ q.marked_by }}{{ q.feedback ? ': ' + q.feedback : '' }}</p>
+            } @else if (q.needs_marking) {
+              <p class="qd-feedback wait"><i class="bi bi-hourglass-split"></i> {{ markable(q) ? 'Waiting for a mentor or admin with marking permission.' : 'Cannot be marked: the attempt was not submitted.' }}</p>
+            }
+          }
+          @if (q.explanation) { <p class="qd-expl"><i class="bi bi-lightbulb"></i> {{ q.explanation }}</p> }
+        </article>
+      } @empty {
+        <p class="qd-muted">No questions were served for this attempt.</p>
+      }
+    }
+  </div>
+
+  <div class="modal-footer-custom">
+    <button type="button" class="cancel-btn" (click)="close()">Close</button>
+  </div>
+</div>

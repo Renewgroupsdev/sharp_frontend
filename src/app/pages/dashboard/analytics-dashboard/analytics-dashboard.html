@@ -1,0 +1,424 @@
+<header class="an-head">
+  <div>
+    <h1>Analytics Dashboard – {{ role() }}</h1>
+    <p>Overall platform insights across all modules</p>
+  </div>
+  <label class="range">
+    <i class="bi bi-calendar3"></i>
+    <select [value]="range()" (change)="pick($event)" aria-label="Date range">
+      @for (r of ranges; track r.months) {
+        <option [value]="r.months" [selected]="r.months === range()">{{ r.label }}</option>
+      }
+    </select>
+  </label>
+</header>
+
+@if (error()) {
+  <div class="an-note error">{{ error() }} <button type="button" (click)="load()">Retry</button></div>
+}
+
+@if (data(); as d) {
+  <section class="kpis" aria-label="Platform totals">
+    @for (k of kpis(); track k.label) {
+      <a class="kpi" [routerLink]="'/app/' + k.route">
+        <span class="kpi-icon"><i class="bi" [class]="k.icon"></i></span>
+        <div>
+          <strong>{{ k.value }}</strong>
+          <span class="kpi-label">{{ k.label }}</span>
+          <span class="kpi-note" [class.down]="k.up === false"><i class="bi" [class.bi-arrow-up-right]="k.up !== false" [class.bi-arrow-down-right]="k.up === false" [hidden]="k.up === null"></i> {{ k.note }}</span>
+        </div>
+      </a>
+    }
+  </section>
+
+  <div class="grid" [class.loading]="loading()">
+    <!-- Attendance -->
+    <section class="mod wide">
+      <header><i class="bi bi-calendar-check"></i><h2><a class="mod-link" routerLink="/app/attendance">Attendance</a></h2><span class="tag">Heatmap + Stacked Bar</span></header>
+      <div class="mod-body three">
+        <div>
+          <h3>Attendance Heatmap (last 5 weeks)</h3>
+          <div class="heat">
+            <div class="heat-days"><span></span>@for (day of days; track day) { <span>{{ day }}</span> }</div>
+            @for (w of heatmap(); track w.label) {
+              <div class="heat-row">
+                <span class="heat-label">{{ w.label }}</span>
+                @for (c of w.cells; track $index) {
+                  <i class="cell l{{ c.level }}" [class.link]="c.v !== null" (click)="c.v !== null && go('attendance', { from: c.date, to: c.date })" [title]="c.v === null ? 'No attendance marked' : c.v + '% present'"></i>
+                }
+              </div>
+            }
+          </div>
+          <ul class="legend inline">
+            <li><i class="sw" style="background-color:#2f8f69"></i>≥ 90%</li>
+            <li><i class="sw" style="background-color:#4fb58a"></i>80–89%</li>
+            <li><i class="sw" style="background-color:#a6dcc0"></i>70–79%</li>
+            <li><i class="sw" style="background-color:#e46f6f"></i>&lt; 70%</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Batch Attendance</h3>
+          @if (batchAttendance().length) {
+            <div class="stack">
+              @for (b of batchAttendance(); track b.name) {
+                <div class="stack-col" (click)="go('attendance', { batch: b.name })" [title]="b.name + ': ' + b.counts.present + ' present, ' + b.counts.late + ' late, ' + b.counts.absent + ' absent'">
+                  <div class="stack-bar">
+                    <span style="background-color:#e46f6f" [style.height.%]="b.absent"></span>
+                    <span style="background-color:#e8b33f" [style.height.%]="b.late"></span>
+                    <span style="background-color:#4fb58a" [style.height.%]="b.present"></span>
+                  </div>
+                  <small>{{ b.name }}</small>
+                </div>
+              }
+            </div>
+          } @else { <p class="empty">No attendance recorded yet.</p> }
+          <ul class="legend inline">
+            <li><i class="sw" style="background-color:#4fb58a"></i>Present</li>
+            <li><i class="sw" style="background-color:#e8b33f"></i>Late / Manual</li>
+            <li><i class="sw" style="background-color:#e46f6f"></i>Absent</li>
+          </ul>
+        </div>
+        <div class="pending-row">
+          @if (pendingChart(); as pc) {
+            <h3><i class="bi bi-hourglass-split"></i> Pending attendance · {{ pc.title }}</h3>
+            <div class="pend-sum">
+              @if (pc.requested) { <span class="req" [style.flex-grow]="pc.requested"><b>{{ pc.requested }}</b> requested, waiting for a decision</span> }
+              @if (pc.notMarked) { <span class="nm" [style.flex-grow]="pc.notMarked"><b>{{ pc.notMarked }}</b> not marked by anyone</span> }
+              @if (!pc.requested && !pc.notMarked) { <span class="ok">Nothing pending this month</span> }
+            </div>
+            <div class="phb">
+              @if (!pc.rows.length) { <p class="empty">No pending days this month.</p> }
+              @for (r of pc.rows; track r.date) {
+                <div class="phb-row" [class.today]="r.today">
+                  <span class="phb-date">{{ r.today ? 'Today' : r.label }}</span>
+                  <div class="phb-line" [title]="r.label + ': ' + r.requested + ' requested, ' + r.notMarked + ' not marked'">
+                    @if (r.requested) {
+                      <a class="seg req" routerLink="/app/attendance" [queryParams]="{ date: r.date, kind: 'requested' }" [style.width.%]="r.reqW" [title]="r.label + ': ' + r.requested + ' requested, waiting for a decision'">{{ r.requested }}</a>
+                    }
+                    @if (r.notMarked) {
+                      <a class="seg nm" routerLink="/app/attendance" [queryParams]="{ date: r.date, kind: 'not-marked' }" [style.width.%]="r.nmW" [title]="r.label + ': ' + r.notMarked + ' not marked by anyone'">{{ r.notMarked }}</a>
+                    }
+                  </div>
+                  @if (r.clear) { <i class="bi bi-check-circle-fill phb-ok" title="Everyone is marked"></i> }
+                </div>
+              }
+            </div>
+            <ul class="legend inline">
+              <li><i class="sw" style="background-color:linear-gradient(180deg,#a99fe6,#8a7fd9)"></i>Requested (waiting for a decision)</li>
+              <li><i class="sw" style="background-color:linear-gradient(180deg,#f6bd8a,#ee9a55)"></i>Not marked by anyone</li>
+            </ul>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- Users -->
+    <section class="mod">
+      <header><i class="bi bi-people"></i><h2><a class="mod-link" routerLink="/app/users">Users</a></h2><span class="tag">Donut + Horizontal Bar</span></header>
+      <div class="mod-body two">
+        <div class="donut-wrap">
+          <div class="donut">
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <circle cx="50" cy="50" [attr.r]="r" class="ring-bg" />
+              @for (s of roleSlices(); track s.label; let i = $index) {
+                <circle cx="50" cy="50" [attr.r]="r" class="ring" [class.hot]="uHover() === i" [class.dim]="uHover() !== null && uHover() !== i" (click)="go('users', { source: roleName(s.label) })" (mouseenter)="uHover.set(i)" (mouseleave)="uHover.set(null)" [attr.stroke]="s.color"
+                  [attr.stroke-dasharray]="s.length + ' ' + (circ - s.length)" [attr.stroke-dashoffset]="-s.offset" />
+              }
+            </svg>
+            <div class="donut-center">@if (uHover() !== null) { <strong>{{ roleSlices()[uHover()!].percent }}%</strong><span>{{ roleSlices()[uHover()!].label }} · {{ roleSlices()[uHover()!].value }}</span> } @else { <strong>{{ d.users.total.toLocaleString() }}</strong><span>Users</span> }</div>
+          </div>
+          <ul class="legend">
+            @for (s of roleSlices(); track s.label; let i = $index) {
+              <li class="slice-key" [class.hot]="uHover() === i" (click)="go('users', { source: roleName(s.label) })" (mouseenter)="uHover.set(i)" (mouseleave)="uHover.set(null)"><i class="sw dot" [style.background-color]="s.color"></i><span>{{ s.label }}</span><b>{{ s.percent }}%</b></li>
+            }
+          </ul>
+        </div>
+        <div>
+          <h3>User Registration (Monthly)</h3>
+          <div class="hbars">
+            @for (m of registrations(); track m.label) {
+              <div class="hbar" (click)="go('users')"><span>{{ m.label }}</span><div><i [style.width.%]="m.width" [style.background-color]="m.color"></i></div><b>{{ m.value }}</b></div>
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Course -->
+    <section class="mod">
+      <header><i class="bi bi-book"></i><h2><a class="mod-link" routerLink="/app/courses">Course</a></h2><span class="tag">Progress Bars + Treemap</span></header>
+      <div class="mod-body two">
+        <div>
+          <h3>Course Completion Rate</h3>
+          @for (c of completion(); track c.label) {
+            <div class="prog" (click)="go('courses', { q: c.label })">
+              <div><span [title]="c.label">{{ c.label }}</span><b>{{ c.value }}%</b></div>
+              <div class="track"><i [style.width.%]="c.value"></i></div>
+            </div>
+          } @empty { <p class="empty">No course progress yet.</p> }
+        </div>
+        <div>
+          <h3>Course Enrollment (Treemap)</h3>
+          @if (treemap().length) {
+            <div class="treemap">
+              @for (row of treemap(); track $index) {
+                <div class="tm-row" [style.flex-grow]="row.height">
+                  @for (t of row.tiles; track t.label) {
+                    <div class="tm-tile" (click)="go('courses', { q: t.label })" [style.flex-grow]="t.width" [style.background-color]="t.color" [title]="t.label + ': ' + t.count + ' enrolled'">
+                      <span>{{ t.label }}</span><b>{{ t.value }}%</b>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          } @else { <p class="empty">No enrolments yet.</p> }
+        </div>
+      </div>
+    </section>
+
+    <!-- Assignment -->
+    <section class="mod">
+      <header><i class="bi bi-file-earmark-text"></i><h2><a class="mod-link" routerLink="/app/courses/assignments">Assignment</a></h2><span class="tag">Stacked Bar + Funnel</span></header>
+      <div class="mod-body two">
+        <div>
+          <h3>Assignment Status (by Batch)</h3>
+          @if (assignmentBatches().length) {
+            <div class="stack">
+              @for (b of assignmentBatches(); track b.name) {
+                <div class="stack-col" (click)="go('assessments', { type: 'Assignment' })" [title]="b.name + ': ' + b.counts.submitted + ' submitted, ' + b.counts.pending + ' in review, ' + b.counts.evaluated + ' evaluated, ' + b.counts.overdue + ' overdue'">
+                  <div class="stack-bar">
+                    <span style="background-color:#e46f6f" [style.height.%]="b.overdue"></span>
+                    <span style="background-color:#e8b33f" [style.height.%]="b.evaluated"></span>
+                    <span style="background-color:#5b93d8" [style.height.%]="b.pending"></span>
+                    <span style="background-color:#4fb58a" [style.height.%]="b.submitted"></span>
+                  </div>
+                  <small>{{ b.name }}</small>
+                </div>
+              }
+            </div>
+          } @else { <p class="empty">No batches to show.</p> }
+          <ul class="legend inline">
+            <li><i class="sw" style="background-color:#4fb58a"></i>Submitted</li>
+            <li><i class="sw" style="background-color:#5b93d8"></i>In review</li>
+            <li><i class="sw" style="background-color:#e8b33f"></i>Evaluated</li>
+            <li><i class="sw" style="background-color:#e46f6f"></i>Overdue</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Assignment Funnel</h3>
+          <div class="funnel">
+            @for (f of assignmentFunnel(); track f.label) {
+              <div class="stage" (click)="go('assessments', { type: 'Assignment' })" [style.width.%]="f.width" [style.background-color]="f.color"
+                [style.clip-path]="'polygon(0 0, 100% 0, ' + (50 + (f.next / f.width) * 50) + '% 100%, ' + (50 - (f.next / f.width) * 50) + '% 100%)'">
+                {{ f.label }} ({{ f.value.toLocaleString() }})
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Assessment -->
+    <section class="mod">
+      <header><i class="bi bi-clipboard-check"></i><h2><a class="mod-link" routerLink="/app/courses/assessments">Assessment</a></h2><span class="tag">Histogram + Combo Chart</span></header>
+      <div class="mod-body two">
+        <div>
+          <h3>Score Distribution</h3>
+          <div class="cols hist">
+            <div class="yaxis">@for (t of histogram().ticks; track $index) { <span>{{ t }}</span> }</div>
+            <div class="cols-plot">
+              @for (b of histogram().rows; track b.label) {
+                <div class="col" (click)="go('assessments', { type: 'Assessment' })"><span class="val">{{ b.value || '' }}</span><i [style.height.%]="b.height"></i><small>{{ b.label }}</small></div>
+              }
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3>Pass/Fail &amp; Avg. Score Trend</h3>
+          <ul class="legend inline top">
+            <li><i class="sw" style="background-color:#4fb58a"></i>Pass</li>
+            <li><i class="sw" style="background-color:#e46f6f"></i>Fail</li>
+            <li><i class="sw line"></i>Avg. Score</li>
+          </ul>
+          <svg class="combo" (click)="go('assessments', { type: 'Quiz' })" viewBox="-20 -6 262 136" aria-label="Pass, fail and average score by month">
+            @for (t of combo().ticks; track $index) {
+              <line x1="0" x2="220" [attr.y1]="$index * 27.5" [attr.y2]="$index * 27.5" class="grid-line" />
+              <text x="-4" [attr.y]="$index * 27.5 + 3" text-anchor="end" class="axis">{{ t }}</text>
+            }
+            @for (c of combo().columns; track c.label) {
+              <rect [attr.x]="c.x" [attr.y]="c.passY" [attr.width]="c.bar" [attr.height]="c.passH" fill="#4fb58a" />
+              <rect [attr.x]="c.x" [attr.y]="c.failY" [attr.width]="c.bar" [attr.height]="c.failH" fill="#e46f6f" />
+              <text [attr.x]="c.cx" y="124" text-anchor="middle" class="axis">{{ c.label }}</text>
+            }
+            @if (combo().dots.length > 1) { <polyline [attr.points]="combo().line" class="avg-line" /> }
+            @for (p of combo().dots; track $index) { <circle [attr.cx]="p[0]" [attr.cy]="p[1]" r="2.6" class="avg-dot" /> }
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quiz -->
+    <section class="mod">
+      <header><i class="bi bi-question-circle"></i><h2><a class="mod-link" routerLink="/app/courses/quiz">Quiz</a></h2><span class="tag">Radar + Donut</span></header>
+      <div class="mod-body two">
+        <div>
+          <h3>Topic-wise Performance</h3>
+          @if (radar(); as rd) {
+            <svg class="radar" (click)="go('assessments', { type: 'Quiz' })" viewBox="-30 -5 260 210" aria-label="Average quiz score by topic">
+              @for (ring of rd.rings; track $index) { <polygon [attr.points]="ring" class="radar-ring" /> }
+              @for (s of rd.spokes; track $index) { <line x1="100" y1="100" [attr.x2]="s[0]" [attr.y2]="s[1]" class="radar-ring" /> }
+              <polygon [attr.points]="rd.shape" class="radar-shape" />
+              @for (p of rd.dots; track $index) { <circle [attr.cx]="p[0]" [attr.cy]="p[1]" r="2.6" fill="#c05a9a" /> }
+              @for (l of rd.labels; track $index) {
+                <text [attr.x]="l.x" [attr.y]="l.y" [attr.text-anchor]="l.anchor" class="axis lg">{{ l.text }}</text>
+              }
+            </svg>
+          } @else if (d.quiz.topics.length) {
+            <div class="prog-list">
+              @for (t of d.quiz.topics; track t.label) {
+                <div class="prog" (click)="go('assessments', { type: 'Quiz' })"><div><span>{{ t.label }}</span><b>{{ t.value }}%</b></div><div class="track"><i [style.width.%]="t.value"></i></div></div>
+              }
+            </div>
+          } @else { <p class="empty">No quiz attempts yet.</p> }
+        </div>
+        <div>
+          <h3>Student Quiz Status</h3>
+          <div class="donut-wrap">
+            <div class="donut sm">
+              <svg viewBox="0 0 100 100" aria-hidden="true">
+                <circle cx="50" cy="50" [attr.r]="r" class="ring-bg" />
+                @for (s of quizSlices(); track s.label; let i = $index) {
+                  <circle cx="50" cy="50" [attr.r]="r" class="ring" [class.hot]="qHover() === i" [class.dim]="qHover() !== null && qHover() !== i" (click)="go('assessments', { type: 'Quiz' })" (mouseenter)="qHover.set(i)" (mouseleave)="qHover.set(null)" [attr.stroke]="s.color"
+                    [attr.stroke-dasharray]="s.length + ' ' + (circ - s.length)" [attr.stroke-dashoffset]="-s.offset" />
+                }
+              </svg>
+              <div class="donut-center">@if (qHover() !== null) { <strong>{{ quizSlices()[qHover()!].percent }}%</strong><span>{{ quizSlices()[qHover()!].label }}</span> } @else { <strong>{{ d.quiz.students.total }}</strong><span>Student quizzes</span> }</div>
+            </div>
+            <ul class="legend">
+              @for (s of quizSlices(); track s.label; let i = $index) {
+                <li class="slice-key" [class.hot]="qHover() === i" (click)="go('assessments', { type: 'Quiz' })" (mouseenter)="qHover.set(i)" (mouseleave)="qHover.set(null)"><i class="sw dot" [style.background-color]="s.color"></i><span>{{ s.label }}</span><b>{{ s.value }} · {{ s.percent }}%</b></li>
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Certificate -->
+    <section class="mod">
+      <header><i class="bi bi-award"></i><h2><a class="mod-link" routerLink="/app/certificates">Certificate</a></h2><span class="tag">Donut + Funnel</span></header>
+      <div class="mod-body two">
+        <div class="donut-wrap">
+          <div class="donut">
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <circle cx="50" cy="50" [attr.r]="r" class="ring-bg" />
+              @for (s of certSlices(); track s.label; let i = $index) {
+                <circle cx="50" cy="50" [attr.r]="r" class="ring" [class.hot]="cHover() === i" [class.dim]="cHover() !== null && cHover() !== i" (click)="go('certificates', { status: s.label })" (mouseenter)="cHover.set(i)" (mouseleave)="cHover.set(null)" [attr.stroke]="s.color"
+                  [attr.stroke-dasharray]="s.length + ' ' + (circ - s.length)" [attr.stroke-dashoffset]="-s.offset" />
+              }
+            </svg>
+            <div class="donut-center">@if (cHover() !== null) { <strong>{{ certSlices()[cHover()!].percent }}%</strong><span>{{ certSlices()[cHover()!].label }} · {{ certSlices()[cHover()!].value }}</span> } @else { <strong>{{ d.certificates.total.toLocaleString() }}</strong><span>Certificates</span> }</div>
+          </div>
+          <ul class="legend">
+            @for (s of certSlices(); track s.label; let i = $index) {
+              <li class="slice-key" [class.hot]="cHover() === i" (click)="go('certificates', { status: s.label })" (mouseenter)="cHover.set(i)" (mouseleave)="cHover.set(null)"><i class="sw dot" [style.background-color]="s.color"></i><span>{{ s.label }}</span><b>{{ s.percent }}%</b></li>
+            }
+          </ul>
+        </div>
+        <div>
+          <h3>Certificates by Category</h3>
+          @if (pie3d(); as pie) {
+            <svg class="pie3d" [class.has-hover]="pieHover() !== null" [attr.viewBox]="'0 0 200 ' + pie.height" aria-label="Certificates by course category">
+              @for (s of pie.slices; track s.label; let i = $index) {
+                <g class="pie-part" [class.hot]="pieHover() === i" [attr.transform]="pieHover() === i ? 'translate(' + s.dx + ' ' + s.dy + ')' : null">
+                  @if (s.full) {
+                    <path [attr.d]="'M ' + (pie.cx - pie.rx) + ' ' + pie.cy + ' v ' + pie.depth + ' A ' + pie.rx + ' ' + pie.ry + ' 0 0 0 ' + (pie.cx + pie.rx) + ' ' + (pie.cy + pie.depth) + ' v -' + pie.depth + ' Z'" [attr.fill]="s.color" class="pie-wall" />
+                  }
+                  @for (w of s.walls; track $index) { <path [attr.d]="w" [attr.fill]="s.color" class="pie-wall" /> }
+                </g>
+              }
+              @for (s of pie.slices; track s.label; let i = $index) {
+                <g class="pie-part pie-face" (click)="go('certificates')" [class.hot]="pieHover() === i" [attr.transform]="pieHover() === i ? 'translate(' + s.dx + ' ' + s.dy + ')' : null"
+                  (mouseenter)="pieHover.set(i)" (mouseleave)="pieHover.set(null)">
+                  @if (s.full) {
+                    <ellipse [attr.cx]="pie.cx" [attr.cy]="pie.cy" [attr.rx]="pie.rx" [attr.ry]="pie.ry" [attr.fill]="s.color" class="pie-top" />
+                  } @else {
+                    <path [attr.d]="s.top" [attr.fill]="s.color" class="pie-top" />
+                  }
+                  @if (s.percent >= 5) { <text [attr.x]="s.lx" [attr.y]="s.ly" text-anchor="middle" class="pie-label">{{ s.percent }}%</text> }
+                </g>
+              }
+            </svg>
+            <p class="pie-tip">
+              @if (pieHover() !== null) { <b>{{ pie.slices[pieHover()!].label }}</b>: {{ pie.slices[pieHover()!].value }} certificate{{ pie.slices[pieHover()!].value === 1 ? '' : 's' }} · {{ pie.slices[pieHover()!].percent }}% }
+              @else { Hover a slice for details }
+            </p>
+            <ul class="legend inline">
+              @for (s of pie.slices; track s.label; let i = $index) {
+                <li class="pie-key" (click)="go('certificates')" [class.hot]="pieHover() === i" (mouseenter)="pieHover.set(i)" (mouseleave)="pieHover.set(null)"><i class="sw" [style.background-color]="s.color"></i>{{ s.label }} ({{ s.value }})</li>
+              }
+            </ul>
+          } @else { <p class="empty">No certificates yet.</p> }
+        </div>
+      </div>
+    </section>
+
+    <!-- Community -->
+    <section class="mod">
+      <header><i class="bi bi-chat-dots"></i><h2><a class="mod-link" routerLink="/app/community">Community</a></h2><span class="tag">Timeline + Bar Chart</span></header>
+      <div class="mod-body two">
+        <div>
+          <h3>Recent Community Activity</h3>
+          <ul class="timeline">
+            @for (e of d.community.recent; track $index) {
+              <li (click)="go('community')"><i class="pin" [class]="'pin ' + e.tone"></i><span class="tl-text">{{ e.text }}</span><time>{{ ago(e.at) }}</time></li>
+            } @empty { <li class="empty">No community messages yet.</li> }
+          </ul>
+        </div>
+        <div>
+          <h3>Engagement by Type</h3>
+          <div class="cols eng">
+            <div class="yaxis">@for (t of engagement().ticks; track $index) { <span>{{ t }}</span> }</div>
+            <div class="cols-plot">
+              @for (b of engagement().rows; track b.label) {
+                <div class="col" (click)="go('community')"><span class="val">{{ b.value || '' }}</span><i [style.height.%]="b.height"></i><small>{{ b.label }}</small></div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Logs -->
+    <section class="mod">
+      <header><i class="bi bi-list-check"></i><h2><a class="mod-link" routerLink="/app/logs">Logs</a></h2><span class="tag">Timeline + Heatmap</span></header>
+      <div class="mod-body two">
+        <div>
+          <h3>Recent System Logs</h3>
+          <ul class="timeline logs">
+            @for (l of d.logs.recent; track $index) {
+              <li (click)="go('logs', { q: l.text })">
+                <span class="log-icon" [class]="'log-icon ' + l.tone"><i class="bi" [class]="logIcon(l.kind, l.tone)"></i></span>
+                <span class="tl-text">{{ l.text }}@if (l.by) { <small> · {{ l.by }}</small> }</span>
+                <time>{{ ago(l.at) }}</time>
+              </li>
+            } @empty { <li class="empty">No activity logged yet.</li> }
+          </ul>
+        </div>
+        <div>
+          <h3>Activity Heatmap (Hour × Day)</h3>
+          <div class="heat logheat">
+            @for (row of logHeat(); track row.day) {
+              <div class="heat-row"><span class="heat-label">{{ row.day }}</span>
+                @for (c of row.cells; track $index) { <i class="cell l{{ c.level }} link" (click)="go('logs')" [title]="c.n + ' actions'"></i> }
+              </div>
+            }
+            <div class="heat-row hours"><span class="heat-label"></span>@for (h of hours; track h) { <span>{{ h }}</span> }</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+} @else if (loading()) {
+  <p class="an-note">Loading analytics…</p>
+}

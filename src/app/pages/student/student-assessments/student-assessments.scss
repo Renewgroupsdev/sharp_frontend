@@ -16,8 +16,6 @@
   position: relative; display: flex; align-items: center; gap: 18px; padding: 22px 20px; border-radius: 20px; background: var(--bg);
   transition: transform .15s ease, box-shadow .15s ease;
   &:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -14px color-mix(in srgb, var(--ac) 55%, transparent); }
-  &[data-type='assessment'] { --bg: #FBE8F7; --ac: #c06ad8; --ink: #7a2d8f; }
-  &[data-type='assignment'] { --bg: #FDE8EC; --ac: #e0607a; --ink: #a1243f; }
 }
 
 .sa-art { position: relative; flex: 0 0 96px; height: 96px; display: grid; place-items: center; color: var(--ac);

@@ -4,7 +4,7 @@ import { apiErrorMessage } from '../../../core/http/api.interceptor';
 import { saveBlob } from '../../utils/export.util';
 import { repairPptx } from '../../utils/pptx-repair.util';
 
-type PreviewKind = 'pdf' | 'image' | 'text' | 'docx' | 'pptx' | 'none';
+type PreviewKind = 'pdf' | 'video' | 'image' | 'text' | 'docx' | 'pptx' | 'none';
 
 const IMAGE = /\.(png|jpe?g)$/i;
 
@@ -25,11 +25,14 @@ export class AttachmentViewer implements OnInit, OnDestroy {
   readonly size = input<string>('');
   readonly mime = input<string | null>(null);
   readonly load = input.required<() => Promise<Blob>>();
+  /** Shows the Download button; the document preview popup turns it off. */
+  readonly downloadable = input(true);
 
   readonly kind = computed<PreviewKind>(() => {
     const mime = this.mime() ?? '';
     const name = this.name();
     if (mime === 'application/pdf' || /\.pdf$/i.test(name)) return 'pdf';
+    if (mime.startsWith('video/') || /.(mp4|webm|mov)$/i.test(name)) return 'video';
     if (mime.startsWith('image/') || IMAGE.test(name)) return 'image';
     if (mime === 'text/plain' || /\.txt$/i.test(name)) return 'text';
     if (/\.docx$/i.test(name) || mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') return 'docx';

@@ -25,11 +25,6 @@
     <div class="sa-list">
       @for (a of visible(); track a.id) {
         <article class="sa-item" [attr.data-type]="a.type">
-          <div class="sa-art" aria-hidden="true">
-            <i class="dot d1"></i><i class="dot d2"></i><i class="dot d3"></i>
-            <i class="bi" [class]="a.type === 'quiz' ? 'bi-patch-question-fill' : a.type === 'assignment' ? 'bi-journal-text' : 'bi-patch-check-fill'"></i>
-            <i class="bi bi-laptop mini"></i>
-          </div>
 
           <div class="sa-body">
             <div class="sa-head">

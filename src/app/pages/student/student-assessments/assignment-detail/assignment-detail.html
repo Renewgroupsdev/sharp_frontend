@@ -1,43 +1,123 @@
-<section class="st-page">
-  <div class="st-head">
-    <div><a routerLink="/app/assessments" class="back-link">← Back to assessments</a><h2 class="page-title">{{ assessment()?.title || 'Assignment' }}</h2><p class="st-sub">{{ assessment()?.course }} · {{ assessment()?.module || 'General' }}</p></div>
-  </div>
-  @if (error(); as err) { <div class="st-card warn" role="alert">{{ err }}</div> }
+<section class="st-page ad">
+  <a routerLink="/app/assessments" class="back-link"><i class="bi bi-arrow-left"></i> Back to assessments</a>
+
+  @if (error(); as err) { <div class="ad-alert" role="alert"><i class="bi bi-exclamation-circle"></i> {{ err }}</div> }
   @if (loading()) { <div class="st-card">Loading assignment…</div> }
+
   @if (assessment(); as a) {
-    <div class="st-card assignment-panel">
-      <div class="facts"><span>Due: <strong>{{ a.due_date || 'No deadline' }}</strong></span><span>Maximum marks: <strong>{{ a.max_marks }}</strong></span></div>
-      <h3>Instructions</h3><p class="instructions">{{ a.description || 'No additional instructions provided.' }}</p>
-      @if (a.attachment) {
-        <p class="muted">Assignment document: {{ a.attachment.name }} ({{ a.attachment.size }})</p>
-        @if (a.attachment.available !== false) { <button type="button" class="st-btn" (click)="viewDocument()"><i class="bi bi-eye"></i> View document</button> }
-      }
-    </div>
+    <header class="ad-hero">
+      <div>
+        <span class="ad-eyebrow">Assignment</span>
+        <h2>{{ a.title }}</h2>
+        <p class="ad-where"><span class="ad-course"><i class="bi bi-journal-bookmark-fill"></i> {{ a.course }}</span>@if (a.module) { <span class="ad-mod">{{ a.module }}</span> }</p>
+      </div>
+      <span class="ad-state" [attr.data-tone]="stateTone()"><i class="bi" [class]="stateIcon()"></i> {{ stateText() }}</span>
+    </header>
 
-    <div class="st-card assignment-panel">
-      <h3>Submit your work</h3>
-      @if (canSubmit()) {
-        <label for="submission-content">Written answer</label>
-        <textarea id="submission-content" rows="7" [ngModel]="content()" (ngModelChange)="content.set($event)" placeholder="Write your answer or submission notes…"></textarea>
-        <label for="submission-files">Attachments (up to 5 files, 20 MB each)</label>
-        <input id="submission-files" type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.jpg,.jpeg,.png" (change)="onFiles($event)" />
-        @if (selectedNames().length) { <ul>@for (name of selectedNames(); track name) { <li>{{ name }}</li> }</ul> }
-        <button class="st-btn" type="button" [disabled]="saving()" (click)="submit()">{{ saving() ? 'Submitting…' : 'Submit assignment' }}</button>
-        <p class="muted">You can submit a new version until the due date. Previous versions remain available in your history.</p>
-      } @else { <p class="muted">The submission deadline has passed. New submissions are closed.</p> }
-    </div>
+    <div class="ad-layout">
+      <div class="ad-main">
+        <!-- 1. brief -->
+        <section class="ad-step">
+          <div class="ad-step-h"><span class="n">1</span><h3>Read the instructions</h3></div>
+          <p class="ad-text">{{ a.description || 'No additional instructions provided.' }}</p>
+          @if (a.attachment) {
+            <div class="ad-doc">
+              <i class="bi bi-file-earmark-text"></i>
+              <div><b>{{ a.attachment.name }}</b><small>{{ a.attachment.size }}</small></div>
+              @if (a.attachment.available !== false) { <button type="button" class="st-btn alt" (click)="viewDocument()"><i class="bi bi-eye"></i> View</button> }
+            </div>
+          }
+        </section>
 
-    <div class="st-card assignment-panel">
-      <h3>Submission history</h3>
-      @for (item of submissions(); track item.id) {
-        <div class="submission-version">
-          <div><strong>Version {{ item.submission_no }}</strong><span class="status" [attr.data-status]="item.status">{{ statusLabel(item.status) }}</span><p class="muted">Submitted {{ item.submitted_at | date:'medium' }}</p></div>
-          @if (item.marks_obtained !== null) { <strong>{{ item.marks_obtained }} / {{ a.max_marks }}</strong> }
-          @if (item.content) { <p class="submission-content">{{ item.content }}</p> }
-          @if (item.feedback) { <p class="feedback">{{ item.feedback }}</p> }
-          @if (item.attachments.length) { <app-submission-files [files]="item.attachments" /> }
-        </div>
-      } @empty { <p class="muted">You have not submitted this assignment yet.</p> }
+        <!-- 2 + 3. work -->
+        @if (canSubmit()) {
+          <section class="ad-step">
+            <div class="ad-step-h"><span class="n">2</span><h3>Write your answer <small>optional if you attach a file</small></h3></div>
+            <textarea id="submission-content" rows="8" [ngModel]="content()" (ngModelChange)="content.set($event)" placeholder="Type your answer or add notes for your mentor…"></textarea>
+            <span class="ad-count">{{ content().length }} characters</span>
+          </section>
+
+          <section class="ad-step">
+            <div class="ad-step-h"><span class="n">3</span><h3>Attach files <small>up to 5 files · 2 MB each, video up to 5 MB</small></h3></div>
+            <label class="ad-drop" [class.over]="dragOver()" for="submission-files"
+                   (dragover)="$event.preventDefault(); dragOver.set(true)" (dragleave)="dragOver.set(false)" (drop)="onDrop($event)">
+              <i class="bi bi-cloud-arrow-up"></i>
+              <b>Drag files here or <u>browse</u></b>
+              <small>PDF, Word, Excel, PowerPoint, TXT, ZIP, JPG, PNG · Video MP4, WebM, MOV</small>
+            </label>
+            <input id="submission-files" class="ad-file" type="file" multiple [accept]="accept" (change)="onFiles($event)" />
+            @if (fileError(); as fe) { <p class="ad-ferr" role="alert"><i class="bi bi-exclamation-circle"></i> {{ fe }}</p> }
+            @if (files().length) {
+              <ul class="ad-files">
+                @for (f of files(); track f.name + f.size; let i = $index) {
+                  <li>
+                    <div class="thumb" [attr.data-tone]="kind(f.name).tone">
+                      @if (kindOf(f) === 'image') { <img [src]="previewOf(f)" [alt]="f.name" /> }
+                      @else if (kindOf(f) === 'video') { <video [src]="previewOf(f)" muted preload="metadata"></video><i class="bi bi-play-circle-fill play"></i> }
+                      @else { <i class="bi" [class]="kind(f.name).icon"></i> }
+                    </div>
+                    <div class="meta">
+                      <b class="nm" [title]="f.name">{{ f.name }}</b>
+                      <small>{{ kind(f.name).label }} · {{ kind(f.name).ext.toUpperCase() }} · {{ sizeOf(f) }}</small>
+                    </div>
+                    @if (kindOf(f) !== 'other') {
+                      <button type="button" class="pvbtn" (click)="previewing.set(previewing() === f ? null : f)"><i class="bi" [class]="previewing() === f ? 'bi-eye-slash' : 'bi-eye'"></i> {{ previewing() === f ? 'Hide' : 'Preview' }}</button>
+                    }
+                    <button type="button" class="rm" (click)="removeFile(i)" [attr.aria-label]="'Remove ' + f.name"><i class="bi bi-x-lg"></i></button>
+                    @if (previewing() === f) {
+                      @if (kindOf(f) === 'video') { <video class="pv" controls autoplay [src]="previewOf(f)"></video> }
+                      @else { <img class="pv" [src]="previewOf(f)" [alt]="f.name" /> }
+                    }
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+
+          <div class="ad-submit">
+            <p>{{ submissions().length ? 'This will be saved as version ' + (submissions().length + 1) + '. Earlier versions stay in your history.' : 'You can submit a new version until the due date.' }}</p>
+            <button class="st-btn" type="button" [disabled]="saving() || (!content().trim() && !files().length)" (click)="submit()"><i class="bi bi-send"></i> {{ saving() ? 'Submitting…' : 'Submit assignment' }}</button>
+          </div>
+        } @else {
+          <div class="ad-closed"><i class="bi bi-lock-fill"></i> The submission deadline has passed. New submissions are closed.</div>
+        }
+      </div>
+
+      <aside class="ad-side">
+        <section class="ad-card">
+          <h3>Summary</h3>
+          <ul class="ad-kv">
+            <li><i class="bi bi-calendar-event"></i><span>Due date</span><b>{{ a.due_date || 'No deadline' }}</b></li>
+            @if (daysLeft() !== null) { <li><i class="bi bi-hourglass-split"></i><span>Time left</span><b [class.late]="daysLeft()! < 0 || daysLeft()! <= 1">{{ daysLeftText() }}</b></li> }
+            <li><i class="bi bi-award"></i><span>Maximum marks</span><b>{{ a.max_marks }}</b></li>
+            <li><i class="bi bi-bullseye"></i><span>Pass mark</span><b>{{ a.min_percent }}%</b></li>
+            <li><i class="bi bi-layers"></i><span>Versions</span><b>{{ submissions().length }}</b></li>
+          </ul>
+        </section>
+
+        <section class="ad-card">
+          <h3>Submission history</h3>
+          <div class="ad-vers">
+          @for (item of submissions(); track item.id; let first = $first) {
+            <div class="ad-ver" [class.latest]="first">
+              <div class="ad-ver-h">
+                <span class="vn">v{{ item.submission_no }}</span>
+                <div class="vt"><b>Version {{ item.submission_no }}@if (first) { <em>Latest</em> }</b><small>{{ item.submitted_at | date:'MMM d, y, h:mm a' }}</small></div>
+                <span class="status" [attr.data-status]="item.status">{{ statusLabel(item.status) }}</span>
+                @if (canDelete(item)) { <button type="button" class="ad-del" (click)="deleteVersion(item)" title="Delete this version" aria-label="Delete this version"><i class="bi bi-trash"></i></button> }
+              </div>
+              @if (item.marks_obtained !== null) { <p class="ad-mark"><i class="bi bi-award"></i> {{ item.marks_obtained }} / {{ a.max_marks }}</p> }
+              @if (item.content) {
+                <p class="ad-note" [class.clamp]="!isOpen(item.id)">{{ item.content }}</p>
+                @if (item.content.length > 140) { <button type="button" class="ad-more" (click)="toggle(item.id)">{{ isOpen(item.id) ? 'Show less' : 'Show more' }}</button> }
+              }
+              @if (item.feedback) { <p class="ad-feedback"><i class="bi bi-chat-left-text"></i> {{ item.feedback }}</p> }
+              @if (item.attachments.length) { <app-submission-files [files]="item.attachments" /> }
+            </div>
+          } @empty { <p class="muted">You have not submitted this assignment yet.</p> }
+          </div>
+        </section>
+      </aside>
     </div>
   }
 </section>

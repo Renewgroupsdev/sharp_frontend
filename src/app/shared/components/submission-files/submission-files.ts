@@ -2,7 +2,7 @@ import { Component, inject, input, signal } from '@angular/core';
 import { AssessmentsApi } from '../../common-services/assessments-api.service';
 import { AttachmentPreviewService } from '../../common-services/attachment-preview.service';
 import { SubmissionAttachment } from '../../models/my-assessment.model';
-import { humanSize } from '../../utils/upload.util';
+import { fileKind, humanSize } from '../../utils/upload.util';
 
 /** The files a student attached to one submission, each with View (popup preview). Saving a file is for admins, on the Submissions page. */
 @Component({
@@ -18,6 +18,7 @@ export class SubmissionFiles {
   readonly files = input.required<SubmissionAttachment[]>();
   readonly error = signal<string | null>(null);
 
+  readonly kind = fileKind;
   readonly sizeOf = (f: SubmissionAttachment): string => humanSize(f.size);
 
   view(f: SubmissionAttachment): void {

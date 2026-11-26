@@ -1,7 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../core/auth/auth.service';
-import { MENTOR_NAV, NavLink, STUDENT_NAV, adminNav } from '../core/nav/nav-config';
+import { NavLink, navForShell } from '../core/nav/nav-config';
 import { NavLayoutService } from '../services/nav-layout.service';
 
 /** Role-aware sidebar: the admin workspace shows only modules the role may view; Mentor and Student have their own menus. */
@@ -13,16 +13,11 @@ import { NavLayoutService } from '../services/nav-layout.service';
   styleUrl: './left-side-navbar.scss',
 })
 export class LeftSideNavbar {
-  private readonly auth = inject(AuthService);
+  protected readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   protected readonly navLayout = inject(NavLayoutService);
 
-  readonly links = computed<NavLink[]>(() => {
-    const shell = this.auth.shell();
-    if (shell === 'mentor') return MENTOR_NAV;
-    if (shell === 'student') return STUDENT_NAV;
-    return adminNav(this.auth.role(), key => this.auth.can(key, 'v'));
-  });
+  readonly links = computed<NavLink[]>(() => navForShell(this.auth.shell(), this.auth.role(), key => this.auth.can(key, 'v')));
 
   isActive(link: NavLink): boolean {
     const url = this.router.url.split('?')[0];

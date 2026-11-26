@@ -35,6 +35,24 @@ export class StudentCertificates implements OnInit {
   protected readonly items = this.store.items;
   protected readonly issuedCount = computed(() => this.items().filter(c => c.status === 'Issued').length);
 
+  /** One card per course: the certificate (if any) and the course QR together. */
+  protected readonly rows = computed(() => {
+    const certs = this.items();
+    const pick = (courseId: number) => certs.find(c => c.course_id === courseId && c.status === 'Issued') ?? certs.find(c => c.course_id === courseId);
+    const rows = this.qrCodes().map(q => {
+      const cert = pick(q.course_id);
+      return { key: 'q' + q.course_id, course: q.course, courseId: q.course_id, cert, qr: q as CertQrCard | undefined, progress: q.progress, done: q.status !== 'in_progress' };
+    });
+    const seen = new Set(rows.map(r => r.courseId));
+    const extra = certs.filter(c => !seen.has(c.course_id) && pick(c.course_id) === c)
+      .map(c => ({ key: 'c' + c.id, course: c.course, courseId: c.course_id, cert: c as Certificate | undefined, qr: undefined as CertQrCard | undefined, progress: 100, done: true }));
+    return [...rows, ...extra];
+  });
+
+  protected certStatus(r: { cert?: Certificate }): { text: string; tone: string } {
+    return r.cert ? { text: r.cert.status, tone: this.tone(r.cert) } : { text: 'Not issued', tone: '' };
+  }
+
   ngOnInit(): void {
     this.store.loadMine().catch(e => this.error.set(apiErrorMessage(e)));
     void this.loadQr();

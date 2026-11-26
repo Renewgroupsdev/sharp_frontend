@@ -1,7 +1,7 @@
 <div class="att">
   <div class="att-bar">
     <span class="att-name"><i class="bi bi-paperclip"></i> {{ name() }} @if (size()) { <small>({{ size() }})</small> }</span>
-    <button type="button" class="att-btn" (click)="download()"><i class="bi bi-download"></i> Download</button>
+    @if (downloadable()) { <button type="button" class="att-btn" (click)="download()"><i class="bi bi-download"></i> Download</button> }
   </div>
 
   @if (error(); as err) { <div class="att-msg warn" role="alert">{{ err }}</div> }
@@ -12,10 +12,11 @@
     <div class="att-msg">Loading document…</div>
   } @else if (src(); as url) {
     @switch (kind()) {
+      @case ('video') { <video class="att-image" controls controlsList="nodownload" [src]="url"></video> }
       @case ('image') { <img class="att-image" [src]="url" [alt]="name()" /> }
       @default { <iframe class="att-frame" [src]="url" [title]="name()"></iframe> }
     }
   } @else if (kind() === 'none' && !error()) {
-    <div class="att-msg">This file type cannot be previewed here. Use Download to open it.</div>
+    <div class="att-msg">This file type cannot be previewed here. @if (downloadable()) { Use Download to open it. }</div>
   }
 </div>

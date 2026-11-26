@@ -2,65 +2,49 @@
   <div class="st-head">
     <div>
       <h2 class="page-title"><i class="bi bi-award"></i> Certificates</h2>
-      <p class="st-sub">{{ issuedCount() }} issued · {{ items().length - issuedCount() }} in progress or not issued</p>
+      <p class="st-sub">{{ issuedCount() }} issued · {{ rows().length - issuedCount() }} not issued yet</p>
     </div>
   </div>
 
   @if (error(); as err) { <div class="st-card warn" role="alert">{{ err }}</div> }
 
-  <div class="st-grid cols-3">
-    @for (c of items(); track c.id) {
-      <div class="st-card cert-card">
-        <div class="cert-top">
-          <span class="pill" [class]="tone(c)">{{ c.status }}</span>
-          @if (c.number) { <code>{{ c.number }}</code> }
-        </div>
-        <h4 class="cert-title">{{ c.course }}</h4>
-        <ul class="cert-facts">
-          @if (c.issued_at) { <li><i class="bi bi-calendar-check"></i> Issued {{ day(c.issued_at) }}</li> }
-          @if (c.score !== null) { <li><i class="bi bi-graph-up"></i> Score {{ c.score }}%</li> }
-          @if (c.attendance !== null) { <li><i class="bi bi-person-check"></i> Attendance {{ c.attendance }}%</li> }
-        </ul>
-        @if (c.status === 'Issued') {
-          <div class="cert-actions">
-            <button type="button" class="st-btn" (click)="view(c)"><i class="bi bi-eye"></i> View</button>
-            <button type="button" class="st-btn alt" (click)="download(c)"><i class="bi bi-download"></i> Download</button>
-            <button type="button" class="st-btn alt" (click)="print(c)"><i class="bi bi-printer"></i> PDF</button>
+  <div class="ct-list">
+    @for (r of rows(); track r.key) {
+      <article class="ct-item">
+        <div class="ct-body">
+          <div class="ct-head">
+            <h3 class="ct-title">{{ r.course }}</h3>
+            @if (r.cert?.status === 'Issued') { <span class="star"><i class="bi bi-star-fill"></i> Certified</span> }
           </div>
-        } @else {
-          <p class="t2">{{ note(c) }}</p>
-          @if (c.status === 'Cancelled' && c.cancel_reason) {
-            <p class="t2"><b>Reason:</b> {{ c.cancel_reason === 'Other' ? c.cancel_note : c.cancel_reason + (c.cancel_note ? ': ' + c.cancel_note : '') }}</p>
+          <ul class="ct-facts">
+            <li><i class="bi bi-graph-up"></i><span>Score</span><b>{{ r.cert?.score != null ? r.cert?.score + '%' : '—' }}</b></li>
+            <li><i class="bi bi-person-check"></i><span>Attendance</span><b>{{ r.cert?.attendance != null ? r.cert?.attendance + '%' : '—' }}</b></li>
+            <li><i class="bi bi-journal-check"></i><span>Course</span><b><span class="tag st" [class.g]="r.done" [class.w]="!r.done">{{ r.done ? 'Completed' : 'In progress · ' + r.progress + '%' }}</span></b></li>
+            <li><i class="bi bi-award"></i><span>Certificate</span><b><span class="tag st" [class]="certStatus(r).tone">{{ certStatus(r).text }}</span></b></li>
+            @if (r.cert?.number) { <li><i class="bi bi-hash"></i><span>Number</span><b>{{ r.cert?.number }}</b></li> }
+            @if (r.cert?.issued_at) { <li><i class="bi bi-calendar-check"></i><span>Issued</span><b>{{ day(r.cert?.issued_at ?? null) }}</b></li> }
+          </ul>
+          @if (r.cert && r.cert.status !== 'Issued') { <p class="ct-desc">{{ note(r.cert) }}</p> }
+          @if (r.cert?.status === 'Cancelled' && r.cert?.cancel_reason) {
+            <p class="ct-desc"><b>Reason:</b> {{ r.cert?.cancel_reason === 'Other' ? r.cert?.cancel_note : r.cert?.cancel_reason + (r.cert?.cancel_note ? ': ' + r.cert?.cancel_note : '') }}</p>
           }
-        }
-      </div>
-    }
-  </div>
-
-  <div class="qr-head">
-    <h3><i class="bi bi-qr-code"></i> Certificate QR codes</h3>
-    <p class="t2">One for each course you are enrolled in. Scanning it shows your certificate when the course is 100% complete, and otherwise says the course is not completed.</p>
-  </div>
-  <div class="st-grid cols-3">
-    @for (q of qrCodes(); track q.course_id) {
-      <div class="st-card qr-card">
-        <div class="cert-top"><span class="pill" [class]="qrTone(q)">{{ qrLabel(q) }}</span></div>
-        <h4 class="cert-title">{{ q.course }}</h4>
-        <img class="qr-img" [src]="q.image" [alt]="'QR code for the ' + q.course + ' certificate'" width="160" height="160" />
-        <div class="cert-actions">
-          <button type="button" class="st-btn alt" (click)="copyLink(q)"><i class="bi" [class]="copied() === q.course_id ? 'bi-check2' : 'bi-link-45deg'"></i> {{ copied() === q.course_id ? 'Copied' : 'Copy link' }}</button>
+          @if (r.cert?.status === 'Issued') {
+            <div class="ct-links">
+              <button type="button" class="sa-link" (click)="view(r.cert!)"><i class="bi bi-eye"></i> View</button>
+              <button type="button" class="sa-link" (click)="download(r.cert!)"><i class="bi bi-download"></i> Download</button>
+              <button type="button" class="sa-link" (click)="print(r.cert!)"><i class="bi bi-printer"></i> PDF</button>
+            </div>
+          }
         </div>
-      </div>
+        @if (r.qr; as q) {
+          <div class="ct-qr">
+            <img class="qr-img" [src]="q.image" [alt]="'QR code for the ' + r.course + ' certificate'" width="132" height="132" />
+            <button type="button" class="sa-link" (click)="copyLink(q)"><i class="bi" [class]="copied() === q.course_id ? 'bi-check2' : 'bi-link-45deg'"></i> {{ copied() === q.course_id ? 'Copied' : 'Copy link' }}</button>
+          </div>
+        }
+      </article>
     } @empty {
-      @if (qrLoaded()) { <div class="st-card gray empty"><i class="bi bi-qr-code"></i><span class="t2">You are not enrolled in a course yet, so there is no QR code.</span></div> }
+      @if (loaded() && qrLoaded()) { <div class="st-card gray empty"><i class="bi bi-award"></i><span class="t1">No courses yet</span><span class="t2">Your courses, certificates and QR codes appear here once your batch is mapped to a course.</span></div> }
     }
   </div>
-
-  @if (loaded() && !items().length) {
-    <div class="st-card gray empty">
-      <i class="bi bi-award"></i>
-      <span class="t1">No certificates yet</span>
-      <span class="t2">Finish a course and your certificate appears here once it is approved.</span>
-    </div>
-  }
 </section>

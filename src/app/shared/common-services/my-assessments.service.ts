@@ -42,6 +42,11 @@ export class MyAssessmentsApi {
     return (await this.unwrap(firstValueFrom(this.http.get<{ ok: boolean; submissions: AssessmentSubmission[] }>(`${this.base}/${id}/submissions`)))).submissions;
   }
 
+  /** Takes back one of the student's own versions (only while it is waiting and before the deadline). */
+  async deleteSubmission(id: number | string, submissionId: number): Promise<void> {
+    await this.unwrap(firstValueFrom(this.http.delete<{ ok: boolean }>(`${this.base}/${id}/submissions/${submissionId}`)));
+  }
+
   async submitAssignment(id: number | string, content: string, files: File[]): Promise<AssessmentSubmission> {
     const body = new FormData();
     if (content.trim()) body.append('content', content.trim());

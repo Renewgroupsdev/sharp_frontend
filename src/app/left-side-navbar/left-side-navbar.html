@@ -1,7 +1,12 @@
 <nav class="side-navbar" [class.expanded]="navLayout.sidebarVisible()" aria-label="Main navigation">
   <div class="nav-caption">
-    <i class="bi bi-grid-fill"></i>
-    @if (navLayout.sidebarVisible()) { <span>Main Modules</span> }
+    <span class="cap-icon"><i class="bi bi-mortarboard-fill"></i></span>
+    @if (navLayout.sidebarVisible()) {
+      <div class="cap-copy">
+        <strong>Learning Hub</strong>
+        <small>Study · Assess · Get placed</small>
+      </div>
+    }
   </div>
 
   <ul class="nav-list">
@@ -10,6 +15,7 @@
         <a class="nav-link" [routerLink]="link.path" [class.active]="isActive(link)" [attr.title]="navLayout.sidebarVisible() ? null : link.label" (click)="onNavigate()">
           <span class="nav-icon"><i class="bi" [class]="link.icon"></i></span>
           @if (navLayout.sidebarVisible()) { <span class="nav-label">{{ link.label }}</span> }
+          @if (navLayout.sidebarVisible() && link.children) { <i class="bi bi-chevron-down nav-caret" [class.open]="isActive(link)"></i> }
         </a>
         @if (navLayout.sidebarVisible() && link.children && isActive(link)) {
           <ul class="sub-list">
@@ -26,4 +32,16 @@
       </li>
     }
   </ul>
+
+  @if (navLayout.sidebarVisible()) {
+    <div class="nav-promo" aria-hidden="true">
+      <div class="promo-art">
+        <i class="bi bi-journal-bookmark-fill"></i>
+        <i class="bi bi-arrow-right-short"></i>
+        <i class="bi bi-briefcase-fill"></i>
+      </div>
+      <strong>From classroom to career</strong>
+      <span>Finish your modules, clear assessments and earn certificates to become placement-ready.</span>
+    </div>
+  }
 </nav>

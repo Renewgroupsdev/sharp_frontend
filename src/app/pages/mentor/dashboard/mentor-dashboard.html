@@ -1,10 +1,5 @@
 <div class="m-page">
-  <div class="m-head">
-    <div>
-      <h1 class="page-title"><i class="bi bi-grid-fill"></i> Welcome, {{ me().n }}</h1>
-      <p class="m-sub">{{ mentor.id }} · {{ mentor.role }} · {{ mentor.org }}</p>
-    </div>
-  </div>
+  <app-welcome-hero [subtitle]="mentor.id + ' · ' + mentor.role + ' · ' + mentor.org + ' — guide your learners from first lesson to placement.'" />
 
   <app-role-dashboard [heading]="false" />
 

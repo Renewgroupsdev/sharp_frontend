@@ -8,11 +8,12 @@ import { CertificatesService } from '../../../shared/common-services/certificate
 import { MentorGroupService } from '../../../shared/common-services/mentor-group.service';
 import { RoleDashboard } from '../../../shared/components/role-dashboard/role-dashboard';
 import { SubmissionStatsCard } from '../../../shared/components/submission-stats/submission-stats';
+import { WelcomeHero } from '../../../shared/components/welcome-hero/welcome-hero';
 
 @Component({
   selector: 'app-mentor-dashboard',
   standalone: true,
-  imports: [RouterLink, SubmissionStatsCard, RoleDashboard],
+  imports: [RouterLink, SubmissionStatsCard, RoleDashboard, WelcomeHero],
   templateUrl: './mentor-dashboard.html',
   styleUrls: ['../mentor.scss'],
 })

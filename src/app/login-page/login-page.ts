@@ -19,6 +19,7 @@ export class LoginPage {
   protected password = '';
   protected readonly error = signal('');
   protected readonly busy = signal(false);
+  protected readonly showPassword = signal(false);
 
   async submit(): Promise<void> {
     if (this.busy()) return;

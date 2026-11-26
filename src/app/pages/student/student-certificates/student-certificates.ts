@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CertificatesApi } from '../../../shared/common-services/certificates-api.service';
 import { CertQrCode } from '../../../shared/models/certificate.model';
-import { CertQrCard, downloadQrImage, qrStatusLabel, withQrImages } from '../../../shared/utils/certificate-qr.util';
+import { CertQrCard, qrStatusLabel, withQrImages } from '../../../shared/utils/certificate-qr.util';
 import { apiErrorMessage } from '../../../core/http/api.interceptor';
 import { CertificateActionsService } from '../../../shared/common-services/certificate-actions.service';
 import { CertificatesService } from '../../../shared/common-services/certificates.service';
@@ -55,7 +55,6 @@ export class StudentCertificates implements OnInit {
 
   protected qrTone(c: CertQrCode): string { return c.status === 'issued' ? 'g' : c.status === 'in_progress' ? 'w' : c.status === 'completed' ? 'b' : 'd'; }
 
-  protected readonly downloadQr = downloadQrImage;
 
   protected async copyLink(c: { course_id: number; url: string }): Promise<void> {
     try {

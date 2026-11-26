@@ -25,7 +25,34 @@ export class StudentAssessments implements OnInit {
     { key: 'all', label: 'All' }, { key: 'quiz', label: 'Quizzes' }, { key: 'assignment', label: 'Assignments' }, { key: 'assessment', label: 'Assessments' },
   ];
 
-  readonly visible = computed(() => this.store.items().filter(a => this.filter() === 'all' || a.type === this.filter()));
+  readonly query = signal('');
+  readonly total = computed(() => this.store.items().length);
+  count(key: Filter): number { return key === 'all' ? this.total() : this.store.items().filter(a => a.type === key).length; }
+
+  readonly visible = computed(() => {
+    const q = this.query().trim().toLowerCase();
+    return this.store.items().filter(a => (this.filter() === 'all' || a.type === this.filter())
+      && (!q || `${a.title} ${a.module ?? ''} ${a.topic ?? ''} ${a.course}`.toLowerCase().includes(q)));
+  });
+
+  /** Board stage: passed or graded is done; an attempt, a submission or a retry is in progress; the rest is to do. */
+  private stage(a: MyAssessment): 'todo' | 'doing' | 'done' {
+    if (a.type === 'assignment') {
+      const s = a.latest_submission?.status;
+      return s === 'graded' ? 'done' : s ? 'doing' : 'todo';
+    }
+    if (a.passed) return 'done';
+    return a.in_progress_attempt_id || a.attempts_used ? 'doing' : 'todo';
+  }
+
+  readonly columns = computed(() => {
+    const defs = [
+      { key: 'todo', label: 'To do', icon: 'bi-list-task' },
+      { key: 'doing', label: 'In progress', icon: 'bi-hourglass-split' },
+      { key: 'done', label: 'Completed', icon: 'bi-check-circle' },
+    ] as const;
+    return defs.map(d => ({ ...d, items: this.visible().filter(a => this.stage(a) === d.key) }));
+  });
 
   /** The list grouped by course, in the order the API returns them. */
   readonly byCourse = computed(() => {

@@ -1,64 +1,64 @@
-<section class="st-page">
+<section class="st-page sa">
   <div class="st-head">
     <div>
       <h2 class="page-title"><i class="bi bi-patch-check"></i> Assessments</h2>
-      <p class="st-sub">{{ summary().quizzes }} quizzes · {{ summary().passed }} passed · {{ summary().assignments }} assignments · {{ summary().submitted }} submitted</p>
+      <p class="st-sub">Quizzes, assignments and assessments of your courses</p>
     </div>
-    <div class="chips" role="tablist" aria-label="Filter by type">
-      @for (f of filters; track f.key) {
-        <button type="button" role="tab" class="chip" [class.active]="filter() === f.key" [attr.aria-selected]="filter() === f.key" (click)="filter.set(f.key)">{{ f.label }}</button>
-      }
-    </div>
+    <label class="sa-search"><i class="bi bi-search"></i><input type="search" placeholder="Search title, module or course" [value]="query()" (input)="query.set($any($event.target).value)" /></label>
   </div>
 
   @if (error(); as err) { <div class="st-card warn" role="alert">{{ err }}</div> }
 
-  @for (g of byCourse(); track g.course) {
-    <h3 class="sa-course">{{ g.course }}</h3>
-    <div class="st-grid cols-3">
-      @for (a of g.items; track a.id) {
-        <div class="st-card sa-card">
-          <div class="sa-top">
-            <span class="pill" [class.b]="a.type === 'quiz'" [class.m]="a.type === 'assignment'" [class.w]="a.type === 'assessment'">{{ a.type }}</span>
-            @if (a.type !== 'assignment') { <span class="pill" [class]="status(a).tone">{{ status(a).text }}</span> }
+  <div class="sa-tabs" role="tablist" aria-label="Filter by type">
+    @for (f of filters; track f.key) {
+      <button type="button" role="tab" [class.active]="filter() === f.key" [attr.aria-selected]="filter() === f.key" (click)="filter.set(f.key)">{{ f.label }} <em>{{ count(f.key) }}</em></button>
+    }
+  </div>
+
+  @if (loaded() && !visible().length) {
+    <div class="st-card gray empty">
+      <i class="bi bi-patch-check"></i>
+      <span class="t1">{{ query() || filter() !== 'all' ? 'No matches' : 'Nothing to attempt yet' }}</span>
+      <span class="t2">{{ query() || filter() !== 'all' ? 'Try another filter or search.' : 'Published quizzes, assignments and assessments of your courses appear here.' }}</span>
+    </div>
+  } @else {
+    <div class="sa-list">
+      @for (a of visible(); track a.id) {
+        <article class="sa-item" [attr.data-type]="a.type">
+          <div class="sa-art" aria-hidden="true">
+            <i class="dot d1"></i><i class="dot d2"></i><i class="dot d3"></i>
+            <i class="bi" [class]="a.type === 'quiz' ? 'bi-patch-question-fill' : a.type === 'assignment' ? 'bi-journal-text' : 'bi-patch-check-fill'"></i>
+            <i class="bi bi-laptop mini"></i>
           </div>
-          <h4 class="sa-title">{{ a.title }}</h4>
-          <span class="t2">{{ a.module || 'General' }}{{ a.topic && a.topic !== 'All topics' ? ' · ' + a.topic : '' }}</span>
+
+          <div class="sa-body">
+            <div class="sa-head">
+              <h3 class="sa-title">{{ a.title }}</h3>
+              <span class="tag st" [class]="(a.type !== 'assignment' ? status(a) : submissionStatus(a)).tone">{{ (a.type !== 'assignment' ? status(a) : submissionStatus(a)).text }}</span>
+            </div>
+            <p class="sa-course"><i class="bi bi-journal-bookmark"></i> {{ a.course }}</p>
+            <p class="sa-desc">{{ a.description || (a.type === 'assignment' ? 'Complete and submit this assignment.' : 'No description.') }}</p>
+            <ul class="sa-facts">
+              <li><i class="bi bi-calendar-event"></i><span>Due date</span><b>{{ a.due_date || '—' }}</b></li>
+              <li><i class="bi bi-award"></i><span>Marks</span><b>{{ a.max_marks }}@if (a.latest_submission?.marks_obtained !== null && a.latest_submission?.marks_obtained !== undefined) { · awarded {{ a.latest_submission?.marks_obtained }} }</b></li>
+              <li><i class="bi bi-paperclip"></i><span>Document</span>
+                @if (a.attachment) { <button type="button" class="sa-link" (click)="view(a)" [title]="a.attachment.name">{{ a.attachment.name }}</button> } @else { <b>—</b> }
+              </li>
+            </ul>
+            @if (a.locked_reason && a.type !== 'assignment') { <p class="sa-lock"><i class="bi bi-lock-fill"></i> {{ a.locked_reason }}</p> }
+          </div>
 
           @if (a.type !== 'assignment') {
-            <ul class="sa-facts">
-              <li><i class="bi bi-question-circle"></i> {{ a.questions_count }} questions · {{ a.max_marks }} marks</li>
-              <li><i class="bi bi-stopwatch"></i> {{ minutes(a.time_limit_sec) }}</li>
-              <li><i class="bi bi-arrow-repeat"></i> {{ a.attempts_used }}{{ a.attempts_allowed === null ? '' : ' of ' + a.attempts_allowed }} attempt{{ a.attempts_used === 1 ? '' : 's' }} used</li>
-              <li><i class="bi bi-bullseye"></i> Pass mark {{ a.min_percent }}%{{ a.best_percent !== null ? ' · best ' + a.best_percent + '%' : '' }}</li>
-            </ul>
             @if (a.locked_reason) {
-              <p class="sa-lock"><i class="bi bi-lock-fill"></i> {{ a.locked_reason }}</p>
+              <span class="sa-go off" title="Locked"><i class="bi bi-lock-fill"></i></span>
             } @else {
-              <a class="st-btn sa-btn" [routerLink]="['/app/assessments', a.id, 'attempt']">{{ action(a).label }} <i class="bi bi-arrow-right"></i></a>
+              <a class="sa-go" [routerLink]="['/app/assessments', a.id, 'attempt']" [attr.aria-label]="action(a).label" [title]="action(a).label"><i class="bi bi-chevron-right"></i></a>
             }
           } @else {
-            <div class="sa-top"><span class="pill" [class]="submissionStatus(a).tone">{{ submissionStatus(a).text }}</span></div>
-            <ul class="sa-facts">
-              <li><i class="bi bi-calendar-event"></i> Due {{ a.due_date || '—' }}</li>
-              <li><i class="bi bi-award"></i> {{ a.max_marks }} marks · pass mark {{ a.min_percent }}%</li>
-              @if (a.latest_submission?.marks_obtained !== null && a.latest_submission?.marks_obtained !== undefined) { <li><i class="bi bi-check-circle"></i> Awarded {{ a.latest_submission?.marks_obtained }} / {{ a.max_marks }}</li> }
-              @if (a.attachment) { <li><i class="bi bi-paperclip"></i> {{ a.attachment.name }} ({{ a.attachment.size }})</li> }
-            </ul>
-            @if (a.description) { <p class="t2">{{ a.description }}</p> }
-            <button type="button" class="st-btn sa-btn" (click)="view(a)"><i class="bi bi-eye"></i> View details{{ a.attachment ? ' & document' : '' }}</button>
-            <a class="st-btn sa-btn" [routerLink]="['/app/assessments', a.id, 'assignment']">{{ a.latest_submission ? 'Open / submit new version' : 'Open assignment' }} <i class="bi bi-arrow-right"></i></a>
+            <a class="sa-go" [routerLink]="['/app/assessments', a.id, 'assignment']" [attr.aria-label]="a.latest_submission ? 'Open or resubmit' : 'Open assignment'" [title]="a.latest_submission ? 'Open / resubmit' : 'Open assignment'"><i class="bi bi-chevron-right"></i></a>
           }
-        </div>
+        </article>
       }
     </div>
-  } @empty {
-    @if (loaded()) {
-      <div class="st-card gray empty">
-        <i class="bi bi-patch-check"></i>
-        <span class="t1">Nothing to attempt yet</span>
-        <span class="t2">Published quizzes, assignments and assessments of your courses appear here.</span>
-      </div>
-    }
   }
 </section>

@@ -50,3 +50,18 @@
   b { font-size: 15px; } span { font-size: 10px; } &.today { background: #fde8f1; color: #c2186b; } }
 
 @media (max-width: 640px) { .d-hero { padding: 18px; .art { display: none; } h1 { font-size: 26px; } } }
+
+/* enterprise theme */
+.st-card { border-radius: 8px; }
+.d-hero { border-radius: 8px; padding: 28px 32px; background: linear-gradient(120deg, #080536 0%, #1a1660 60%, #2c3545 100%);
+  .eyebrow { color: rgba(255, 255, 255, .7); }
+  h1 { font-size: 28px; font-weight: 700; color: #fff; em { color: #F3B34A; } }
+  p { color: rgba(255, 255, 255, .78); }
+  .dark-btn { background: #fff; color: #080536; border-radius: 8px; }
+  .art { color: rgba(255, 255, 255, .9); > i:first-child { filter: none; opacity: .9; } .bulb { color: #F3B34A; } .spark { color: #F3B34A; } } }
+.shortcut { border-radius: 8px; border: 1px solid #E4E7EC; }
+.mod-card { border-radius: 8px; .thumb { border-radius: 6px; } }
+.st-card.soft { background: #F9FAFB; border-color: #E4E7EC; }
+.st-btn.wide { border-radius: 8px; background: #080536; }
+.prog circle.fg { stroke: #080536; } .prog circle.bg { stroke: #ECECF6; }
+.date { border-radius: 8px; background: #ECECF6; color: #080536; }

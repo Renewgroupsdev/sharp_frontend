@@ -18,9 +18,9 @@
             <i class="bi bi-exclamation-circle-fill"></i>
             <div>
               <b>Course not completed</b>
-              <p>{{ r.name }} has not completed “{{ r.course }}” yet, so there is no certificate to show.</p>
+              <p>{{ r.name }} is still working on “{{ r.course }}”. The certificate is shown here once the course reaches 100%.</p>
               <div class="sc-bar" role="progressbar" [attr.aria-valuenow]="r.progress ?? 0" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="'Course progress'"><i [style.width.%]="r.progress ?? 0"></i></div>
-              <small>{{ r.progress ?? 0 }}% of the course done</small>
+              <small>{{ r.progress ?? 0 }}% completed</small>
             </div>
           </div>
         }

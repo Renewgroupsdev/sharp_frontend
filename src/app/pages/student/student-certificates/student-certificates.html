@@ -48,7 +48,6 @@
         <h4 class="cert-title">{{ q.course }}</h4>
         <img class="qr-img" [src]="q.image" [alt]="'QR code for the ' + q.course + ' certificate'" width="160" height="160" />
         <div class="cert-actions">
-          <button type="button" class="st-btn alt" (click)="downloadQr(q)"><i class="bi bi-download"></i> Download QR</button>
           <button type="button" class="st-btn alt" (click)="copyLink(q)"><i class="bi" [class]="copied() === q.course_id ? 'bi-check2' : 'bi-link-45deg'"></i> {{ copied() === q.course_id ? 'Copied' : 'Copy link' }}</button>
         </div>
       </div>

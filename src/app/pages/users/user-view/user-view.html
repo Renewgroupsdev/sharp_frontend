@@ -156,7 +156,6 @@
                   <img [src]="q.image" [alt]="'QR code for ' + q.course" width="132" height="132" />
                   <b>{{ q.course }}</b>
                   <span class="pp-pill" [ngClass]="qrTone(q)">{{ qrLabel(q) }}</span>
-                  <button type="button" class="qr-btn" (click)="saveQr(q)"><i class="bi bi-download"></i> Download</button>
                 </div>
               } @empty {
                 <p class="pp-note">This student is not enrolled in a course yet, so there is no QR code.</p>

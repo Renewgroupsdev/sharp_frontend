@@ -105,3 +105,27 @@ button.pill { cursor: pointer; }
 }
 .composer { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--border-soft); background: var(--app-surface-bg);
   input { flex: 1; height: 32px; padding: 0 10px; border-radius: 9px; border: 1px solid var(--border-soft-strong); font: inherit; font-size: 12.5px; } }
+
+/* enterprise theme: flat cards, navy actions, tighter radii */
+.st-card { border-color: #E4E7EC; border-radius: 8px; padding: 16px; }
+.st-card h3, .st-h { padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #F2F4F7; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #344054; }
+.st-card.green { background: #F9FAFB; border-color: #E4E7EC; }
+.st-card.gray { background: #F9FAFB; }
+.t1 { font-size: 14px; }
+.t2, .mut { font-size: 12px; }
+.st-ico { border-radius: 8px; &.solid { background: #080536; } &.b { background: #ECECF6; color: #080536; } &.m { background: #F2F4F7; color: #475467; } }
+.pill { border-radius: 6px; padding: 3px 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; &.b { background: #ECECF6; color: #080536; } &.m { background: #F2F4F7; color: #475467; } }
+.st-btn { min-height: 34px; padding: 0 16px; border-radius: 6px; font-size: 13px; background: #080536; &:hover:not(:disabled) { background: #1a1660; }
+  &.alt { background: #fff; color: #080536; border: 1px solid #D0D5DD; &:hover:not(:disabled) { background: #F9FAFB; } } }
+.st-bar { height: 6px; border-radius: 3px; i { background: #080536; border-radius: 3px; } }
+.tile { border-radius: 8px; border-color: #E4E7EC; b { color: #080536; } &:hover { border-color: #080536; } }
+.hero { border-radius: 8px; background: linear-gradient(120deg, #080536 0%, #1a1660 60%, #2c3545 100%); }
+.mod-num { border-radius: 8px; &.done { background: #080536; } &.cur { background: #F3B34A; color: #080536; } }
+.outcome { border-radius: 6px; background: #F9FAFB; border: 1px solid #E4E7EC; }
+.chip { border-radius: 6px; font-size: 13px; &.active { background: #080536; border-color: #080536; } }
+.back-link { color: #080536; }
+.empty i { color: #080536; }
+.chat-box { border-radius: 8px; border-color: #E4E7EC; }
+.msg .mb { border-radius: 8px; } .msg.me .mb { background: #ECECF6; border-color: #D9D9EC; }
+.composer input { border-radius: 6px; }
+.st-h .link { color: #080536; }

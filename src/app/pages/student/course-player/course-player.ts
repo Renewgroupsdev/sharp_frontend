@@ -6,7 +6,7 @@ import { ModuleState, MyLearningApi, MyLearningService, ProgressSummary } from '
 import { ToastService } from '../../../shared/common-services/toast.service';
 import { Course, HOST_ICON, Lesson, hostLabel } from '../../../shared/models/course.model';
 
-type Viewer = { kind: 'embed'; url: SafeResourceUrl } | { kind: 'video'; url: string } | { kind: 'text'; html: string } | { kind: 'file'; name: string; size: string };
+type Viewer = { kind: 'embed'; url: SafeResourceUrl } | { kind: 'video'; url: string } | { kind: 'text'; html: string } | { kind: 'pdf'; url: SafeResourceUrl; name: string } | { kind: 'image'; url: string; name: string } | { kind: 'file'; name: string; size: string; url?: string };
 
 const YOUTUBE_ID = /(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/))([\w-]{11})/;
 const DRIVE_ID = /drive\.google\.com\/(?:file\/d\/|open\?id=)([\w-]+)/;
@@ -154,7 +154,10 @@ export class CoursePlayer implements OnInit {
       }
       case 'Video upload': return url ? { kind: 'video', url } : { kind: 'file', name: l.file?.name ?? l.name, size: l.file?.size ?? '' };
       case 'Editor': return { kind: 'text', html: l.content ?? '' };
-      default: return { kind: 'file', name: l.file?.name ?? l.name, size: l.file?.size ?? '' };
+      case 'Image upload': return url ? { kind: 'image', url, name: l.file?.name ?? l.name } : { kind: 'file', name: l.file?.name ?? l.name, size: l.file?.size ?? '' };
+      default:
+        if (url && /\.pdf(\?|$)/i.test(url)) return { kind: 'pdf', url: trust(url), name: l.file?.name ?? l.name };
+        return { kind: 'file', name: l.file?.name ?? l.name, size: l.file?.size ?? '', url: url || undefined };
     }
   }
 }

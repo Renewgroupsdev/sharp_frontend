@@ -1,5 +1,9 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
+import { environment } from '../../../../environments/environment';
+import { apiErrorMessage } from '../../../core/http/api.interceptor';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { ActivityLogService } from '../../../shared/common-services/activity-log.service';
 import { CoursesService } from '../../../shared/common-services/courses.service';
@@ -23,6 +27,8 @@ export class LessonForm {
   private readonly store = inject(CoursesService);
   private readonly toast = inject(ToastService);
   private readonly log = inject(ActivityLogService);
+  private readonly http = inject(HttpClient);
+  readonly uploading = signal(false);
 
   readonly course = this.store.get(this.data.courseId);
   readonly chapter = this.course?.chapters.find(c => c.id === this.data.chapterId);
@@ -65,7 +71,7 @@ export class LessonForm {
 
   close(): void { this.dialogRef.close(false); }
 
-  save(form: NgForm): void {
+  async save(form: NgForm): Promise<void> {
     this.submitted.set(true);
     this.serverError.set(null);
     if (!this.course || !this.chapter) return;
@@ -86,11 +92,22 @@ export class LessonForm {
       host,
       privacy: m.privacy,
       desc: m.desc.trim(),
-      url: HOST_URL.includes(host) ? url : '',
+      url: HOST_URL.includes(host) ? url : (HOST_FILE[host] ? this.existing?.url ?? '' : ''),
       content: host === 'Editor' ? m.content.trim() : '',
     };
     if (HOST_FILE[host]) {
       if (this.picked) {
+        this.uploading.set(true);
+        try {
+          const body = new FormData();
+          body.append('file', this.picked);
+          const up = await firstValueFrom(this.http.post<{ url: string }>(`${environment.apiBaseUrl}/lesson-files`, body));
+          lesson.url = up.url;
+        } catch (e) {
+          this.uploading.set(false);
+          return fail(apiErrorMessage(e));
+        }
+        this.uploading.set(false);
         const kb = this.picked.size / 1024;
         lesson.file = { name: this.picked.name, size: kb < 1024 ? `${Math.round(kb)} KB` : `${(this.picked.size / 1048576).toFixed(1)} MB` };
       } else {

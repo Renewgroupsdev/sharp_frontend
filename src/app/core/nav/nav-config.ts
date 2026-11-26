@@ -13,6 +13,9 @@ export interface NavLink {
 /** Modules that are reached through another menu entry (Course Management → ...), so they get no top-level link. */
 const NESTED_MODULES = new Set(['a_assess', 'a_attempts']);
 
+/** Modules switched off from every role's menu (Enrollment, Learning). */
+const HIDDEN_MODULES = new Set(['a_enroll', 'a_learn']);
+
 /** Sub-menus per admin module key. */
 const ADMIN_SUBMENUS: Record<string, NavLink[]> = {
   a_courses: [
@@ -38,7 +41,6 @@ export const MENTOR_NAV: NavLink[] = [
 
 export const STUDENT_NAV: NavLink[] = [
   { path: '/app/dashboard', label: 'Dashboard', icon: 'bi-grid-fill' },
-  { path: '/app/learning', label: 'My Learning', icon: 'bi-journal-richtext' },
   { path: '/app/attendance', label: 'Attendance', icon: 'bi-clock-history' },
   { path: '/app/assessments', label: 'Assessments', icon: 'bi-patch-check' },
   { path: '/app/certificates', label: 'Certificates', icon: 'bi-award' },
@@ -51,7 +53,7 @@ export function adminNav(role: Role | null, can: (moduleKey: string) => boolean)
   const links: NavLink[] = [{ path: '/app/dashboard', label: 'Dashboard', icon: 'bi-grid-fill' }];
   // Assessment Library is no longer a top-level module: its pages sit under Course Management.
   for (const m of ADMIN_MODULES) {
-    if (!can(m.key) || NESTED_MODULES.has(m.key)) continue;
+    if (!can(m.key) || NESTED_MODULES.has(m.key) || HIDDEN_MODULES.has(m.key)) continue;
     const children = ADMIN_SUBMENUS[m.key]?.filter(c => !c.moduleKey || can(c.moduleKey));
     links.push({ path: '/app/' + m.route, label: m.label, icon: m.icon, moduleKey: m.key, children });
   }

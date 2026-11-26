@@ -14,7 +14,7 @@ import { UsersService } from '../../../shared/common-services/users.service';
 import { CanActionDirective } from '../../../shared/directives/can-action.directive';
 import { AttendanceRecord } from '../../../shared/models/attendance.model';
 import { Certificate } from '../../../shared/models/certificate.model';
-import { CertQrCard, downloadQrImage, qrStatusLabel, withQrImages } from '../../../shared/utils/certificate-qr.util';
+import { CertQrCard, qrStatusLabel, withQrImages } from '../../../shared/utils/certificate-qr.util';
 import { learningStatusOf } from '../../../shared/common-services/learning.service';
 import { ModuleProgress } from '../../../shared/models/learning.model';
 import { BATCH_ROLES } from '../../../shared/models/user.model';
@@ -72,7 +72,6 @@ export class UserView {
   /** The student's certificate QR codes, one per enrolled course. */
   readonly qrCards = signal<CertQrCard[]>([]);
   protected readonly qrLabel = qrStatusLabel;
-  protected readonly saveQr = downloadQrImage;
   protected qrTone(c: CertQrCard): string { return c.status === 'issued' ? 'ok' : c.status === 'completed' ? 'ok' : c.status === 'in_progress' ? 'wait' : 'bad'; }
   readonly logs = signal<AuditEntry[]>([]);
   readonly busy = signal<Partial<Record<TabKey, boolean>>>({});

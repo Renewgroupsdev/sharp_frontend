@@ -56,3 +56,14 @@
 .rd-rows em { flex: 0 0 auto; padding: 2px 9px; border-radius: 999px; background: var(--primary-soft, #eef0f6); font-style: normal; font-size: 11.5px; font-weight: 700; }
 .rd-rows em.red { background: #fde4e6; color: #b42318; }
 .rd-rows em.amber { background: #fff1d6; color: #8a5a00; }
+
+/* enterprise theme */
+.rd-head h2 { font-size: 20px; }
+.rd-kpi { position: relative; padding: 16px 16px 16px 18px; border-color: #E4E7EC; border-radius: 8px; overflow: hidden; }
+.rd-kpi::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #080536; }
+.rd-kpi span { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+.rd-kpi b { font-size: 28px; letter-spacing: -.02em; }
+.rd-card { border-color: #E4E7EC; border-radius: 8px; }
+.rd-card h3 { padding-bottom: 10px; border-bottom: 1px solid #F2F4F7; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #344054; }
+.rd-bar span, .rd-meter i { background: #080536; }
+.rd-meter { height: 6px; }

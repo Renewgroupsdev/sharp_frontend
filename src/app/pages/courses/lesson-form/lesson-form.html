@@ -73,7 +73,7 @@
     </div>
     <div class="modal-footer-custom">
       <button type="button" class="cancel-btn" (click)="close()">Back</button>
-      <button type="submit" class="save-btn"><i class="bi bi-check-lg"></i> {{ isEdit ? 'Save lesson' : 'Add lesson' }}</button>
+      <button type="submit" class="save-btn" [disabled]="uploading()"><i class="bi bi-check-lg"></i> {{ uploading() ? 'Uploading…' : isEdit ? 'Save lesson' : 'Add lesson' }}</button>
     </div>
   </form>
 </div>

@@ -39,6 +39,12 @@
             @case ('video') {
               <video class="frame-video" controls controlsList="nodownload" [src]="$any(viewer()).url"></video>
             }
+            @case ('pdf') {
+              <div class="pdf-frame"><iframe [src]="$any(viewer()).url" [title]="$any(viewer()).name"></iframe></div>
+            }
+            @case ('image') {
+              <img class="lesson-img" [src]="$any(viewer()).url" [alt]="$any(viewer()).name">
+            }
             @case ('text') {
               <div class="rich" [innerHTML]="$any(viewer()).html"></div>
             }
@@ -47,7 +53,12 @@
                 <i class="bi" [class]="icon[l.host]"></i>
                 <b>{{ $any(viewer()).name }}</b>
                 <span class="t2">{{ hostLabel(l.host) }}{{ $any(viewer()).size ? ' · ' + $any(viewer()).size : '' }}</span>
-                <span class="t2">The file preview is not available in the app yet. Read it from the material your mentor shared, then mark the lesson complete.</span>
+                @if ($any(viewer()).url) {
+                  <span class="t2">This file type cannot be previewed here.</span>
+                  <a class="st-btn" [href]="$any(viewer()).url" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> Open file</a>
+                } @else {
+                  <span class="t2">The file is not available. Ask your mentor to upload it again, then mark the lesson complete.</span>
+                }
               </div>
             }
           }

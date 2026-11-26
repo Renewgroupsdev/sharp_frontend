@@ -58,3 +58,10 @@ export function adminNav(role: Role | null, can: (moduleKey: string) => boolean)
   if (role === 'Super Admin' || role === 'Admin') links.push({ path: '/app/settings', label: 'Settings', icon: 'bi-gear' });
   return links;
 }
+
+/** The role-aware menu for a shell: used by the sidebar and by the header's breadcrumb / quick search. */
+export function navForShell(shell: 'admin' | 'mentor' | 'student', role: Role | null, can: (moduleKey: string) => boolean): NavLink[] {
+  if (shell === 'mentor') return MENTOR_NAV;
+  if (shell === 'student') return STUDENT_NAV;
+  return adminNav(role, can);
+}

@@ -1,9 +1,9 @@
 import { Component, computed, EventEmitter, Input, Output, signal } from '@angular/core';
 import { DetailCardIconVariant, RibbonItem } from '../../models/common-components.model';
 
-const PALETTE = ['#0f766e', '#4338ca', '#be185d', '#b45309', '#15803d', '#0369a1', '#6d28d9'];
+const PALETTE = ['#0369a1', '#0e7490', '#0284c7', '#0f766e', '#075985', '#155e75', '#1d4ed8'];
 const VARIANT_COLORS: Record<DetailCardIconVariant, string> = {
-  primary: '#0f766e', green: '#15803d', orange: '#b45309', blue: '#0369a1', purple: '#6d28d9',
+  primary: '#0369a1', green: '#0f766e', orange: '#0e7490', blue: '#0284c7', purple: '#075985',
 };
 const POPUP_LIMIT = 8;
 const POPUP_WIDTH = 260;

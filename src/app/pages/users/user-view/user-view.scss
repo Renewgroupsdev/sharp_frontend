@@ -49,4 +49,4 @@
 .qr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-top: 10px; }
 .qr-item { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 12px; text-align: center; background: #fff;
   img { padding: 4px; border: 1px solid #e5e7eb; border-radius: 8px; } b { font-size: 13px; overflow-wrap: anywhere; } }
-.qr-btn { padding: 4px 12px; border: 1px solid #d6d3ee; border-radius: 8px; background: #fff; color: #3a3380; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; &:hover { background: #f1f0fb; } }
+.qr-btn { padding: 4px 12px; border: 1px solid #cfe3ef; border-radius: 8px; background: #fff; color: var(--primary); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; &:hover { background: #eef5f9; } }

@@ -9,7 +9,7 @@ export type ThemeMode = 'light' | 'dark';
 export type PrimaryColor = 'renew' | 'green' | 'blue' | 'purple' | 'teal' | 'custom';
 
 const PRIMARY_PRESETS: Record<Exclude<PrimaryColor, 'custom'>, string> = {
-  renew: '#080536',
+  renew: '#0369a1',
   green: '#18b875',
   blue: '#2d7ff9',
   purple: '#8b5cf6',

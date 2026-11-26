@@ -17,7 +17,7 @@ export class Settings {
 
   readonly themes: { value: ThemeMode; label: string }[] = [{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }];
   readonly colors: { value: Exclude<PrimaryColor, 'custom'>; hex: string }[] = [
-    { value: 'renew', hex: '#080536' }, { value: 'green', hex: '#18b875' }, { value: 'blue', hex: '#2d7ff9' },
+    { value: 'renew', hex: '#0369a1' }, { value: 'green', hex: '#18b875' }, { value: 'blue', hex: '#2d7ff9' },
     { value: 'purple', hex: '#8b5cf6' }, { value: 'teal', hex: '#0f9f91' },
   ];
 

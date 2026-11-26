@@ -1,21 +1,96 @@
 <div class="login-shell">
-  <div class="login-card">
-    <img src="assets/02_Renew%20Group%20-Logo%20png.png" alt="" class="logo">
-    <p class="sub">Student, Mentor &amp; Admin portal</p>
-    <h1>Sign in</h1>
-    <p class="hint">Use the username and password issued to you.</p>
+  <!-- Left: learning & placement showcase -->
+  <aside class="hero" aria-hidden="true">
+    <div class="hero-top">
+      <span class="hero-badge"><i class="bi bi-mortarboard-fill"></i> SHARP Learning &amp; Placement</span>
+    </div>
 
-    <form (ngSubmit)="submit()">
-      @if (error()) { <div class="error" role="alert">{{ error() }}</div> }
-      <label class="fld">
-        <span>Username</span>
-        <input type="text" name="username" [(ngModel)]="username" autocomplete="username" autofocus required>
-      </label>
-      <label class="fld">
-        <span>Password</span>
-        <input type="password" name="password" [(ngModel)]="password" autocomplete="current-password" required>
-      </label>
-      <button type="submit" class="submit" [disabled]="busy()">{{ busy() ? 'Signing in…' : 'Sign in' }}</button>
-    </form>
-  </div>
+    <div class="hero-main">
+      <h2>Learn today.<br>Get <em>placed</em> tomorrow.</h2>
+      <p>One portal for courses, live attendance, assessments, certificates and placement readiness — for students, mentors and institutes.</p>
+
+      <div class="hero-cards">
+        <div class="fc fc-course">
+          <span class="fc-ico"><i class="bi bi-play-circle-fill"></i></span>
+          <div class="fc-body">
+            <strong>Module 4 · Communication Skills</strong>
+            <div class="fc-bar"><i></i></div>
+            <small>72% complete · 3 lessons left</small>
+          </div>
+        </div>
+
+        <div class="fc fc-quiz">
+          <span class="fc-ico amber"><i class="bi bi-clipboard2-check-fill"></i></span>
+          <div class="fc-body">
+            <strong>Aptitude Assessment</strong>
+            <small>Scored 86 / 100 · Passed</small>
+          </div>
+        </div>
+
+        <div class="fc fc-place">
+          <span class="fc-ico teal"><i class="bi bi-briefcase-fill"></i></span>
+          <div class="fc-body">
+            <strong>Placement ready</strong>
+            <small>Certificate issued · Profile shared</small>
+          </div>
+          <i class="bi bi-patch-check-fill fc-check"></i>
+        </div>
+      </div>
+    </div>
+
+    <ul class="hero-feats">
+      <li><i class="bi bi-journal-bookmark-fill"></i><span>Courses &amp; lessons</span></li>
+      <li><i class="bi bi-calendar2-check-fill"></i><span>Attendance</span></li>
+      <li><i class="bi bi-award-fill"></i><span>Certificates</span></li>
+      <li><i class="bi bi-graph-up-arrow"></i><span>Progress reports</span></li>
+    </ul>
+  </aside>
+
+  <!-- Right: sign-in form -->
+  <main class="panel">
+    <div class="login-card">
+      <img src="assets/02_Renew%20Group%20-Logo%20png.png" alt="Renew Group" class="logo">
+
+      <div class="head">
+        <span class="eyebrow"><i class="bi bi-stars"></i> Welcome back, learner</span>
+        <h1>Sign in to your portal</h1>
+        <p class="hint">Use the username and password issued to you by your institute.</p>
+      </div>
+
+      <div class="roles" aria-hidden="true">
+        <span><i class="bi bi-person-video3"></i> Student</span>
+        <span><i class="bi bi-person-workspace"></i> Mentor</span>
+        <span><i class="bi bi-buildings"></i> Admin</span>
+      </div>
+
+      <form (ngSubmit)="submit()">
+        @if (error()) { <div class="error" role="alert"><i class="bi bi-exclamation-circle-fill"></i> {{ error() }}</div> }
+
+        <label class="fld">
+          <span>Username</span>
+          <div class="ctl">
+            <i class="bi bi-person"></i>
+            <input type="text" name="username" [(ngModel)]="username" autocomplete="username" placeholder="Enter your username" autofocus required>
+          </div>
+        </label>
+
+        <label class="fld">
+          <span>Password</span>
+          <div class="ctl">
+            <i class="bi bi-lock"></i>
+            <input [type]="showPassword() ? 'text' : 'password'" name="password" [(ngModel)]="password" autocomplete="current-password" placeholder="Enter your password" required>
+            <button type="button" class="eye" [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'" (click)="showPassword.set(!showPassword())">
+              <i class="bi" [class.bi-eye]="!showPassword()" [class.bi-eye-slash]="showPassword()"></i>
+            </button>
+          </div>
+        </label>
+
+        <button type="submit" class="submit" [disabled]="busy()">
+          @if (busy()) { <span class="spin"></span> Signing in… } @else { Sign in <i class="bi bi-arrow-right"></i> }
+        </button>
+      </form>
+
+      <p class="foot"><i class="bi bi-shield-lock"></i> Secure access for TNCCI students, mentors &amp; administrators</p>
+    </div>
+  </main>
 </div>

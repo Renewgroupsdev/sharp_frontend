@@ -1,42 +1,50 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { ActivityLogService } from '../../shared/common-services/activity-log.service';
-import { ToastService } from '../../shared/common-services/toast.service';
-import { CanActionDirective } from '../../shared/directives/can-action.directive';
+import { apiErrorMessage } from '../../core/http/api.interceptor';
+import { AUDIT_HEAD, AuditEntry, AuditLogsApi, auditRow, auditWhen } from '../../shared/common-services/audit-logs-api.service';
 import { toCsv } from '../../shared/utils/csv.util';
 import { fileStamp, saveBlob } from '../../shared/utils/export.util';
 
+/** Logs Management: the server's audit trail (sign-ins, creates, updates, reviews...), limited to what the signed-in role may see. */
 @Component({
   selector: 'app-logs',
   standalone: true,
-  imports: [FormsModule, CanActionDirective],
+  imports: [FormsModule],
   templateUrl: './logs.html',
   styleUrls: ['../../shared/styles/erp-page.scss', './logs.scss'],
 })
-export class Logs {
-  private readonly logs = inject(ActivityLogService);
-  private readonly toast = inject(ToastService);
+export class Logs implements OnInit {
+  private readonly api = inject(AuditLogsApi);
 
+  readonly entries = signal<AuditEntry[]>([]);
+  readonly loading = signal(true);
+  readonly error = signal<string | null>(null);
   readonly search = signal(inject(ActivatedRoute).snapshot.queryParamMap.get('q') ?? '');
-  readonly module = signal('');
+  readonly role = signal('');
 
-  readonly modules = computed(() => [...new Set(this.logs.items().map(l => l.m))].sort());
+  readonly roles = computed(() => [...new Set(this.entries().map(e => e.actor_role).filter((r): r is string => !!r))].sort());
   readonly rows = computed(() => {
     const q = this.search().trim().toLowerCase();
-    const m = this.module();
-    return this.logs.items().filter(l => (!m || l.m === m) && (!q || [l.a, l.t, l.m].some(x => x.toLowerCase().includes(q))));
+    const role = this.role();
+    return this.entries().filter(e => (!role || e.actor_role === role) && (!q || [e.actor_name, e.action, e.target, e.details].some(x => (x ?? '').toLowerCase().includes(q))));
   });
-  readonly shown = computed(() => this.rows().slice(0, 200));
+  readonly shown = computed(() => this.rows().slice(0, 300));
 
-  download(): void {
-    const csv = toCsv(['When', 'Actor', 'Module', 'Activity'], this.rows().map(l => [l.w, l.a, l.m, l.t]));
-    saveBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), `activity-log-${fileStamp()}.csv`);
+  protected readonly when = auditWhen;
+
+  async ngOnInit(): Promise<void> {
+    try {
+      this.entries.set(await this.api.list());
+    } catch (e) {
+      this.error.set(apiErrorMessage(e));
+    } finally {
+      this.loading.set(false);
+    }
   }
 
-  async clear(): Promise<void> {
-    if (!(await this.toast.confirm('Clear the log?', 'All recorded activity will be removed.', 'Yes, clear it'))) return;
-    this.logs.replace([]);
-    this.logs.record('Logs Management', 'Cleared the activity log');
+  download(): void {
+    const csv = toCsv(AUDIT_HEAD, this.rows().map(auditRow));
+    saveBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), `activity-log-${fileStamp()}.csv`);
   }
 }

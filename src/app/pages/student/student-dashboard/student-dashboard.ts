@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../core/http/api.interceptor';
+import { AttendanceApi, AttendanceCourseRow } from '../../../shared/common-services/attendance-api.service';
 import { MyAttendanceService } from '../../../shared/common-services/my-attendance.service';
 import { MyCourseSummary, MyLearningService } from '../../../shared/common-services/my-learning.service';
 import { RoleDashboard } from '../../../shared/components/role-dashboard/role-dashboard';
@@ -30,7 +31,15 @@ export class StudentDashboard implements OnInit {
 
   readonly courses = this.learning.courses;
   readonly loaded = this.learning.loaded;
-  readonly attendancePct = this.attendance.rate;
+  private readonly attendanceApi = inject(AttendanceApi);
+  /** Attendance of each course: days attended out of the working days between its start and end dates. */
+  readonly courseAttendance = signal<AttendanceCourseRow[]>([]);
+  /** The overall figure: the average of the courses (0 until they load). */
+  readonly attendancePct = computed(() => {
+    const rows = this.courseAttendance();
+    return rows.length ? Math.round(rows.reduce((a, r) => a + r.pct, 0) / rows.length) : 0;
+  });
+  protected tone(pct: number): string { return pct >= 75 ? 'good' : pct >= 50 ? 'mid' : 'low'; }
   readonly recentAttendance = computed(() => this.attendance.records().slice(0, 4));
 
   readonly name = computed(() => this.auth.actor().n);
@@ -78,6 +87,7 @@ export class StudentDashboard implements OnInit {
   ngOnInit(): void {
     this.learning.load().catch(e => this.error.set(apiErrorMessage(e)));
     this.attendance.load().catch(() => undefined);
+    this.attendanceApi.summary().then(s => this.courseAttendance.set(s.courses)).catch(() => undefined);
   }
 
   tint(i: number) {

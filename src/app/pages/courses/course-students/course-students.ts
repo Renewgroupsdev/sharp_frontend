@@ -8,14 +8,17 @@ import { CoursesService } from '../../../shared/common-services/courses.service'
 import { EnrollmentService } from '../../../shared/common-services/enrollment.service';
 import { ToastService } from '../../../shared/common-services/toast.service';
 import { UsersService } from '../../../shared/common-services/users.service';
+import { CommunityApi } from '../../../shared/common-services/community-api.service';
+import { LearningApi, ModuleReportRow } from '../../../shared/common-services/learning-api.service';
+import { apiErrorMessage } from '../../../core/http/api.interceptor';
 import { lessonsOf, today } from '../../../shared/models/course.model';
 import { CourseInvite } from './course-invite';
 
-type StudentView = 'list' | 'status' | 'notify' | 'feedback';
+type StudentView = 'list' | 'status' | 'notify';
 
 interface StudentRow { sid: string; name: string; phone: string; email: string; progress: number }
 
-/** Students enrolled in a course, with each student's topic status, a notification and mentor feedback. */
+/** Students enrolled in a course, with each student's topic status and a personal message to send. */
 @Component({
   selector: 'app-course-students',
   standalone: true,
@@ -34,6 +37,14 @@ export class CourseStudents {
   private readonly toast = inject(ToastService);
   private readonly log = inject(ActivityLogService);
   private readonly auth = inject(AuthService);
+  private readonly learningApi = inject(LearningApi);
+  private readonly communityApi = inject(CommunityApi);
+  readonly sending = signal(false);
+
+  /** The picked student's real lesson completions, by module (from the server). */
+  readonly report = signal<ModuleReportRow[] | null>(null);
+  readonly reportBusy = signal(false);
+  private readonly doneLessons = computed(() => new Set((this.report() ?? []).flatMap(m => (m.lessons ?? []).filter(l => l.done).map(l => String(l.id)))));
 
   readonly canEdit = this.auth.hasActionAccess('a_courses.edit');
   readonly course = computed(() => this.store.get(this.data.courseId));
@@ -41,23 +52,35 @@ export class CourseStudents {
   readonly submitted = signal(false);
   readonly sid = signal('');
 
+  /** Each student's real completion of this course, from the server (the enrolment list only holds a placeholder). */
+  private readonly liveProgress = signal<ReadonlyMap<string, number>>(new Map());
+
+  constructor() {
+    const c = this.store.get(this.data.courseId);
+    if (c) {
+      this.learningApi.list({ course_id: Number(c.id) })
+        .then(list => this.liveProgress.set(new Map(list.map(r => [r.student_id, r.progress]))))
+        .catch(() => undefined);
+    }
+  }
+
   readonly rows = computed<StudentRow[]>(() => {
     const c = this.course();
     if (!c) return [];
     return this.enrollments.forCourse(c.title).map(e => {
       const u = this.users.get(e.sid);
-      return { sid: e.sid, name: e.name, phone: u?.ph || '—', email: u?.email || '—', progress: e.progress ?? 0 };
+      return { sid: e.sid, name: e.name, phone: u?.ph || '—', email: u?.email || '—', progress: this.liveProgress().get(e.sid) ?? e.progress ?? 0 };
     });
   });
 
   readonly student = computed(() => this.rows().find(r => r.sid === this.sid()));
 
-  /** Topics with a status derived from the student's overall progress, plus the feedback left on each. */
+  /** Each topic with its real status for the student, and the quiz result. */
   readonly topics = computed(() => {
     const c = this.course(), s = this.student();
     if (!c || !s) return [];
-    const lessons = lessonsOf(c), done = Math.round(s.progress / 100 * lessons.length);
-    const feedback = this.store.feedback.items().filter(f => f.cid === c.id && f.sid === s.sid);
+    const lessons = lessonsOf(c), real = this.report() !== null, doneIds = this.doneLessons();
+    const nextOpen = lessons.findIndex(l => !doneIds.has(String(l.id)));
     const quizzes = this.assessments.quizzes().filter(q => q.course === c.title);
     const results = this.assessments.results.items().filter(r => r.sid === s.sid);
     return lessons.map((l, i) => {
@@ -67,10 +90,9 @@ export class CourseStudents {
       return {
         name: l.name,
         chapter: l.ch,
-        status: i < done ? 'Completed' : i === done && s.progress > 0 && s.progress < 100 ? 'In progress' : 'Not started',
+        status: !real ? '…' : doneIds.has(String(l.id)) ? 'Completed' : i === nextOpen && doneIds.size > 0 ? 'In progress' : 'Not started',
         quizStatus: !quiz ? '—' : !res ? 'Not attempted' : res.result >= res.minp ? 'Passed' : 'Failed',
         result: res ? `${res.result}%` : '—',
-        feedback: feedback.filter(f => f.topic === l.id).map(f => f.text),
       };
     });
   });
@@ -78,17 +100,7 @@ export class CourseStudents {
   /** Number of quizzes on the course, shown above the status table. */
   readonly quizCount = computed(() => this.assessments.quizzes().filter(q => q.course === this.course()?.title).length);
 
-  readonly overallFeedback = computed(() => {
-    const c = this.course();
-    return c ? this.store.feedback.items().filter(f => f.cid === c.id && f.sid === this.sid() && !f.topic) : [];
-  });
-
-  readonly lessonOptions = computed(() => {
-    const c = this.course();
-    return c ? lessonsOf(c).map(l => ({ id: l.id, name: l.name })) : [];
-  });
-
-  model = { msg: '', topic: '', text: '' };
+  model = { msg: '' };
 
   close(): void { this.dialogRef.close(); }
 
@@ -98,32 +110,47 @@ export class CourseStudents {
     this.submitted.set(false);
     this.model = {
       msg: s ? `Hi ${s.name.split(' ')[0]}, you are at ${s.progress}% in ${this.course()?.title}. Please continue with your next lesson.` : '',
-      topic: '',
-      text: '',
     };
     this.view.set(view);
+    if (view === 'status') void this.loadReport(sid);
+  }
+
+  private async loadReport(sid: string): Promise<void> {
+    const c = this.course();
+    this.report.set(null);
+    if (!c) return;
+    this.reportBusy.set(true);
+    try {
+      this.report.set(await this.learningApi.moduleReport(sid, Number(c.id)));
+    } catch {
+      this.report.set([]);
+    } finally {
+      this.reportBusy.set(false);
+    }
   }
 
   invite(): void {
     this.dialog.open(CourseInvite, { data: { courseId: this.data.courseId }, width: '560px', maxWidth: '96vw', autoFocus: false });
   }
 
-  sendNotification(): void {
+  /** Sends the message to the student as a personal message in SHARP Community. */
+  async sendNotification(): Promise<void> {
     this.submitted.set(true);
     const s = this.student();
-    if (!s || !this.model.msg.trim()) return;
-    this.log.record('Course Management', `Notification sent to ${s.name} (${s.sid}) for ${this.course()?.title}`);
-    this.toast.success('Notification sent', s.name);
-    this.go('list');
+    const text = this.model.msg.trim();
+    if (!s || !text || this.sending()) return;
+    this.sending.set(true);
+    try {
+      const chat = await this.communityApi.openDm(s.sid);
+      await this.communityApi.postMessage(chat.id, text);
+      this.log.record('Course Management', `Personal message sent to ${s.name} (${s.sid}) for ${this.course()?.title}`);
+      this.toast.success('Message sent', `${s.name} will see it in SHARP Community.`);
+      this.go('list');
+    } catch (e) {
+      this.toast.error('Could not send the message', apiErrorMessage(e));
+    } finally {
+      this.sending.set(false);
+    }
   }
 
-  saveFeedback(): void {
-    this.submitted.set(true);
-    const c = this.course(), s = this.student(), text = this.model.text.trim();
-    if (!c || !s || !text) return;
-    this.store.feedback.add({ cid: c.id, sid: s.sid, topic: this.model.topic, text, by: this.auth.actor().n, on: today() });
-    this.log.record('Course Management', `Feedback added for ${s.name} on ${c.title}`);
-    this.toast.success('Feedback saved');
-    this.go('status');
-  }
 }

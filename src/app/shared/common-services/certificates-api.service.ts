@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiCrud } from '../../core/http/api-crud';
-import { CertQrCode, CertScan, CertSettings, CertVerification, Certificate } from '../models/certificate.model';
+import { CertDesign, CertQrCode, CertScan, CertSettings, CertTemplate, CertVerification, Certificate } from '../models/certificate.model';
 
 export type CertificateApiResource = Certificate;
 
@@ -19,6 +19,7 @@ export interface CertificateDesignEdit {
   signature_name: string | null;
   signature_role: string | null;
   signature_image: string | null;
+  accent?: string | null;
   show_profile: boolean;
   show_qr: boolean;
 }
@@ -35,8 +36,23 @@ export class CertificatesApi extends ApiCrud<Certificate, never> {
   constructor() { super(inject(HttpClient), 'certificates', 'certificate', 'certificates'); }
 
   /** Staff create a Pending certificate; `studentId` is the student's public id (SH2026-0412). */
-  async createFor(studentId: string, courseId: number): Promise<Certificate> {
-    return this.pick<Certificate>(await this.call('post', this.baseUrl, { student_id: studentId, course_id: courseId }), 'certificate');
+  async createFor(studentId: string, courseId: number, templateId?: number | null): Promise<Certificate> {
+    return this.pick<Certificate>(await this.call('post', this.baseUrl, { student_id: studentId, course_id: courseId, ...(templateId ? { template_id: templateId } : {}) }), 'certificate');
+  }
+
+  /** The saved certificate templates. */
+  async templates(): Promise<CertTemplate[]> {
+    return (await firstValueFrom(this.rawHttp.get<{ ok: boolean; templates: CertTemplate[] }>(`${environment.apiBaseUrl}/certificate-templates`))).templates;
+  }
+
+  async saveTemplate(body: { name: string; description: string | null; design: CertDesign }, id?: number): Promise<CertTemplate> {
+    const url = `${environment.apiBaseUrl}/certificate-templates`;
+    const res = await firstValueFrom(id ? this.rawHttp.put<{ ok: boolean; template: CertTemplate }>(`${url}/${id}`, body) : this.rawHttp.post<{ ok: boolean; template: CertTemplate }>(url, body));
+    return res.template;
+  }
+
+  async deleteTemplate(id: number): Promise<void> {
+    await firstValueFrom(this.rawHttp.delete(`${environment.apiBaseUrl}/certificate-templates/${id}`));
   }
 
   /** Staff edit a certificate that is not issued yet; an issued one is locked. A field left out is unchanged, null clears it. */

@@ -3,7 +3,7 @@
     <span class="cap-icon"><i class="bi bi-mortarboard-fill"></i></span>
     @if (navLayout.sidebarVisible()) {
       <div class="cap-copy">
-        <strong>Learning Hub</strong>
+        <strong>Sharp Learning Panel   </strong>
         <small>Study · Assess · Get placed</small>
       </div>
     }
@@ -15,6 +15,7 @@
         <a class="nav-link" [routerLink]="link.path" [class.active]="isActive(link)" [attr.title]="navLayout.sidebarVisible() ? null : link.label" (click)="onNavigate()">
           <span class="nav-icon"><i class="bi" [class]="link.icon"></i></span>
           @if (navLayout.sidebarVisible()) { <span class="nav-label">{{ link.label }}</span> }
+          @if (badge(link); as n) { <span class="nav-badge" [attr.aria-label]="n + ' unread messages'">{{ n > 99 ? '99+' : n }}</span> }
           @if (navLayout.sidebarVisible() && link.children) { <i class="bi bi-chevron-down nav-caret" [class.open]="isActive(link)"></i> }
         </a>
         @if (navLayout.sidebarVisible() && link.children && isActive(link)) {

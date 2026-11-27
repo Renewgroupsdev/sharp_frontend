@@ -15,7 +15,7 @@ import { CourseModules } from './course-modules';
 export class CourseModulesDialog {
   private readonly dialogRef = inject(MatDialogRef<CourseModulesDialog>);
   private readonly data = inject<{ courseId: string }>(MAT_DIALOG_DATA);
-  readonly canEdit = inject(AuthService).hasActionAccess('a_courses.edit');
+  readonly canEdit = inject(AuthService).hasActionAccess('a_courses.modules');
 
   readonly courseId = this.data.courseId;
   readonly course = inject(CoursesService).get(this.data.courseId);

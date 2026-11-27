@@ -8,6 +8,8 @@ export class ChatDockService {
   /** `n` changes on every call, so asking for the same thing twice still re-opens the drawer. */
   readonly request = signal<{ scope: ChatScope; n: number } | null>(null);
   readonly chat = signal<{ id: number; n: number; panel?: 'add' | 'edit' } | null>(null);
+  /** Unread messages across every chat; the chat drawer keeps it current and the SHARP Community menu item shows it. */
+  readonly totalUnread = signal(0);
   private n = 0;
 
   show(scope: ChatScope = 'all'): void {

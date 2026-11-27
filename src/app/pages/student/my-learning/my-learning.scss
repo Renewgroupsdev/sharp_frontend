@@ -12,3 +12,6 @@
 .empty { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 28px; text-align: center; grid-column: 1 / -1;
   i { font-size: 28px; color: var(--text-muted); }
 }
+
+.att-row { display: grid; grid-template-columns: auto 1fr 44px; align-items: center; gap: 10px; margin-top: 10px; font-size: 12px; color: #475467; i { margin-right: 4px; color: #080536; } b { text-align: right; color: #101828; &[data-tone='good'] { color: #1c7d52; } &[data-tone='mid'] { color: #a86a0a; } &[data-tone='low'] { color: #b42318; } } }
+.bar.att { margin: 0; height: 6px; i { &[data-tone='good'] { background: #1aa05c; } &[data-tone='mid'] { background: #F3B34A; } &[data-tone='low'] { background: #E56B6F; } } }

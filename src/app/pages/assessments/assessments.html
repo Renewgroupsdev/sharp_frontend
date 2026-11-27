@@ -1,12 +1,17 @@
 <div class="purchase-page container-fluid px-0">
-  <div class="page-header">
-    @if (meta; as m) {
-      <h6 class="page-title"><i class="bi" [class]="m.icon"></i> {{ m.label === 'Quiz' ? 'Quiz' : m.label + 's' }}</h6>
-      <p class="page-subtitle">{{ subtitles[m.key] }}</p>
-    } @else {
-      <h6 class="page-title"><i class="bi bi-patch-check"></i> Assessment Library</h6>
-      <p class="page-subtitle">Build quizzes, assessments and assignments once, then use them in each course by module and topic.</p>
-    }
+  <div class="page-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+    <div>
+      @if (meta; as m) {
+        <h6 class="page-title"><i class="bi" [class]="m.icon"></i> {{ m.label === 'Quiz' ? 'Quiz' : m.label + 's' }}</h6>
+        <p class="page-subtitle">{{ subtitles[m.key] }}</p>
+      } @else {
+        <h6 class="page-title"><i class="bi bi-patch-check"></i> Assessment Library</h6>
+        <p class="page-subtitle">Build quizzes, assessments and assignments once, then use them in each course by module and topic.</p>
+      }
+    </div>
+    <div class="header-actions">
+      @if (actions.template(); as t) { <ng-container [ngTemplateOutlet]="t" /> }
+    </div>
   </div>
 
   @if (!pinned) {

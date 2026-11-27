@@ -107,6 +107,7 @@ export class ChatDock implements OnInit {
   protected readonly active = computed(() => this.chats().find(g => g.id === this.activeId()) ?? null);
 
   constructor() {
+    effect(() => this.dock.totalUnread.set(this.totalUnread()));
     // A page asked for the drawer: on the list, or straight into one chat (the View icon in SHARP Community).
     effect(() => {
       const req = this.dock.request();

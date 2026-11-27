@@ -50,7 +50,7 @@
               <a class="sa-go" [routerLink]="['/app/assessments', a.id, 'attempt']" [attr.aria-label]="action(a).label" [title]="action(a).label"><i class="bi bi-chevron-right"></i></a>
             }
           } @else {
-            <a class="sa-go" [routerLink]="['/app/assessments', a.id, 'assignment']" [attr.aria-label]="a.latest_submission ? 'Open or resubmit' : 'Open assignment'" [title]="a.latest_submission ? 'Open / resubmit' : 'Open assignment'"><i class="bi bi-chevron-right"></i></a>
+            <a class="sa-go" [routerLink]="['/app/assessments', a.id, 'assignment']" [attr.aria-label]="a.latest_submission?.status === 'graded' ? 'View graded work' : a.latest_submission ? 'Open or resubmit' : 'Open assignment'" [title]="a.latest_submission?.status === 'graded' ? 'View graded work' : a.latest_submission ? 'Open / resubmit' : 'Open assignment'"><i class="bi bi-chevron-right"></i></a>
           }
         </article>
       }

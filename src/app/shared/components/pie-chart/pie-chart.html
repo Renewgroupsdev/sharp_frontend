@@ -1,10 +1,28 @@
 <div class="pc">
   <figure class="pc-fig">
-    <svg viewBox="0 0 160 160" role="img" [attr.aria-label]="total() + ' ' + unit() + ': ' + summary()">
+    <svg [attr.viewBox]="threeD() ? '0 0 160 126' : '0 0 160 160'" [class.tilted]="threeD()" role="img" [attr.aria-label]="total() + ' ' + unit() + ': ' + summary()">
       @if (total() === 0) {
         <circle cx="80" cy="80" r="76" class="pc-empty-disc" />
         <text x="80" y="78" text-anchor="middle" class="pc-empty-big">0</text>
         <text x="80" y="96" text-anchor="middle" class="pc-empty-small">{{ emptyText() }}</text>
+      } @else if (threeD()) {
+        <ellipse cx="80" [attr.cy]="tiltCy + depth + 6" rx="72" ry="10" class="pc-shadow" />
+        <g class="pc-wall">
+          @for (w of wedges(); track w.label) {
+            @if (w.full) {
+              <ellipse cx="80" [attr.cy]="tiltCy + depth" rx="76" [attr.ry]="tiltRy" [style.fill]="w.color" />
+            } @else {
+              <path [attr.d]="w.path3d" [attr.transform]="'translate(0 ' + depth + ')'" [style.fill]="w.color" />
+            }
+          }
+        </g>
+        @for (w of wedges(); track w.label) {
+          @if (w.full) {
+            <ellipse cx="80" [attr.cy]="tiltCy" rx="76" [attr.ry]="tiltRy" class="pc-wedge" [style.fill]="w.color"><title>{{ w.label }}: {{ w.value }} ({{ w.percent }}%)</title></ellipse>
+          } @else {
+            <path class="pc-wedge" [attr.d]="w.path3d" [style.fill]="w.color"><title>{{ w.label }}: {{ w.value }} ({{ w.percent }}%)</title></path>
+          }
+        }
       } @else {
         @for (w of wedges(); track w.label) {
           @if (w.full) {

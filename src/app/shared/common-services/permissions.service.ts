@@ -1,44 +1,104 @@
-import { Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { buildPermissions } from '../../core/data/seed';
-import { PermissionMap } from '../../core/data/models';
 
-const KEY = environment.storagePrefix + 'perms';
+/** One node of the Roles & Permissions tree: a module or sub-module with its tabs and actions, and the roles allowed on each. */
+export interface PermAction { slug: string; name: string; roles: string[] }
+export interface PermTab { slug: string; name: string; icon?: string | null; roles: string[] }
+export interface PermNode {
+  slug: string;
+  name: string;
+  icon?: string | null;
+  roles: string[];
+  actions: PermAction[];
+  tabs: PermTab[];
+  sub_modules: PermNode[];
+}
 
-/** Roles & Permissions matrix: which of view / create / edit / delete (v, c, u, d) each role holds per module. */
+/** The role values the API uses, with the names shown on screen. */
+export const ASSIGNABLE_ROLES: { value: string; label: string }[] = [
+  { value: 'super_admin', label: 'Super Admin' }, { value: 'admin', label: 'Admin' }, { value: 'mentor', label: 'Mentor' },
+  { value: 'member', label: 'Member' }, { value: 'ob', label: 'OB' }, { value: 'institution', label: 'Institution' }, { value: 'student', label: 'Student' },
+];
+
+/**
+ * What the signed-in role may use, from GET /permissions/mine: module slugs (sub-modules included), action slugs such as
+ * `a_users.create`, and tab slugs such as `a_certs.tab.templates`. Access to a module is its View; Create, Edit and Delete
+ * are its actions. The Roles & Permissions screen reads and writes the whole tree.
+ */
 @Injectable({ providedIn: 'root' })
 export class PermissionsService {
-  readonly matrix = signal<PermissionMap>(this.load());
-  /** Defaults, used for a module added after the saved matrix was stored, so it never reads as "no access". */
-  private readonly defaults = buildPermissions();
+  private readonly http = inject(HttpClient);
+  private readonly base = `${environment.apiBaseUrl}/permissions`;
 
-  private load(): PermissionMap {
-    try { const raw = localStorage.getItem(KEY); if (raw) return JSON.parse(raw) as PermissionMap; } catch { /* use defaults */ }
-    return buildPermissions();
+  readonly modules = signal<ReadonlySet<string>>(new Set());
+  readonly actions = signal<ReadonlySet<string>>(new Set());
+  readonly tabs = signal<ReadonlySet<string>>(new Set());
+  readonly loaded = signal(false);
+  private loading?: Promise<void>;
+
+  /** Loads the signed-in role's permissions once (pass `force` after they change). */
+  load(force = false): Promise<void> {
+    if (this.loaded() && !force) return Promise.resolve();
+    this.loading ??= (async () => {
+      try {
+        const res = await firstValueFrom(this.http.get<{ modules: string[]; actions: string[]; tabs: string[] }>(`${this.base}/mine`));
+        this.modules.set(new Set(res.modules));
+        this.actions.set(new Set(res.actions));
+        this.tabs.set(new Set(res.tabs));
+        this.loaded.set(true);
+      } catch {
+        // Leave everything closed rather than guessing: a screen without its permissions shows nothing.
+      } finally {
+        this.loading = undefined;
+      }
+    })();
+    return this.loading;
   }
 
-  private save(m: PermissionMap): void {
-    this.matrix.set(m);
-    try { localStorage.setItem(KEY, JSON.stringify(m)); } catch { /* storage blocked */ }
+  clear(): void {
+    this.modules.set(new Set());
+    this.actions.set(new Set());
+    this.tabs.set(new Set());
+    this.loaded.set(false);
   }
 
-  /** The letters (e.g. "vcu") a role holds on a module. */
-  letters(role: string, moduleKey: string): string {
-    return this.matrix()[role]?.[moduleKey] ?? this.defaults[role]?.[moduleKey] ?? '';
+  /** View / Create / Edit / Delete on a module (v, c, u, d). */
+  can(moduleKey: string, letter: 'v' | 'c' | 'u' | 'd'): boolean {
+    if (letter === 'v') return this.modules().has(moduleKey);
+    const action = ({ c: 'create', u: 'edit', d: 'delete' } as const)[letter];
+    return this.actions().has(`${moduleKey}.${action}`);
   }
 
-  has(role: string, moduleKey: string, letter: 'v' | 'c' | 'u' | 'd'): boolean {
-    return this.letters(role, moduleKey).includes(letter);
+  hasTab(slug: string): boolean { return this.tabs().has(slug); }
+
+  /* ---------- the Assign Permissions screen ---------- */
+
+  async tree(): Promise<PermNode[]> {
+    return (await firstValueFrom(this.http.get<{ modules: PermNode[] }>(`${this.base}/tree`))).modules;
   }
 
-  toggle(role: string, moduleKey: string, letter: string): void {
-    const cur = this.letters(role, moduleKey);
-    const next = cur.includes(letter) ? cur.replace(letter, '') : cur + letter;
-    const ordered = ['v', 'c', 'u', 'd'].filter(l => next.includes(l)).join('');
-    this.save({ ...this.matrix(), [role]: { ...this.matrix()[role], [moduleKey]: ordered } });
+  async save(nodes: PermNode[]): Promise<void> {
+    const modules: Record<string, string[]> = {};
+    const actions: Record<string, string[]> = {};
+    const tabs: Record<string, string[]> = {};
+    const walk = (list: PermNode[]) => {
+      for (const n of list) {
+        modules[n.slug] = n.roles;
+        n.actions.forEach(a => (actions[a.slug] = a.roles));
+        n.tabs.forEach(t => (tabs[t.slug] = t.roles));
+        walk(n.sub_modules);
+      }
+    };
+    walk(nodes);
+    await firstValueFrom(this.http.put(`${this.base}/tree`, { modules, actions, tabs }));
+    await this.load(true);
   }
 
-  resetDefaults(): void {
-    this.save(buildPermissions());
+  async reset(): Promise<PermNode[]> {
+    const res = await firstValueFrom(this.http.post<{ modules: PermNode[] }>(`${this.base}/reset`, {}));
+    await this.load(true);
+    return res.modules;
   }
 }

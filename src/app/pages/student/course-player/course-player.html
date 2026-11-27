@@ -112,12 +112,12 @@
 
             @for (q of m?.quizzes ?? []; track q.id) {
               <div class="mod-quiz">
-                <span class="st-ico" [class.g]="q.passed" [class.w]="!q.passed"><i class="bi bi-patch-question"></i></span>
+                <span class="st-ico" [class.g]="q.passed" [class.w]="!q.passed"><i class="bi" [class]="q.type === 'assessment' ? 'bi-patch-check' : 'bi-patch-question'"></i></span>
                 <span class="grow">
                   <span class="t1">{{ q.title }}</span>
                   <span class="t2">{{ q.passed ? 'Passed · ' + q.best_percent + '%' : q.best_percent !== null ? 'Best ' + q.best_percent + '% · pass mark ' + q.min_percent + '%' : 'Pass mark ' + q.min_percent + '%' }}</span>
                 </span>
-                @if (!m?.locked) { <a class="st-btn alt" [routerLink]="['/app/assessments', q.id, 'attempt']">{{ q.passed ? 'Review' : 'Take quiz' }}</a> }
+                @if (!m?.locked && q.available === false) { <span class="t2" [title]="q.reason ?? ''"><i class="bi bi-lock"></i> {{ q.reason }}</span> } @else if (!m?.locked) { <a class="st-btn alt" [routerLink]="['/app/assessments', q.id, 'attempt']">{{ q.passed ? 'Review' : q.type === 'assessment' ? 'Take assessment' : 'Take quiz' }}</a> }
               </div>
             }
           </div>

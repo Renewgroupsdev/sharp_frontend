@@ -78,3 +78,5 @@
 .m-tile .ic, .m-stat .ic { border-radius: 8px; background: #ECECF6; color: #080536; }
 .m-tile:hover { transform: none; box-shadow: 0 4px 12px rgba(16, 24, 40, .08); }
 .m-bar i { background: #080536; }
+
+.m-select { height: 34px; padding: 0 10px; border: 1px solid #D0D5DD; border-radius: 6px; background: #fff; font: inherit; font-size: 13px; &:focus { outline: none; border-color: #080536; } }

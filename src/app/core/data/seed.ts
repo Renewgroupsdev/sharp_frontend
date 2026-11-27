@@ -67,10 +67,10 @@ export function buildPermissions(): PermissionMap {
   const spec: Record<string, Record<string, string>> = {
     'Super Admin': { '*': 'vcud' },
     Admin: { '*': 'vcud' },
-    Mentor: { a_users: 'v', a_courses: 'v', a_enroll: 'v', a_attend: 'vcu', a_learn: 'v', a_assess: 'v', a_attempts: 'vu', a_certs: 'v', a_comms: 'vc', a_notif: 'v' },
+    Mentor: { a_users: 'v', a_courses: 'vu', a_enroll: 'v', a_attend: 'vcu', a_learn: 'v', a_assess: 'vcu', a_dmchat: 'v', a_attempts: 'vu', a_certs: 'v', a_comms: 'vc' },
     Member: { a_users: 'v', a_orgs: 'v', a_courses: 'v' },
     OB: { a_courses: 'v', a_enroll: 'v', a_attend: 'v', a_learn: 'v', a_assess: 'v', a_attempts: 'v', a_comms: 'v' },
-    Institution: { a_users: 'v', a_orgs: 'v', a_attend: 'v', a_learn: 'v', a_certs: 'v', a_reports: 'v' },
+    Institution: { a_users: 'v', a_orgs: 'v', a_courses: 'v', a_attend: 'v', a_learn: 'v', a_certs: 'v', a_comms: 'v', a_reports: 'v', a_logs: 'v' },
     Student: { a_courses: 'v', a_learn: 'v', a_attend: 'v', a_assess: 'v', a_certs: 'v', a_comms: 'vc' },
   };
   const out: PermissionMap = {};

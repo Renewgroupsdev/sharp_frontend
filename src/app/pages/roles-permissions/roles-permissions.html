@@ -1,46 +1,54 @@
 <section class="purchase-page">
-  <div class="page-header">
+  <div class="page-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
     <div>
       <h2 class="page-title"><i class="bi bi-shield-lock"></i> Roles &amp; Permissions</h2>
-      <p class="page-subtitle">Choose what each role can see and do in every module. Changes apply immediately.</p>
+      <p class="page-subtitle">Pick a role, then switch on the modules, sub-modules, tabs and actions it may use.</p>
     </div>
     <div class="header-actions">
       <button type="button" class="ghost-btn" (click)="reset()"><i class="bi bi-arrow-counterclockwise"></i> Reset to defaults</button>
+      <button type="button" class="add-lead-btn" [disabled]="!dirty() || saving()" (click)="save()"><i class="bi bi-floppy"></i> {{ saving() ? 'Saving…' : 'Save permissions' }}</button>
     </div>
   </div>
 
-  <div class="role-chips">
-    @for (r of roles; track r) {
-      <button type="button" class="role-chip" [class.active]="r === selected()" [attr.aria-pressed]="r === selected()" (click)="selected.set(r)">{{ r }}</button>
-    }
-  </div>
+  @if (error(); as err) { <div class="rp-alert" role="alert">{{ err }}</div> }
 
-  <div class="alert-banner info">
-    <i class="bi bi-info-circle"></i>
-    <div><strong>{{ selected() }}</strong>{{ description() }}@if (locked()) { Super Admin permissions are fixed. }</div>
-  </div>
+  <div class="rp-layout">
+    <aside class="rp-roles" aria-label="Roles">
+      <h3>Roles</h3>
+      @for (r of roles; track r.value) {
+        <button type="button" class="rp-role" [class.active]="r.value === selected()" [attr.aria-pressed]="r.value === selected()" (click)="selected.set(r.value)">
+          <span class="av">{{ r.label.charAt(0) }}</span>
+          <span class="tx"><b>{{ r.label }}</b><small>{{ roleStat(r.value).on }} of {{ roleStat(r.value).total }} modules</small></span>
+          <span class="bar"><i [style.width.%]="roleStat(r.value).total ? roleStat(r.value).on / roleStat(r.value).total * 100 : 0"></i></span>
+        </button>
+      }
+    </aside>
 
-  <div class="matrix-wrap">
-    <table class="matrix">
-      <thead>
-        <tr>
-          <th>Module</th>
-          @for (a of actions; track a.letter) { <th>{{ a.label }}</th> }
-        </tr>
-      </thead>
-      <tbody>
-        @for (m of modules; track m.key) {
-          <tr>
-            <td><i class="bi" [class]="m.icon"></i> <b>{{ m.label }}</b></td>
-            @for (a of actions; track a.letter) {
-              <td>
-                <input type="checkbox" [checked]="has(m.key, a.letter)" [disabled]="locked()"
-                  [attr.aria-label]="a.label + ' ' + m.label" (change)="toggle(m.key, a.label, a.letter)" />
-              </td>
-            }
-          </tr>
-        }
-      </tbody>
-    </table>
+    <div class="rp-main">
+      <div class="rp-summary">
+        <div class="rp-who">
+          <b>{{ roleLabel() }}</b>
+          <span>{{ summary().modules }} modules · {{ summary().tabs }} tabs · {{ summary().actions }} actions switched on</span>
+        </div>
+        @if (dirty()) { <em>Unsaved changes</em> }
+        <div class="rp-tools">
+          <label class="rp-search"><i class="bi bi-search"></i><input type="search" placeholder="Search module, tab or action" [value]="search()" (input)="search.set($any($event.target).value)" /></label>
+          <button type="button" class="rp-link" (click)="expandAll(true)">Expand all</button>
+          <button type="button" class="rp-link" (click)="expandAll(false)">Collapse all</button>
+        </div>
+      </div>
+
+      @if (loading()) {
+        <p class="rp-note">Loading the permission tree…</p>
+      } @else {
+        <div class="rp-grid">
+          @for (n of nodes(); track n.slug) {
+            <app-perm-node [node]="n" [ctx]="this" />
+          } @empty {
+            <p class="rp-note">No modules found.</p>
+          }
+        </div>
+      }
+    </div>
   </div>
 </section>

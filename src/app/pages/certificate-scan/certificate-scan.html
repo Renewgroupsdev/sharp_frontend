@@ -1,5 +1,5 @@
 <main class="sc">
-  <section class="sc-card" [class.wide]="result()?.status === 'issued' || result()?.status === 'completed'">
+  <section class="sc-card" [class.wide]="result()?.status === 'issued'">
     @if (error(); as err) {
       <div class="sc-box warn" role="alert"><i class="bi bi-exclamation-triangle-fill"></i><div><b>Could not check this code</b><p>{{ err }}</p></div></div>
     } @else if (result(); as r) {
@@ -9,16 +9,20 @@
           @if (r.certificate; as c) { <app-certificate-view [cert]="c" /> }
         }
         @case ('completed') {
-          <p class="sc-ok"><i class="bi bi-patch-check-fill"></i> Course completed (100%). {{ r.name }} has finished “{{ r.course }}”.</p>
-          @if (r.certificate; as c) { <app-certificate-view [cert]="c" /> }
-          <p class="sc-note">The certificate number is added once the programme office issues the certificate.</p>
+          <div class="sc-box warn" role="status">
+            <i class="bi bi-shield-exclamation"></i>
+            <div>
+              <b>Certificate not verified</b>
+              <p>{{ r.name }} has completed “{{ r.course }}”, but the certificate has not been verified by the programme office admin yet. It is shown here once it is verified and issued.</p>
+            </div>
+          </div>
         }
         @case ('in_progress') {
           <div class="sc-box warn" role="status">
             <i class="bi bi-exclamation-circle-fill"></i>
             <div>
               <b>Course not completed</b>
-              <p>{{ r.name }} is still working on “{{ r.course }}”. The certificate is shown here once the course reaches 100%.</p>
+              <p>{{ r.name }} is still working on “{{ r.course }}”. The certificate is shown here once the course reaches 100% and the programme office has verified it.</p>
               <div class="sc-bar" role="progressbar" [attr.aria-valuenow]="r.progress ?? 0" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="'Course progress'"><i [style.width.%]="r.progress ?? 0"></i></div>
               <small>{{ r.progress ?? 0 }}% completed</small>
             </div>

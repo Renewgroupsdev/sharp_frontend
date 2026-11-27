@@ -1,7 +1,12 @@
 <div class="purchase-page container-fluid px-0">
-  <div class="page-header">
-    <h6 class="page-title"><i class="bi bi-award"></i> Certificate Management</h6>
-    <p class="page-subtitle">Review, issue, cancel and download course certificates. Set the template and the minimum attendance and score.</p>
+  <div class="page-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+    <div>
+      <h6 class="page-title"><i class="bi bi-award"></i> Certificate Management</h6>
+      <p class="page-subtitle">Review, issue, cancel and download course certificates. Set the template and the minimum attendance and score.</p>
+    </div>
+    <div class="header-actions">
+      @if (actions.template(); as t) { <ng-container [ngTemplateOutlet]="t" /> }
+    </div>
   </div>
 
   <div class="tab-bar" role="tablist">
@@ -13,6 +18,10 @@
   </div>
 
   <div class="tab-panel">
-    @if (tab() === 'list') { <app-certificate-list /> } @else { <app-certificate-settings /> }
+    @switch (tab()) {
+      @case ('templates') { <app-certificate-templates /> }
+      @case ('settings') { <app-certificate-settings (openTemplates)="tab.set('templates')" /> }
+      @default { <app-certificate-list /> }
+    }
   </div>
 </div>

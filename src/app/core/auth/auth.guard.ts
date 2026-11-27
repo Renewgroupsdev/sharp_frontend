@@ -1,13 +1,17 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, CanMatchFn, Route, Router } from '@angular/router';
 import { ADMIN_MODULES } from '../data/models';
+import { PermissionsService } from '../../shared/common-services/permissions.service';
 import { AuthService, Shell } from './auth.service';
 
 /** Everything under /app needs a chosen role. */
 export const authGuard: CanActivateFn = async () => {
   const auth = inject(AuthService);
   const router = inject(Router);
-  return (auth.isAuthenticated() && (await auth.refreshProfile())) || router.createUrlTree(['/login']);
+  const perms = inject(PermissionsService); // inject before any await
+  if (!auth.isAuthenticated() || !(await auth.refreshProfile())) return router.createUrlTree(['/login']);
+  await perms.load(); // the menu and the route guards read it
+  return true;
 };
 
 /** Skip the login page when a role is already chosen. */

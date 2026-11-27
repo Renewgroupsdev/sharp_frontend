@@ -67,7 +67,9 @@ export class Attendance extends LocalListBase implements OnInit {
   override sortActive = 'order';
   override sortDirection: 'asc' | 'desc' = 'desc';
 
-  readonly tab = signal<Tab>('list');
+  readonly tab = signal<Tab>(this.auth.hasTab('a_attend.tab.list') || !this.auth.hasTab('a_attend.tab.manual') ? 'list' : 'manual');
+  readonly showListTab = this.auth.hasTab('a_attend.tab.list');
+  readonly showManualTab = this.auth.hasTab('a_attend.tab.manual');
   /** The day the list tab shows: today, or the day picked from the dashboard calendar. */
   private readonly listDate = signal<string | null>(null);
   private readonly listDay = () => this.listDate() ?? this.requestStore.serverToday();
@@ -124,7 +126,7 @@ export class Attendance extends LocalListBase implements OnInit {
     const reported = new Set(this.reports().map(r => `${r.sid}|${r.iso}`));
     return this.store.items().filter(rec => this.inScope(rec.iso) && !reported.has(`${rec.sid}|${rec.iso}`)).map(rec => ({
       id: `m-${rec.id}`,
-      person: { name: rec.name, subtitle: rec.sid },
+      person: { name: rec.name, subtitle: rec.sid, photo: this.users.photoOf(rec.sid) },
       __person: rec.name,
       __sid: rec.sid,
       searchText: `${rec.name} ${rec.sid} ${rec.remarks}`,
@@ -144,7 +146,7 @@ export class Attendance extends LocalListBase implements OnInit {
   private reportRows(): TableRow[] {
     return this.reports().filter(r => this.inScope(r.iso)).map(r => ({
       id: r.id,
-      person: { name: r.name, subtitle: `${r.sid} · ${r.org}` },
+      person: { name: r.name, subtitle: `${r.sid} · ${r.org}`, photo: this.users.photoOf(r.sid) },
       __person: r.name,
       __sid: r.sid,
       searchText: `${r.name} ${r.sid} ${r.org} ${r.reason}`,
@@ -221,7 +223,8 @@ export class Attendance extends LocalListBase implements OnInit {
       && u.id !== actor?.id
       && !(u.r === 'Student' && requested.has(u.id))
     );
-    return this.limited() ? all.filter(u => u.b === actor?.b) : all;
+    // A mentor's user list already holds only their assigned students (the API limits it), whatever their own batch is.
+    return all;
   });
 
   private readonly drafts = signal<Record<string, Partial<Draft>>>({});

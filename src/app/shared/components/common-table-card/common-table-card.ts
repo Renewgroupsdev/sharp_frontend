@@ -4,6 +4,7 @@ import { Component, EventEmitter, HostListener, Input, Output, TemplateRef, View
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSortModule, Sort, SortDirection } from '@angular/material/sort';
 import { MatTable, MatTableModule } from '@angular/material/table';
+import { PortalDirective } from '../../directives/portal.directive';
 import { PageLoader } from '../page-loader/page-loader';
 import { AuthService } from '../../../core/auth/auth.service';
 import { CallerAvatar, CallerLogEntry, LeadCell, QuickAction, TableColumn, TablePageChangeEvent, TableReorderEvent, TableRow, TableTransferEvent } from '../../models/common-components.model';
@@ -39,7 +40,7 @@ const AVATAR_PALETTE_SIZE = 5;
 @Component({
   selector: 'app-common-table-card',
   standalone: true,
-  imports: [CommonModule, MatTableModule, MatPaginatorModule, MatSortModule, DragDropModule, PageLoader],
+  imports: [CommonModule, MatTableModule, MatPaginatorModule, MatSortModule, DragDropModule, PageLoader, PortalDirective],
   templateUrl: './common-table-card.html',
   styleUrl: './common-table-card.scss',
 })

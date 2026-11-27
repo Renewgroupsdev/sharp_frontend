@@ -1,6 +1,6 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ROLES } from '../../core/data/models';
-import { ActivityLogService } from '../../shared/common-services/activity-log.service';
+import { AUDIT_HEAD, AuditEntry, AuditLogsApi, auditRow } from '../../shared/common-services/audit-logs-api.service';
 import { AttendanceService } from '../../shared/common-services/attendance.service';
 import { AssessmentsService } from '../../shared/common-services/assessments.service';
 import { BatchesService } from '../../shared/common-services/batches.service';
@@ -32,7 +32,9 @@ export class Reports {
   private readonly institutes = inject(InstitutesService);
   private readonly batches = inject(BatchesService);
   private readonly attendance = inject(AttendanceService);
-  private readonly logs = inject(ActivityLogService);
+  private readonly auditApi = inject(AuditLogsApi);
+  /** The server's activity log: the same entries Logs Management shows. */
+  private readonly audit = signal<AuditEntry[]>([]);
   private readonly certs = inject(CertificatesService);
   private readonly courses = inject(CoursesService);
   private readonly enrollment = inject(EnrollmentService);
@@ -41,6 +43,7 @@ export class Reports {
 
   constructor() {
     this.certs.load().catch(() => undefined);
+    this.auditApi.list().then(rows => this.audit.set(rows)).catch(() => undefined);
   }
 
   private readonly attendanceRate = computed(() => {
@@ -60,7 +63,7 @@ export class Reports {
     { label: 'Avg learning progress', value: this.avgProgress() === null ? '—' : this.avgProgress() + '%', icon: 'bi-play-circle' },
     { label: 'Certificates issued', value: this.certs.items().filter(c => c.status === 'Issued').length, icon: 'bi-award' },
     { label: 'Batches', value: this.batches.items().length, icon: 'bi-collection' },
-    { label: 'Activity entries', value: this.logs.items().length, icon: 'bi-list-check' },
+    { label: 'Activity entries', value: this.audit().length, icon: 'bi-list-check' },
   ]);
 
   readonly charts = computed<BarChart[]>(() => {
@@ -97,7 +100,7 @@ export class Reports {
       { key: 'learning', title: 'Learning progress', head: ['Student ID', 'Student', 'Course', 'Progress %', 'Materials', 'Status'], rows: this.learning.items().map(l => [l.sid, l.name, l.course, l.progress, l.mats, l.status]) },
       { key: 'assessments', title: 'Assessments', head: ['ID', 'Type', 'Title', 'Course', 'Max', 'Pass', 'Attempts', 'Due', 'Status'], rows: this.assessments.items().map(a => [a.id, a.type, a.title, a.course, a.max, a.pass, a.attempts, a.due, a.status]) },
       { key: 'certificates', title: 'Certificates', head: ['Certificate no', 'Student ID', 'Student', 'Course', 'Score', 'Attendance', 'Issued', 'Status'], rows: this.certs.items().map(c => [c.number ?? '', c.student_id, c.name, c.course, c.score ?? '', c.attendance ?? '', c.issued_at ? c.issued_at.slice(0, 10) : '', c.status]) },
-      { key: 'logs', title: 'Activity log', head: ['When', 'Actor', 'Module', 'Activity'], rows: this.logs.items().map(l => [l.w, l.a, l.m, l.t]) },
+      { key: 'logs', title: 'Activity log', head: AUDIT_HEAD, rows: this.audit().map(auditRow) },
     ];
   });
 

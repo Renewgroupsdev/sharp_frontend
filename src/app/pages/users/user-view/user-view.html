@@ -109,6 +109,7 @@
           <div class="bad"><b>{{ attendanceStats().absent }}</b><span>Absent</span></div>
           <div><b>{{ attendanceStats().rate }}%</b><span>Attendance</span></div>
         </div>
+        <app-attendance-summary [studentId]="user()?.id ?? null" />
         <section class="pp-card">
           <h3>Attendance list <small>last 6 months</small></h3>
           <div class="pp-list pad">
@@ -129,40 +130,37 @@
 
       @if (tab() === 'certificates') {
         @if (busy()['certificates']) { <p class="pp-note">Loading certificates…</p> }
-        @for (c of certs(); track c.id) {
-          <section class="pp-card pp-course">
-            <div class="pp-course-head">
-              <div><b>{{ c.course }}</b><small>{{ c.number || 'Number assigned when issued' }}</small></div>
-              <span class="pp-pill" [ngClass]="c.status === 'Issued' ? 'ok' : c.status === 'Pending' ? 'wait' : 'bad'">{{ c.status }}</span>
-            </div>
-            <dl class="pp-grid compact">
-              <div><dt>Issued on</dt><dd>{{ c.issued_at ? ago(c.issued_at) : '—' }}</dd></div>
-              <div><dt>Score</dt><dd>{{ c.score !== null ? c.score + '%' : '—' }}</dd></div>
-              <div><dt>Attendance</dt><dd>{{ c.attendance !== null ? c.attendance + '%' : '—' }}</dd></div>
-              @if (c.cancel_reason) { <div><dt>Cancelled because</dt><dd>{{ c.cancel_reason }}</dd></div> }
-            </dl>
-          </section>
-        } @empty {
-          @if (!busy()['certificates']) { <p class="pp-note">No certificates for this student yet.</p> }
-        }
-
-        @if (!busy()['certificates']) {
-          <section class="pp-card">
-            <h3><i class="bi bi-qr-code"></i> Certificate QR codes</h3>
-            <p class="pp-note">One per enrolled course. Scanning a code shows the certificate once the course is 100% complete, and otherwise says the course is not completed.</p>
-            <div class="qr-grid">
-              @for (q of qrCards(); track q.course_id) {
-                <div class="qr-item">
-                  <img [src]="q.image" [alt]="'QR code for ' + q.course" width="132" height="132" />
-                  <b>{{ q.course }}</b>
-                  <span class="pp-pill" [ngClass]="qrTone(q)">{{ qrLabel(q) }}</span>
+        <div class="ct-list">
+          @for (r of certRows(); track r.key) {
+            <article class="ct-item">
+              <div class="ct-body">
+                <div class="ct-head">
+                  <h3 class="ct-title">{{ r.course }}</h3>
+                  @if (r.cert?.status === 'Issued') { <span class="star"><i class="bi bi-star-fill"></i> Certified</span> }
                 </div>
-              } @empty {
-                <p class="pp-note">This student is not enrolled in a course yet, so there is no QR code.</p>
+                <ul class="ct-facts">
+                  <li><i class="bi bi-graph-up"></i><span>Score</span><b>{{ r.cert?.score != null ? r.cert?.score + '%' : '—' }}</b></li>
+                  <li><i class="bi bi-person-check"></i><span>Attendance</span><b>{{ r.cert?.attendance != null ? r.cert?.attendance + '%' : '—' }}</b></li>
+                  <li><i class="bi bi-journal-check"></i><span>Course</span><b><span class="tag st" [class.g]="r.done" [class.w]="!r.done">{{ r.done ? 'Completed' : 'In progress · ' + r.progress + '%' }}</span></b></li>
+                  <li><i class="bi bi-award"></i><span>Certificate</span><b><span class="tag st" [class]="certStatus(r.cert).tone">{{ certStatus(r.cert).text }}</span></b></li>
+                  @if (r.cert?.number) { <li><i class="bi bi-hash"></i><span>Number</span><b>{{ r.cert?.number }}</b></li> }
+                  @if (r.cert?.issued_at) { <li><i class="bi bi-calendar-check"></i><span>Issued</span><b>{{ day(r.cert?.issued_at) }}</b></li> }
+                </ul>
+                @if (r.cert?.status === 'Cancelled' && r.cert?.cancel_reason) { <p class="ct-desc"><b>Cancelled because:</b> {{ r.cert?.cancel_reason }}</p> }
+                @if (r.cert?.status === 'Issued') {
+                  <div class="ct-links"><button type="button" class="sa-link" (click)="viewCert(r.cert!)"><i class="bi bi-eye"></i> View certificate</button></div>
+                }
+              </div>
+              @if (r.qr; as q) {
+                <div class="ct-qr">
+                  <img class="qr-img" [src]="q.image" [alt]="'QR code for ' + r.course" width="132" height="132" />
+                </div>
               }
-            </div>
-          </section>
-        }
+            </article>
+          } @empty {
+            @if (!busy()['certificates']) { <p class="pp-note">This student is not enrolled in a course yet, so there are no certificates or QR codes.</p> }
+          }
+        </div>
       }
 
       @if (tab() === 'logs') {

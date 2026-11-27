@@ -20,6 +20,8 @@ export interface ModuleReportRow {
   total: number;
   pct: number;
   status: string;
+  /** Each lesson of the module and whether the student has completed it. */
+  lessons?: { id: number; name: string; done: boolean }[];
 }
 
 export interface LearningPayload {

@@ -7,7 +7,6 @@
           @switch (view()) {
             @case ('status') { Status details — {{ student()?.name }} }
             @case ('notify') { Send push notification }
-            @case ('feedback') { Add feedback }
             @default { Students }
           }
         </h2>
@@ -44,7 +43,6 @@
                       <button type="button" class="icon-btn" title="Status details" aria-label="Status details" (click)="go('status', r.sid)"><i class="bi bi-bar-chart-line"></i></button>
                       @if (canEdit) {
                         <button type="button" class="icon-btn" title="Notify" aria-label="Notify" (click)="go('notify', r.sid)"><i class="bi bi-bell"></i></button>
-                        <button type="button" class="icon-btn" title="Feedback" aria-label="Feedback" (click)="go('feedback', r.sid)"><i class="bi bi-chat-left-text"></i></button>
                       }
                     </span>
                   </td>
@@ -60,9 +58,17 @@
       @case ('status') {
         @if (student(); as s) {
           <p class="lead-text">Overall completion <b>{{ s.progress }}%</b> · {{ quizCount() }} quiz{{ quizCount() === 1 ? '' : 'zes' }} on this course</p>
+          @if (reportBusy()) { <p class="muted">Loading the student's real progress…</p> }
+          @if (report(); as modules) {
+            <div class="mod-prog">
+              @for (m of modules; track $index) {
+                <div class="mp"><span>{{ m.name }}</span><div class="progress" role="progressbar" [attr.aria-valuenow]="m.pct" aria-valuemin="0" aria-valuemax="100"><i [style.width.%]="m.pct"></i></div><b>{{ m.done }}/{{ m.total }}</b></div>
+              }
+            </div>
+          }
           <div class="items-table-wrap">
             <table class="items-table">
-              <thead><tr><th>Topic</th><th>Topic status</th><th>Quiz status</th><th>Result</th><th>Feedback</th></tr></thead>
+              <thead><tr><th>Topic</th><th>Topic status</th><th>Quiz status</th><th>Result</th></tr></thead>
               <tbody>
                 @for (t of topics(); track $index) {
                   <tr>
@@ -70,20 +76,13 @@
                     <td>{{ t.status }}</td>
                     <td>{{ t.quizStatus }}</td>
                     <td>{{ t.result }}</td>
-                    <td>@for (f of t.feedback; track $index) { <div>{{ f }}</div> } @empty { <span class="muted">—</span> }</td>
                   </tr>
                 } @empty {
-                  <tr><td colspan="5" class="muted">This course has no lessons yet.</td></tr>
+                  <tr><td colspan="4" class="muted">This course has no lessons yet.</td></tr>
                 }
               </tbody>
             </table>
           </div>
-          @if (overallFeedback().length) {
-            <h4 class="sec">Overall feedback</h4>
-            @for (f of overallFeedback(); track f.id) {
-              <div class="kv"><span>{{ f.text }}</span><b>{{ f.on }}</b></div>
-            }
-          }
         }
       }
 
@@ -97,39 +96,16 @@
         </form>
       }
 
-      @case ('feedback') {
-        <form id="cs-form" (ngSubmit)="saveFeedback()" novalidate>
-          <div class="form-grid">
-            <div class="form-field full-width">
-              <label for="cs-topic">About</label>
-              <div class="input-wrap"><i class="bi bi-list-nested"></i>
-                <select id="cs-topic" name="topic" [(ngModel)]="model.topic">
-                  <option value="">Overall course</option>
-                  @for (l of lessonOptions(); track l.id) { <option [value]="l.id">{{ l.name }}</option> }
-                </select>
-                <i class="bi bi-chevron-down select-arrow"></i>
-              </div>
-            </div>
-            <div class="form-field full-width">
-              <label for="cs-text">Feedback <span>*</span></label>
-              <div class="input-wrap"><textarea id="cs-text" name="text" rows="4" required [(ngModel)]="model.text" [class.is-invalid]="submitted() && !model.text.trim()"></textarea></div>
-              @if (submitted() && !model.text.trim()) { <small class="error-text">Feedback is required.</small> }
-            </div>
-          </div>
-        </form>
-      }
     }
   </div>
 
   <div class="modal-footer-custom">
     @switch (view()) {
       @case ('list') {
-        @if (canEdit) { <button type="button" class="save-btn" (click)="invite()"><i class="bi bi-envelope-paper"></i> Send invitation</button> }
         <button type="button" class="cancel-btn" (click)="close()">Close</button>
       }
       @case ('status') {
         @if (canEdit) {
-          <button type="button" class="save-btn" (click)="go('feedback')"><i class="bi bi-chat-left-text"></i> Add feedback</button>
           <button type="button" class="cancel-btn" (click)="go('notify')"><i class="bi bi-bell"></i> Notify</button>
         }
         <button type="button" class="cancel-btn" (click)="go('list')"><i class="bi bi-arrow-left"></i> Back to students</button>
@@ -137,10 +113,6 @@
       @case ('notify') {
         <button type="button" class="cancel-btn" (click)="go('list')">Back</button>
         <button type="submit" form="cs-form" class="save-btn"><i class="bi bi-send"></i> Send notification</button>
-      }
-      @case ('feedback') {
-        <button type="button" class="cancel-btn" (click)="go('status')">Back</button>
-        <button type="submit" form="cs-form" class="save-btn"><i class="bi bi-floppy"></i> Save feedback</button>
       }
     }
   </div>

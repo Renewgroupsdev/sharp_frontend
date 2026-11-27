@@ -2,6 +2,7 @@ import { Component, DestroyRef, OnInit, computed, effect, inject, signal } from 
 import { MatDialog } from '@angular/material/dialog';
 import { apiErrorMessage } from '../../../core/http/api.interceptor';
 import { AttendanceRequestsService } from '../../../shared/common-services/attendance-requests.service';
+import { AttendanceSummary } from '../../../shared/components/attendance-summary/attendance-summary';
 import { MyAttendanceService } from '../../../shared/common-services/my-attendance.service';
 import { ToastService } from '../../../shared/common-services/toast.service';
 import { AttendanceRequestForm } from '../attendance-request-form/attendance-request-form';
@@ -30,6 +31,7 @@ const isoOf = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}
 @Component({
   selector: 'app-student-attendance',
   standalone: true,
+  imports: [AttendanceSummary],
   templateUrl: './student-attendance.html',
   styleUrls: ['../../../shared/styles/erp-page.scss', '../student.scss', './student-attendance.scss'],
 })

@@ -1,0 +1,6 @@
+:host { display: block; }
+.sh-head { margin-bottom: 14px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.sh-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto;
+  button { display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border: 1px solid #E4E7EC; border-radius: 6px; background: #fff; font: inherit; font-size: 13px; font-weight: 600; color: #475467; cursor: pointer;
+    &:hover { background: #F9FAFB; }
+    &.active { background: #080536; border-color: #080536; color: #fff; } } }

@@ -4,6 +4,7 @@ import { apiErrorMessage } from '../../../core/http/api.interceptor';
 import { AttendanceRequestsService } from '../../../shared/common-services/attendance-requests.service';
 import { AttendanceService } from '../../../shared/common-services/attendance.service';
 import { GroupMember, MentorGroupService } from '../../../shared/common-services/mentor-group.service';
+import { UsersService } from '../../../shared/common-services/users.service';
 import { ToastService } from '../../../shared/common-services/toast.service';
 import { ActivityLogService } from '../../../shared/common-services/activity-log.service';
 
@@ -22,6 +23,7 @@ export class ManualAttendance implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly log = inject(ActivityLogService);
   readonly group = inject(MentorGroupService);
+  private readonly users = inject(UsersService);
 
   readonly reasons = REASONS;
   readonly picking = signal<GroupMember | null>(null);
@@ -32,7 +34,12 @@ export class ManualAttendance implements OnInit {
   })();
   readonly todayLabel = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
-  readonly rows = computed(() => this.group.members().map(m => {
+  readonly batch = signal('');
+  readonly search = signal('');
+  /** The batches of the mentor's assigned students. */
+  readonly batches = computed(() => [...new Set(this.group.members().map(m => m.b).filter(Boolean))].sort());
+
+  readonly rows = computed(() => this.group.members().filter(m => (!this.batch() || m.b === this.batch()) && (!this.search().trim() || `${m.n} ${m.id}`.toLowerCase().includes(this.search().trim().toLowerCase()))).map(m => {
     const rec = this.attendance.items().find(r => r.sid === m.id && r.iso === this.iso);
     return { m, rec };
   }));
@@ -46,6 +53,7 @@ export class ManualAttendance implements OnInit {
   readonly resolved = computed(() => this.requests().filter(r => r.outcome !== 'Pending'));
 
   ngOnInit(): void {
+    void this.users.refresh();
     this.attendance.load().catch(() => undefined);
     this.requestStore.loadFromApi().catch(e => this.toast.error('Could not load attendance requests', apiErrorMessage(e)));
   }

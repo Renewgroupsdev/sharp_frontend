@@ -1,3 +1,5 @@
+import { UserDetailService } from '../../../shared/common-services/user-detail.service';
+import { UsersService } from '../../../shared/common-services/users.service';
 import { Component, Input, computed, inject } from '@angular/core';
 import { AssessmentsService } from '../../../shared/common-services/assessments.service';
 import { CountRibbon } from '../../../shared/components/count-ribbon/count-ribbon';
@@ -16,6 +18,7 @@ import { RibbonItem, ExportFormat, TableColumn, TableRow } from '../../../shared
   styleUrls: ['../../../shared/styles/erp-page.scss'],
 })
 export class QuizReport extends LocalListBase {
+  private readonly users = inject(UsersService);
   private readonly store = inject(AssessmentsService);
 
   /** Quiz results or assessment results; the two are reported separately. */
@@ -60,10 +63,16 @@ export class QuizReport extends LocalListBase {
     ];
   });
 
+  private readonly userDetail = inject(UserDetailService);
+
+  /** A student's name opens their details, as in User Management. */
+  openProfile(row: TableRow): void { this.userDetail.open(String(row['sid']), 'learning'); }
+
   protected allRows(): TableRow[] {
     return this.results().map(r => ({
       id: r.id,
-      student: { name: r.name, subtitle: r.sid },
+      sid: r.sid,
+      student: { name: r.name, subtitle: r.sid, photo: this.users.photoOf(r.sid) },
       __student: r.name,
       searchText: `${r.name} ${r.sid} ${r.quiz}`,
       course: r.course,

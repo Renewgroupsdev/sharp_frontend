@@ -17,6 +17,8 @@ export interface GroupMember {
   p: number;
   /** Module ids with a passed assessment. */
   done: number[];
+  /** Batch name. */
+  b: string;
 }
 
 /** The mentor's group (students of the mentor's batch), their progress. */
@@ -29,18 +31,22 @@ export class MentorGroupService {
 
   readonly teamName = 'Team Vaigai';
 
-  /** Students of the signed-in mentor's batch only. */
+  constructor() {
+    // The user list is not loaded by itself: without this the mentor pages show leftover demo data or nobody.
+    if (this.auth.accessToken()) void this.users.refresh();
+  }
+
+  /** The mentor's assigned students: the API returns only the students of the batches that take the mentor's courses. */
   readonly members = computed<GroupMember[]>(() => {
-    const batch = this.auth.actor().b;
     const passed = this.learner.state().passed;
-    const students = this.users.students().filter(u => u.b === batch);
+    const students = this.users.students();
     const six = MODULES.length;
     return students.map(u => {
       const t = TEAM.find(x => x.n === u.n);
       const isPriya = u.n === 'Priya R';
       const p = isPriya ? Math.round(MODULES.filter(m => passed[m.id]).length / six * 100) : (t?.p ?? 0);
       const done = isPriya ? MODULES.filter(m => passed[m.id]).map(m => m.id) : MODULES.filter(m => m.id <= Math.round(p / 100 * six)).map(m => m.id);
-      return { id: u.id, n: u.n, c: u.org, r: t?.r ?? 'Member', i: u.i || u.n.slice(0, 2).toUpperCase(), col: u.col, p, done };
+      return { id: u.id, n: u.n, c: u.org, r: t?.r ?? 'Member', i: u.i || u.n.slice(0, 2).toUpperCase(), col: u.col, p, done, b: u.b };
     });
   });
 

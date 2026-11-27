@@ -7,6 +7,7 @@ import { CountRibbon } from '../../../shared/components/count-ribbon/count-ribbo
 import { CommonFilterCard } from '../../../shared/components/common-filter-card/common-filter-card';
 import { CommonTableCard } from '../../../shared/components/common-table-card/common-table-card';
 import { LocalListBase } from '../../../shared/components/local-list-base';
+import { HeaderActionsDirective } from '../../../shared/directives/header-actions.directive';
 import { CanActionDirective } from '../../../shared/directives/can-action.directive';
 import { ASSESS_STATUSES, ASSESS_TYPES, AssessType, usesQuestions } from '../../../shared/models/assessment.model';
 import { RibbonItem, TableColumn, TableRow } from '../../../shared/models/common-components.model';
@@ -16,7 +17,7 @@ import { AssessmentForm } from '../assessment-form/assessment-form';
 @Component({
   selector: 'app-assessment-list',
   standalone: true,
-  imports: [CountRibbon, CommonFilterCard, CommonTableCard, CanActionDirective],
+  imports: [CountRibbon, CommonFilterCard, CommonTableCard, CanActionDirective, HeaderActionsDirective],
   templateUrl: './assessment-list.html',
   styleUrls: ['../../../shared/styles/erp-page.scss'],
 })

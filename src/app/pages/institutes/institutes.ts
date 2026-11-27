@@ -1,4 +1,5 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { AuthService } from '../../core/auth/auth.service';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Institute } from '../../core/data/models';
 import { BatchesService } from '../../shared/common-services/batches.service';
@@ -74,7 +75,11 @@ export class Institutes extends LocalListBase implements OnInit {
   private readonly toast = inject(ToastService);
 
   readonly tab = signal<OrgTab>('inst');
-  readonly tabs: { key: OrgTab; label: string }[] = [{ key: 'inst', label: 'Colleges / institutes' }, { key: 'batch', label: 'Batch details' }];
+  private readonly authForTabs = inject(AuthService);
+  readonly tabs: { key: OrgTab; label: string }[] = [
+    { key: 'inst' as OrgTab, label: 'Colleges / institutes', slug: 'a_orgs.tab.institutes' },
+    { key: 'batch' as OrgTab, label: 'Batch details', slug: 'a_orgs.tab.batches' },
+  ].filter(t => this.authForTabs.hasTab(t.slug));
 
   override columns = INSTITUTE_COLUMNS;
   override filters = this.instituteFilters();

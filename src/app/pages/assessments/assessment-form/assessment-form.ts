@@ -40,7 +40,7 @@ export class AssessmentForm {
     course: this.existing?.course ?? this.data.course ?? this.courses[0] ?? '',
     module: this.existing?.module ?? '',
     topic: this.existing?.topic ?? 'All topics',
-    status: this.existing?.status ?? 'Draft',
+    status: this.existing?.status ?? 'Published',
     dueIso: this.existing?.dueIso ?? '',
     max: this.existing?.max ?? 50,
     minp: this.existing?.minp ?? 60,

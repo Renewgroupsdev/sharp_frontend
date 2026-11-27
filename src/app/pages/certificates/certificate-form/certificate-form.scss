@@ -1,0 +1,17 @@
+.cf-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 20px; align-items: start; }
+.cf-left { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.cf-right { position: sticky; top: 0; min-width: 0; h4 { margin: 0 0 10px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #344054; } }
+.cf-sec { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; border: 1px solid #E4E7EC; border-radius: 8px; background: #fff;
+  h4 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #344054;
+    .n { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; background: #080536; color: #fff; font-size: 11px; } } }
+
+.cf-tpls { display: flex; flex-direction: column; gap: 8px; max-height: 260px; overflow-y: auto; }
+.cf-tpl { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1.5px solid #E4E7EC; border-radius: 8px; background: #fff; font: inherit; text-align: left; cursor: pointer;
+  .sw { flex: 0 0 26px; width: 26px; height: 26px; border-radius: 6px; }
+  .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; b { font-size: 13px; color: #101828; } small { font-size: 11.5px; color: #667085; } }
+  .ok { display: none; color: #080536; }
+  &:hover { border-color: #98A2B3; }
+  &.on { border-color: #080536; background: #F9FAFB; box-shadow: 0 0 0 3px rgba(8, 5, 54, .08); .ok { display: block; } } }
+.hint { display: block; font-size: 11.5px; color: #667085; margin-top: 4px; }
+
+@media (max-width: 900px) { .cf-body { grid-template-columns: 1fr; } .cf-right { position: static; } }

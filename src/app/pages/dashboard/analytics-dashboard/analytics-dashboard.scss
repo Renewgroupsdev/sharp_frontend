@@ -341,3 +341,7 @@ a.mod { display: block; }
 .kpi-icon { width: 40px; height: 40px; border-radius: 8px; font-size: 18px; }
 .mod { border: 1px solid #E4E7EC; border-radius: 8px; box-shadow: none; > header { padding: 11px 16px; background: #fff; color: #101828; border-bottom: 1px solid #E4E7EC; i { color: var(--g-dark); } h2 { font-size: 14px; } .tag { background: #F2F4F7; color: #475467; border-radius: 6px; } } }
 a.kpi:hover, a.mod:hover, a.pending-item:hover { transform: none; box-shadow: 0 4px 12px rgba(16, 24, 40, .08); }
+
+.stack-bar { position: relative; justify-content: flex-end; background: #f1f5f8; }
+.stack-bar .fill { border-radius: 4px 4px 0 0; background: #4fb58a; &[data-tone='mid'] { background: #e8b33f; } &[data-tone='low'] { background: #e46f6f; } }
+.batch-pct { font-size: 11px; font-weight: 700; color: #1f2937; margin-bottom: 3px; }

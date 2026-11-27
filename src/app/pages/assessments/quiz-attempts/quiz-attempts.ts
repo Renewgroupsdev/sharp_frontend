@@ -1,3 +1,4 @@
+import { UsersService } from '../../../shared/common-services/users.service';
 import { Component, Input, OnInit, computed, inject, signal } from '@angular/core';
 import { apiErrorMessage } from '../../../core/http/api.interceptor';
 import { AssessmentsApi } from '../../../shared/common-services/assessments-api.service';
@@ -47,6 +48,7 @@ export const overallOutcome = (attempts: QuizAttemptRow[]): AttemptOutcome =>
   styleUrls: ['../../../shared/styles/erp-page.scss', './quiz-attempts.scss'],
 })
 export class QuizAttempts extends LocalListBase implements OnInit {
+  private readonly users = inject(UsersService);
   private readonly api = inject(AssessmentsApi);
 
   /** Hide the page header when the list sits inside another page's tab. */
@@ -116,7 +118,7 @@ export class QuizAttempts extends LocalListBase implements OnInit {
       const overall = overallOutcome(attempts);
       return {
         id: String(studentId),
-        student: { name: first.student?.name ?? 'Student', subtitle: first.student?.public_id ?? '' },
+        student: { name: first.student?.name ?? 'Student', subtitle: first.student?.public_id ?? '', photo: this.users.photoOf(first.student?.public_id) },
         __student: first.student?.name ?? '',
         searchText: [first.student?.name, first.student?.public_id, ...quizzes, ...attempts.map(a => a.assessment?.course)].filter(Boolean).join(' '),
         quizzes: quizzes.length === 1 ? quizzes[0] : `${quizzes.length} quizzes`,

@@ -7,8 +7,8 @@
   </div>
 
   <div class="segment att-tabs" role="tablist">
-    <button type="button" role="tab" [class.active]="tab() === 'list'" (click)="tab.set('list')">Attendance list ({{ pending() }} to mark)</button>
-    <button type="button" role="tab" [class.active]="tab() === 'manual'" (click)="tab.set('manual')">Mark manual attendance</button>
+    @if (showListTab) { <button type="button" role="tab" [class.active]="tab() === 'list'" (click)="tab.set('list')">Attendance list ({{ pending() }} to mark)</button> }
+    @if (showManualTab) { <button type="button" role="tab" [class.active]="tab() === 'manual'" (click)="tab.set('manual')">Mark manual attendance</button> }
   </div>
 
   @switch (tab()) {

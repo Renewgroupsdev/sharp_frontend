@@ -57,25 +57,22 @@
           </ul>
         </div>
         <div>
-          <h3>Batch Attendance</h3>
+          <h3>Course attendance by batch</h3>
           @if (batchAttendance().length) {
             <div class="stack">
               @for (b of batchAttendance(); track b.name) {
-                <div class="stack-col" (click)="go('attendance', { batch: b.name })" [title]="b.name + ': ' + b.counts.present + ' present, ' + b.counts.late + ' late, ' + b.counts.absent + ' absent'">
-                  <div class="stack-bar">
-                    <span style="background-color:#e46f6f" [style.height.%]="b.absent"></span>
-                    <span style="background-color:#e8b33f" [style.height.%]="b.late"></span>
-                    <span style="background-color:#4fb58a" [style.height.%]="b.present"></span>
-                  </div>
+                <div class="stack-col" (click)="go('attendance', { batch: b.name })" [title]="b.name + ': ' + b.rate + '% course attendance, ' + b.students + ' students'">
+                  <span class="batch-pct">{{ b.rate }}%</span>
+                  <div class="stack-bar"><span class="fill" [attr.data-tone]="b.tone" [style.height.%]="b.rate"></span></div>
                   <small>{{ b.name }}</small>
                 </div>
               }
             </div>
           } @else { <p class="empty">No attendance recorded yet.</p> }
           <ul class="legend inline">
-            <li><i class="sw" style="background-color:#4fb58a"></i>Present</li>
-            <li><i class="sw" style="background-color:#e8b33f"></i>Late / Manual</li>
-            <li><i class="sw" style="background-color:#e46f6f"></i>Absent</li>
+            <li><i class="sw" style="background-color:#4fb58a"></i>75% or more</li>
+            <li><i class="sw" style="background-color:#e8b33f"></i>50–74%</li>
+            <li><i class="sw" style="background-color:#e46f6f"></i>Under 50%</li>
           </ul>
         </div>
         <div class="pending-row">

@@ -1,7 +1,7 @@
 <div class="m-page">
   <div>
     <h1 class="page-title"><i class="bi bi-clock-history"></i> Manual Attendance</h1>
-    <p class="m-sub">Mark students of your batch present, and review their attendance requests.</p>
+    <p class="m-sub">Mark your assigned students present, and review their attendance requests.</p>
   </div>
 
   <div class="m-note">
@@ -12,6 +12,13 @@
   <div class="m-two">
     <div class="m-card">
       <h3>Today · {{ todayLabel }}</h3>
+      <div class="m-inline" style="gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <select class="m-select" aria-label="Batch" [value]="batch()" (change)="batch.set($any($event.target).value)">
+          <option value="">All assigned batches</option>
+          @for (b of batches(); track b) { <option [value]="b">{{ b }}</option> }
+        </select>
+        <input class="m-select" type="search" placeholder="Search student" [value]="search()" (input)="search.set($any($event.target).value)" />
+      </div>
       <div class="m-scroll">
         <table class="m-table">
           <thead><tr><th>Student</th><th>Status</th><th>Detail</th><th></th></tr></thead>
@@ -32,7 +39,7 @@
                 </td>
               </tr>
             } @empty {
-              <tr><td colspan="4" class="m-empty">No students assigned to your batch.</td></tr>
+              <tr><td colspan="4" class="m-empty">No assigned students match.</td></tr>
             }
           </tbody>
         </table>

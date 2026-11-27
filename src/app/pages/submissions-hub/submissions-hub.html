@@ -1,0 +1,19 @@
+<div class="purchase-page container-fluid px-0">
+  <div class="page-header sh-head">
+    <div>
+      <h6 class="page-title"><i class="bi bi-inbox"></i> Submissions</h6>
+      <p class="page-subtitle">Everything students hand in: quiz and assessment attempts, and assignment submissions.</p>
+    </div>
+    <div class="sh-tabs" role="tablist" aria-label="Submission type">
+      @for (t of tabs; track t.key) {
+        <button type="button" role="tab" [class.active]="tab() === t.key" [attr.aria-selected]="tab() === t.key" (click)="tab.set(t.key)"><i class="bi" [class]="t.icon"></i> {{ t.label }}</button>
+      }
+    </div>
+  </div>
+
+  @switch (tab()) {
+    @case ('assessment') { <app-quiz-attempts [embedded]="true" type="Assessment" /> }
+    @case ('assignment') { <app-submissions [embedded]="true" /> }
+    @default { <app-quiz-attempts [embedded]="true" type="Quiz" /> }
+  }
+</div>

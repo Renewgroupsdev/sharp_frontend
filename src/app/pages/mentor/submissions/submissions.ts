@@ -1,4 +1,5 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { UsersService } from '../../../shared/common-services/users.service';
+import { Component, Input, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -34,15 +35,19 @@ const day = (iso: string | null | undefined): string => (iso ? new Date(iso).toL
   styleUrls: ['../../../shared/styles/erp-page.scss', './submissions.scss'],
 })
 export class SubmissionsPage extends LocalListBase implements OnInit {
+  private readonly users = inject(UsersService);
+  /** Hide the page header when the list sits inside the Submissions tabs. */
+  @Input() embedded = false;
+
   private readonly api = inject(AssessmentsApi);
   private readonly preview = inject(AttachmentPreviewService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
 
-  /** Saving a student's file, editing their answer and deleting a submission are for Admin and Super Admin only; others can open files to review. */
-  readonly canManage = computed(() => this.auth.role() === 'Admin' || this.auth.role() === 'Super Admin');
-  readonly editing = signal(false);
-  readonly draft = signal('');
+  /** Saving a student's file is for Admin and Super Admin only; others can open files to review. */
+  readonly canManage = computed(() => this.auth.hasActionAccess('a_assess.download'));
+  /** Marks and reviews are the mentor's (and OB's) job; Admin and Super Admin can only read them. */
+  readonly canGrade = computed(() => this.auth.hasActionAccess('a_assess.grade'));
 
   protected readonly noun = 'submissions';
   protected override filterFields = { status: 'status', source: 'assessmentTitle', branch: ['batch'] };
@@ -170,41 +175,9 @@ export class SubmissionsPage extends LocalListBase implements OnInit {
     catch (e) { this.fileError.set(apiErrorMessage(e)); }
   }
 
+  protected photoOf(id: string | undefined): string { return this.users.photoOf(id); }
+
   ngOnInit(): void { void this.load(); }
-
-  startEdit(): void {
-    this.draft.set(this.selected()?.content ?? '');
-    this.editing.set(true);
-  }
-
-  async saveEdit(): Promise<void> {
-    const s = this.selected();
-    const text = this.draft().trim();
-    if (!s || !this.canManage()) return;
-    if (!text) return void this.toast.error('The answer cannot be empty');
-    this.saving.set(true);
-    try {
-      const res = await this.api.updateSubmission(s.id, text);
-      this.items.update(list => list.map(i => (i.id === s.id ? { ...i, content: res.submission.content } : i)));
-      this.selected.set(this.items().find(i => i.id === s.id) ?? null);
-      this.editing.set(false);
-      this.toast.success('Answer updated');
-    } catch (e) { this.toast.error(apiErrorMessage(e)); }
-    finally { this.saving.set(false); }
-  }
-
-  async deleteSubmission(): Promise<void> {
-    const s = this.selected();
-    if (!s || !this.canManage()) return;
-    if (!(await this.toast.confirm('Delete this submission?', `Version ${s.submission_no} and its files will be removed for good.`))) return;
-    try {
-      await this.api.deleteSubmission(s.id);
-      this.items.update(list => list.filter(i => i.id !== s.id));
-      this.selected.set(null);
-      this.editing.set(false);
-      this.toast.success('Submission deleted');
-    } catch (e) { this.toast.error(apiErrorMessage(e)); }
-  }
 
   protected allRows(): TableRow[] {
     return this.items().map(s => {
@@ -212,7 +185,7 @@ export class SubmissionsPage extends LocalListBase implements OnInit {
       const title = s.assessment?.title || 'Assignment';
       return {
         id: String(s.id),
-        student: { name: s.student?.name || 'Student', subtitle: `${s.student?.public_id ?? ''} · v${s.submission_no}` },
+        student: { name: s.student?.name || 'Student', subtitle: `${s.student?.public_id ?? ''} · v${s.submission_no}`, photo: this.users.photoOf(s.student?.public_id) },
         __student: s.student?.name ?? '',
         assessment: { name: title, subtitle: s.assessment?.course ?? '' },
         assessmentTitle: title,
@@ -249,7 +222,7 @@ export class SubmissionsPage extends LocalListBase implements OnInit {
   }
 
   onQuickAction(e: { row: TableRow; action: string }): void { if (e.action === 'open') this.open(e.row); }
-  onExport(format: ExportFormat): void { this.exportAs(format, 'sharp-submissions', 'Assignment submissions'); }
+  onExport(format: ExportFormat): void { this.exportAs(format, 'sharp-submissions', 'Submissions'); }
 
   select(item: AssessmentSubmission): void {
     this.selected.set(item);

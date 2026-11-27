@@ -1,0 +1,56 @@
+@if (error(); as err) {
+  <p class="as-note" role="alert">{{ err }}</p>
+} @else if (loading()) {
+  <p class="as-note">Loading attendance percentages…</p>
+} @else if (data(); as d) {
+  <div class="as-grid">
+    <section class="as-block">
+      <header>
+        <span class="as-ico"><i class="bi bi-book"></i></span>
+        <div><h3>Course attendance</h3><p>Days attended out of the working days (Mon–Fri) between the course start and end.</p></div>
+      </header>
+      <div class="as-list">
+        @for (c of d.courses; track c.course_id) {
+          <article class="as-course">
+            <div class="as-ring" [attr.data-tone]="tone(c.pct)" [style.--p]="c.pct" role="img" [attr.aria-label]="c.pct + ' percent attendance'">
+              <span><b>{{ c.pct }}%</b></span>
+            </div>
+            <div class="as-info">
+              <b class="as-name">{{ c.course }}</b>
+              <span class="as-dates"><i class="bi bi-calendar-range"></i> {{ day(c.start_date) }} – {{ day(c.end_date) }}</span>
+              <div class="as-chips">
+                <span class="chip ok"><i class="bi bi-check2-circle"></i> {{ c.present }} present</span>
+                <span class="chip bad"><i class="bi bi-x-circle"></i> {{ c.absent }} absent</span>
+                <span class="chip"><i class="bi bi-calendar-check"></i> {{ c.working_days }} days</span>
+              </div>
+              <span class="as-sofar">{{ c.pct_so_far }}% of the {{ c.elapsed_days }} days so far</span>
+            </div>
+          </article>
+        } @empty {
+          <p class="as-note">No course dates yet. The batch needs a start and end date.</p>
+        }
+      </div>
+    </section>
+
+    <section class="as-block">
+      <header>
+        <span class="as-ico"><i class="bi bi-calendar3"></i></span>
+        <div><h3>Month-wise attendance</h3><p>Days attended out of the working days of each month.</p></div>
+      </header>
+      <div class="as-list">
+        @for (m of d.months; track m.month) {
+          <div class="as-month" [attr.title]="m.label + ': ' + m.present + ' of ' + m.working_days + ' days'">
+            <div class="as-mtop">
+              <b>{{ m.label }}</b>
+              <span class="as-pct" [attr.data-tone]="tone(m.pct)">{{ m.pct }}%</span>
+            </div>
+            <div class="as-bar" role="progressbar" [attr.aria-valuenow]="m.pct" aria-valuemin="0" aria-valuemax="100"><i [attr.data-tone]="tone(m.pct)" [style.width.%]="m.pct"></i></div>
+            <small>{{ m.present }} of {{ m.working_days }} working days attended</small>
+          </div>
+        } @empty {
+          <p class="as-note">No attendance recorded yet.</p>
+        }
+      </div>
+    </section>
+  </div>
+}

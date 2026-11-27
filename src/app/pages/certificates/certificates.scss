@@ -1,0 +1,5 @@
+/* This page is taller than the screen, so let it scroll instead of squeezing the header and the tabs. */
+.purchase-page { height: auto; min-height: 100%; }
+.page-header, .tab-bar { flex-shrink: 0; }
+.tab-bar { overflow-y: hidden; }
+.tab-panel { flex: 1 0 auto; }

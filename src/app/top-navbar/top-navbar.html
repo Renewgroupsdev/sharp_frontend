@@ -18,11 +18,13 @@
   <app-notification-bell></app-notification-bell>
 
   <div class="account">
-    <span class="avatar" [style.background]="auth.actor().col">{{ auth.actor().i }}</span>
-    <div class="who">
-      <strong>{{ auth.actor().n }}</strong>
-      <span>{{ auth.role() }}</span>
-    </div>
+    <button type="button" class="profile-btn" title="Edit my profile" aria-label="Edit my profile" (click)="openProfile()">
+      @if (auth.actor().pic; as pic) { <img class="avatar avatar-img" [src]="pic" [alt]="auth.actor().n" /> } @else { <span class="avatar" [style.background]="auth.actor().col">{{ auth.actor().i }}</span> }
+      <div class="who">
+        <strong>{{ auth.actor().n }}</strong>
+        <span>{{ auth.role() }}</span>
+      </div>
+    </button>
     <button type="button" class="logout" title="Sign out" aria-label="Sign out" (click)="auth.logout()"><i class="bi bi-box-arrow-right"></i></button>
   </div>
 </header>

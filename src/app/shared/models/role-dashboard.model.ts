@@ -1,7 +1,7 @@
 /** GET /my/dashboard: the signed-in person's dashboard as figures and blocks, whatever their role. The API scopes every number. */
 export type KpiRow = [label: string, value: string | number, hint: string];
 
-export interface PieBlock { type: 'pie'; title: string; slices: { label: string; value: number }[] }
+export interface PieBlock { type: 'pie'; title: string; three_d?: boolean; slices: { label: string; value: number }[] }
 export interface BarsBlock { type: 'bars'; title: string; unit: string; items: { label: string; value: number }[] }
 export interface ProgressBlock { type: 'progress'; title: string; items: { label: string; value: number }[] }
 

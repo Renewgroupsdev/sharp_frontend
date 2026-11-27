@@ -175,7 +175,11 @@ export class AssignmentDetailPage implements OnInit, OnDestroy {
     return ({ submitted: 'Submitted', under_review: 'Under review', graded: 'Graded', returned: 'Returned for correction' } as Record<string, string>)[status] ?? status;
   }
 
+  /** Once the work is graded the assignment is finished: no new version can be sent. */
+  isGraded(): boolean { return this.submissions()[0]?.status === 'graded'; }
+
   canSubmit(): boolean {
+    if (this.isGraded()) return false;
     const due = this.assessment()?.due_date;
     return !due || new Date(`${due}T23:59:59`).getTime() >= Date.now();
   }

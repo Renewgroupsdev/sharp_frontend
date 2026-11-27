@@ -1,8 +1,8 @@
 <div class="purchase-page container-fluid px-0">
-  <div class="d-flex flex-wrap align-items-center justify-content-between header-actions">
-    <p class="page-subtitle">Question groups collect related questions. A quiz draws its questions from the groups chosen in Quiz setup.</p>
-    <button *appCan="'a_assess.create'" type="button" class="add-lead-btn" (click)="add()"><i class="bi bi-plus-lg"></i> Add question group</button>
-  </div>
+  <p class="page-subtitle grp-note">{{ type === 'Assessment' ? 'Assessment groups collect related questions. An assessment draws its questions from the groups chosen in its setup.' : 'Question groups collect related questions. A quiz draws its questions from the groups chosen in Quiz setup.' }}</p>
+  <ng-template appHeaderActions>
+    <button *appCan="'a_assess.create'" type="button" class="add-lead-btn" (click)="add()"><i class="bi bi-plus-lg"></i> {{ type === 'Assessment' ? 'Add assessment group' : 'Add question group' }}</button>
+  </ng-template>
 
   <app-common-filter-card
     searchPlaceholder="Search question groups"
@@ -13,7 +13,7 @@
 
   <div class="table-col">
     <app-common-table-card
-      title="Question groups"
+      [title]="type === 'Assessment' ? 'Assessment groups' : 'Question groups'"
       [recordCountText]="recordCountText"
       [columns]="columns"
       [rows]="rows"

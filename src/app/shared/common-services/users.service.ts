@@ -48,6 +48,8 @@ export class UsersService extends LocalCollection<SharpUser> {
 
   students(): SharpUser[] { return this.items().filter(u => u.r === 'Student'); }
   byRole(role: string): SharpUser[] { return this.items().filter(u => u.r === role); }
+  /** Profile picture link of a person, by user id; empty when they have none. */
+  photoOf(id: string | null | undefined): string { return (id ? this.get(id)?.pic : '') ?? ''; }
   nameOf(id: string): string { return this.get(id)?.n ?? id; }
   /** Institute of a person, by user id. */
   orgOf(id: string): string { return this.get(id)?.org ?? '—'; }

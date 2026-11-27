@@ -14,6 +14,16 @@ export class UsersApi {
     return `${this.base}/users/${encodeURI(id)}${action}`;
   }
 
+  /** Edit your own profile (any role). */
+  updateMe(body: { name: string; mobile: string | null; email: string | null; short_description: string | null; biography: string | null; avatar?: string; avatar_remove?: boolean }) {
+    return firstValueFrom(this.http.put<ApiOk<{ user: ApiUserResource }>>(`${this.base}/me`, body));
+  }
+
+  /** Change your own password; the current one is checked. */
+  changePassword(body: { current_password: string; new_password: string }) {
+    return firstValueFrom(this.http.post<ApiOk<{ message: string }>>(`${this.base}/auth/change-password`, body));
+  }
+
   me() {
     return firstValueFrom(this.http.get<ApiOk<{ user: ApiUserResource }>>(`${this.base}/me`));
   }

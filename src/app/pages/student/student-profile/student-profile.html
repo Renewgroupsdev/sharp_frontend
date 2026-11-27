@@ -2,36 +2,47 @@
   <div class="st-head">
     <div>
       <h2 class="page-title"><i class="bi bi-person-circle"></i> My Profile</h2>
-      <p class="st-sub">{{ student.id }} · {{ student.batch }}</p>
+      <p class="st-sub">{{ me().id }} · {{ me().b }}</p>
     </div>
-    <button type="button" class="st-btn alt" (click)="requestChange()"><i class="bi bi-pencil-square"></i> Request a change</button>
+    <button type="button" class="st-btn" (click)="edit()"><i class="bi bi-pencil-square"></i> Edit profile</button>
   </div>
 
   <div class="st-grid side">
     <div class="st-card">
       <div class="st-row">
-        <span class="st-ico solid" style="width:56px;height:56px;flex-basis:56px;font-size:20px;font-weight:800;border-radius:16px">{{ student.init }}</span>
+        @if (me().pic; as pic) {
+          <img [src]="pic" [alt]="me().n" style="width:56px;height:56px;flex:0 0 56px;border-radius:16px;object-fit:cover" />
+        } @else {
+          <span class="st-ico solid" style="width:56px;height:56px;flex-basis:56px;font-size:20px;font-weight:800;border-radius:16px" [style.background]="me().col">{{ me().i }}</span>
+        }
         <span class="grow">
-          <span class="t1" style="font-size:17px">{{ student.name }}</span>
-          <span class="t2">{{ student.course }}</span>
-          <span style="display:flex;gap:6px;margin-top:6px"><span class="pill g">Active</span><span class="pill b">{{ student.batch }}</span></span>
+          <span class="t1" style="font-size:17px">{{ me().n }}</span>
+          @if (me().sd) { <span class="t2">{{ me().sd }}</span> }
+          <span style="display:flex;gap:6px;margin-top:6px"><span class="pill g">{{ me().st }}</span><span class="pill b">{{ me().b }}</span></span>
         </span>
       </div>
       <h3 style="margin-top:12px">Details</h3>
-      @for (r of rows; track r[0]) {
+      @for (r of rows(); track r[0]) {
         <div class="kv"><span>{{ r[0] }}</span><span>{{ r[1] }}</span></div>
+      }
+      @if (me().bio) {
+        <h3 style="margin-top:12px">About me</h3>
+        <p class="t2" style="white-space:pre-wrap">{{ me().bio }}</p>
       }
     </div>
 
     <div class="st-card">
-      <h3>Skill progress <span class="mut">{{ progress.progress() }}%</span></h3>
-      <div class="st-bar"><i [style.width.%]="progress.progress()"></i></div>
-      <div style="display:flex;gap:5px;margin-top:12px">
-        @for (m of modules; track m.id) {
-          <span class="pill" [class.g]="progress.score(m.id) !== undefined" style="flex:1;justify-content:center;border-radius:6px" [title]="m.title">{{ m.id }}</span>
-        }
-      </div>
-      <p class="t2" style="margin-top:10px">{{ progress.passedCount() }} of {{ modules.length }} modules passed · attendance {{ progress.attendancePct() }}%</p>
+      <h3>Course progress <span class="mut">{{ overall() }}%</span></h3>
+      <div class="st-bar"><i [style.width.%]="overall()"></i></div>
+      @for (c of courses(); track c.id) {
+        <div style="margin-top:12px">
+          <div style="display:flex;justify-content:space-between;gap:8px"><span class="t1" style="font-size:13px">{{ c.title }}</span><b>{{ c.progress }}%</b></div>
+          <div class="st-bar"><i [style.width.%]="c.progress"></i></div>
+          <span class="t2">{{ c.lessons_done }} of {{ c.lessons_total }} lessons</span>
+        </div>
+      } @empty {
+        <p class="t2" style="margin-top:10px">No courses yet. They appear once your batch is mapped to them.</p>
+      }
     </div>
   </div>
 </section>

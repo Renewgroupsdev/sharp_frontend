@@ -36,6 +36,13 @@ export interface AttendanceListRow {
   created_at: string;
 }
 
+export interface AttendanceMonthRow { month: string; label: string; working_days: number; present: number; pct: number }
+export interface AttendanceCourseRow {
+  course_id: number; course: string; start_date: string; end_date: string;
+  working_days: number; elapsed_days: number; present: number; absent: number; pct: number; pct_so_far: number;
+}
+export interface AttendanceSummaryData { months: AttendanceMonthRow[]; courses: AttendanceCourseRow[] }
+
 /** /api/web/attendance — staff and mentors list and mark attendance; one row per student and day. */
 @Injectable({ providedIn: 'root' })
 export class AttendanceApi {
@@ -50,6 +57,12 @@ export class AttendanceApi {
   async mark(payload: MarkAttendancePayload): Promise<void> {
     const res = await firstValueFrom(this.http.post<{ ok: boolean; message?: string }>(this.url, payload));
     if (res?.ok !== true) throw new Error(res?.message || 'Unexpected response from the server.');
+  }
+
+  /** Month-wise and per-course attendance percentages; your own, or a student's you may see (public id). */
+  async summary(studentId?: string): Promise<AttendanceSummaryData> {
+    const params = studentId ? new HttpParams().set('student_id', studentId) : undefined;
+    return firstValueFrom(this.http.get<AttendanceSummaryData>(`${this.url}/summary`, { params }));
   }
 
   /** Attendance of many students; the server defaults to the last 90 days and scopes a mentor to their batch. */

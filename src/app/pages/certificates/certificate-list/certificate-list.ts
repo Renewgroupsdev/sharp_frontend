@@ -1,3 +1,4 @@
+import { UsersService } from '../../../shared/common-services/users.service';
 import { Component, OnInit, computed, inject } from '@angular/core';
 import { apiErrorMessage } from '../../../core/http/api.interceptor';
 import { CertificateActionsService } from '../../../shared/common-services/certificate-actions.service';
@@ -7,6 +8,8 @@ import { CountRibbon } from '../../../shared/components/count-ribbon/count-ribbo
 import { CommonFilterCard } from '../../../shared/components/common-filter-card/common-filter-card';
 import { CommonTableCard } from '../../../shared/components/common-table-card/common-table-card';
 import { LocalListBase } from '../../../shared/components/local-list-base';
+import { HeaderActionsDirective } from '../../../shared/directives/header-actions.directive';
+import { UserDetailService } from '../../../shared/common-services/user-detail.service';
 import { CanActionDirective } from '../../../shared/directives/can-action.directive';
 import { CERT_STATUSES, Certificate } from '../../../shared/models/certificate.model';
 import { RibbonItem, QuickAction, TableColumn, TableRow } from '../../../shared/models/common-components.model';
@@ -20,11 +23,12 @@ const day = (iso: string | null): string => (iso ? new Date(iso).toLocaleDateStr
 @Component({
   selector: 'app-certificate-list',
   standalone: true,
-  imports: [CountRibbon, CommonFilterCard, CommonTableCard, CanActionDirective],
+  imports: [CountRibbon, CommonFilterCard, CommonTableCard, CanActionDirective, HeaderActionsDirective],
   templateUrl: './certificate-list.html',
   styleUrls: ['../../../shared/styles/erp-page.scss'],
 })
 export class CertificateList extends LocalListBase implements OnInit {
+  private readonly users = inject(UsersService);
   private readonly store = inject(CertificatesService);
   private readonly actions = inject(CertificateActionsService);
   private readonly toast = inject(ToastService);
@@ -41,7 +45,7 @@ export class CertificateList extends LocalListBase implements OnInit {
     { key: 'student', header: 'Student', type: 'lead', width: '18%' },
     { key: 'course', header: 'Course', width: '17%' },
     { key: 'number', header: 'Certificate ID', width: '13%' },
-    { key: 'marks', header: 'Score · attendance', width: '16%' },
+    { key: 'marks', header: 'Score · course attendance', width: '16%' },
     { key: 'issued', header: 'Issued on', width: '11%' },
     { key: 'status', header: 'Status', type: 'badge', width: '9%' },
     { key: 'actions', header: 'Actions', type: 'quickActions', width: '12%', sortable: false },
@@ -70,7 +74,8 @@ export class CertificateList extends LocalListBase implements OnInit {
   protected allRows(): TableRow[] {
     return this.store.items().map(c => ({
       id: c.id,
-      student: { name: c.name, subtitle: c.student_id },
+      sid: c.student_id,
+      student: { name: c.name, subtitle: c.student_id, photo: c.photo || this.users.photoOf(c.student_id) },
       searchText: `${c.name} ${c.student_id} ${c.number ?? ''} ${c.course}`,
       name: c.name,
       course: c.course,
@@ -100,8 +105,13 @@ export class CertificateList extends LocalListBase implements OnInit {
   }
 
   add(): void {
-    this.openDialog(CertificateForm, {}, '520px');
+    this.openDialog(CertificateForm, {}, '1080px');
   }
+
+  protected readonly userDetail = inject(UserDetailService);
+
+  /** A student's name opens their details, as in User Management. */
+  openProfile(row: TableRow): void { this.userDetail.open(String(row['sid']), 'certificates'); }
 
   async onQuickAction(e: { row: TableRow; action: string }): Promise<void> {
     const cert = this.store.items().find(c => c.id === Number(e.row['id']));

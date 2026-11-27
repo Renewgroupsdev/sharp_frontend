@@ -19,6 +19,14 @@
         <span class="t2">{{ c.level }} · {{ c.mode }} · {{ c.hours }} hours</span>
         <span class="t2">Mentor: {{ c.mentors.join(', ') || 'Unassigned' }}</span>
         <div class="bar" role="progressbar" [attr.aria-valuenow]="c.progress" aria-valuemin="0" aria-valuemax="100"><i [style.width.%]="c.progress"></i></div>
+        @if (attendance().get(+c.id); as a) {
+          <div class="att-row" [attr.title]="a.present + ' present of ' + a.working_days + ' working days'">
+            <span><i class="bi bi-calendar-check"></i> Attendance</span>
+            <div class="bar att" role="progressbar" [attr.aria-valuenow]="a.pct" aria-valuemin="0" aria-valuemax="100"><i [attr.data-tone]="tone(a.pct)" [style.width.%]="a.pct"></i></div>
+            <b [attr.data-tone]="tone(a.pct)">{{ a.pct }}%</b>
+          </div>
+          <span class="mut">{{ a.present }} present of {{ a.working_days }} working days</span>
+        }
         <div class="course-foot">
           <span class="mut">{{ c.lessons_done }} of {{ c.lessons_total }} lessons · {{ c.progress }}%</span>
           <a class="st-btn" [routerLink]="['/app/learning', c.id]">{{ action(c.status) }} <i class="bi bi-arrow-right"></i></a>

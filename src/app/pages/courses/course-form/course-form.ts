@@ -81,7 +81,7 @@ export class CourseForm {
       mode: c?.mode ?? 'On Campus',
       level: c?.level ?? 'Beginner',
       scope: c?.scope ?? 'Public',
-      status: c?.status ?? 'Draft',
+      status: c?.status ?? 'Published',
       desc: c?.desc ?? '',
       outcomes: c?.outcomes ?? '',
       reqs: c?.reqs ?? '',

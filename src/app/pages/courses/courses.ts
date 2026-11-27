@@ -18,6 +18,8 @@ import { CategoryForm } from './category-form/category-form';
 import { CategoryView } from './category-view/category-view';
 import { CourseForm } from './course-form/course-form';
 import { CourseModulesDialog } from './course-modules/course-modules-dialog';
+import { AssessmentForm } from '../assessments/assessment-form/assessment-form';
+import { AuthService } from '../../core/auth/auth.service';
 import { CourseStudents } from './course-students/course-students';
 import { CourseInvite } from './course-students/course-invite';
 import { CourseView } from './course-view/course-view';
@@ -63,6 +65,7 @@ const TRASH_COLUMNS: TableColumn[] = [
 })
 export class Courses extends LocalListBase implements OnInit {
   private readonly store = inject(CoursesService);
+  private readonly auth = inject(AuthService);
   private readonly enrollments = inject(EnrollmentService);
   private readonly batchStore = inject(BatchesService);
   private readonly users = inject(UsersService);
@@ -88,10 +91,10 @@ export class Courses extends LocalListBase implements OnInit {
   ];
 
   readonly tabs = computed(() => [
-    { key: 'courses' as const, label: `Courses (${this.store.live().length})` },
-    { key: 'categories' as const, label: `Category list (${this.store.categories.items().length})` },
-    { key: 'trash' as const, label: `Deleted (${this.store.items().length - this.store.live().length})` },
-  ]);
+    { key: 'courses' as const, label: `Courses (${this.store.live().length})`, slug: 'a_courses.tab.courses' },
+    { key: 'categories' as const, label: `Category list (${this.store.categories.items().length})`, slug: 'a_courses.tab.categories' },
+    { key: 'trash' as const, label: `Deleted (${this.store.items().length - this.store.live().length})`, slug: 'a_courses.tab.deleted' },
+  ].filter(t => this.auth.hasTab(t.slug)));
 
   readonly stats = computed<RibbonItem[]>(() => {
     const live = this.store.live();
@@ -149,6 +152,9 @@ export class Courses extends LocalListBase implements OnInit {
         act('front', 'bi-window-desktop', 'Frontend view', 'a_courses.view'),
         act('mods', 'bi-list-nested', 'Modules / topics', 'a_courses.view'),
         act('students', 'bi-people-fill', 'Students', 'a_courses.view'),
+        act('assignment', 'bi-journal-plus', 'Add assignment', 'a_assess.create'),
+        act('assessment', 'bi-patch-plus', 'Add assessment', 'a_assess.create'),
+        act('quiz', 'bi-question-circle', 'Add quiz', 'a_assess.create'),
         act('invite', 'bi-envelope-paper-fill', 'Invite', 'a_courses.edit'),
         act('view', 'bi-eye-fill', 'View course', 'a_courses.view'),
         act('edit', 'bi-pencil-square', 'Edit course', 'a_courses.edit', 'primary'),
@@ -213,6 +219,12 @@ export class Courses extends LocalListBase implements OnInit {
     this.refresh();
   }
 
+  /** Opens the new assignment / assessment / quiz form with this course already chosen. */
+  private addAssessment(courseId: string, type: 'Assignment' | 'Assessment' | 'Quiz'): void {
+    const course = this.store.get(courseId);
+    if (course) this.openDialog(AssessmentForm, { type, course: course.title, lockType: true }, '780px');
+  }
+
   onQuickAction(event: { row: TableRow; action: string }): void {
     const id = String(event.row['id']);
     switch (event.action) {
@@ -220,6 +232,9 @@ export class Courses extends LocalListBase implements OnInit {
       case 'view': return void this.openDialog(CourseView, { courseId: id, mode: 'details' }, '820px');
       case 'mods': return void this.openDialog(CourseModulesDialog, { courseId: id }, '860px');
       case 'students': return void this.openDialog(CourseStudents, { courseId: id }, '900px');
+      case 'assignment': return void this.addAssessment(id, 'Assignment');
+      case 'assessment': return void this.addAssessment(id, 'Assessment');
+      case 'quiz': return void this.addAssessment(id, 'Quiz');
       case 'invite': return void this.openDialog(CourseInvite, { courseId: id }, '560px');
       case 'edit':
         return void (this.tab() === 'categories' ? this.openDialog(CategoryForm, { categoryId: id }, '520px') : this.openDialog(CourseForm, { courseId: id }, '860px'));

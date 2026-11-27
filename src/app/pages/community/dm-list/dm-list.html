@@ -1,5 +1,5 @@
 <div class="purchase-page container-fluid px-0">
-  <p class="hint">One-to-one conversations between any two users. Anyone can start one from a group's member list or with <b>New personal message</b>. Admin, Super Admin and OB can review every personal conversation.</p>
+  @if (!embedded) { <p class="hint">One-to-one conversations between any two users. Anyone can start one from a group's member list or with <b>New personal message</b>. Admin, Super Admin and OB can review every personal conversation.</p> }
 
   <app-common-filter-card
     searchPlaceholder="Search conversations"

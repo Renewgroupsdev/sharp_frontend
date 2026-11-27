@@ -1,5 +1,5 @@
 <div class="purchase-page container-fluid px-0">
-  <app-count-ribbon class="d-block mb-2" [items]="stats()" />
+  <app-count-ribbon class="d-block mb-2" [items]="stats()" [activeKeys]="activeRibbonKeys" (select)="onRibbonSelect($event)" />
 
   <p class="hint">
     @if (kind === 'Chat') { The <b>Common Floor</b> is for every user in the organization: what is posted there shows to all users. }

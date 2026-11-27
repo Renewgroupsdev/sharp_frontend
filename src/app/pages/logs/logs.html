@@ -1,37 +1,39 @@
 <section class="purchase-page">
-  <div class="page-header">
+  <div class="page-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
     <div>
       <h2 class="page-title"><i class="bi bi-list-check"></i> Logs Management</h2>
-      <p class="page-subtitle">Every create, update, delete and approval made in the modules is recorded here.</p>
+      <p class="page-subtitle">Everything done in the system: sign-ins, creates, updates, reviews and approvals, with who did it and about whom.</p>
     </div>
     <div class="header-actions">
       <button type="button" class="ghost-btn" (click)="download()"><i class="bi bi-download"></i> Download</button>
-      <button *appCan="'a_logs.delete'" type="button" class="ghost-btn" (click)="clear()"><i class="bi bi-trash"></i> Clear log</button>
     </div>
   </div>
 
+  @if (error(); as err) { <p class="empty" role="alert">{{ err }}</p> }
+
   <div class="filters">
-    <input class="date-input search" type="search" placeholder="Search actor or activity" [ngModel]="search()" (ngModelChange)="search.set($event)" />
-    <select class="date-input" [ngModel]="module()" (ngModelChange)="module.set($event)">
-      <option value="">All modules</option>
-      @for (m of modules(); track m) { <option [value]="m">{{ m }}</option> }
+    <input class="date-input search" type="search" placeholder="Search actor, activity or details" [ngModel]="search()" (ngModelChange)="search.set($event)" />
+    <select class="date-input" [ngModel]="role()" (ngModelChange)="role.set($event)">
+      <option value="">All roles</option>
+      @for (r of roles(); track r) { <option [value]="r">{{ r }}</option> }
     </select>
     <span class="count">{{ rows().length }} entries</span>
   </div>
 
   <div class="table-wrap">
     <table class="log-table">
-      <thead><tr><th>When</th><th>Actor</th><th>Module</th><th>Activity</th></tr></thead>
+      <thead><tr><th>When</th><th>Actor</th><th>Activity</th><th>About</th><th>Details</th></tr></thead>
       <tbody>
-        @for (l of shown(); track l.id) {
+        @for (e of shown(); track e.id) {
           <tr>
-            <td class="when">{{ l.w }}</td>
-            <td>{{ l.a }}</td>
-            <td><span class="pill">{{ l.m }}</span></td>
-            <td>{{ l.t }}</td>
+            <td class="when">{{ when(e.created_at) }}</td>
+            <td>{{ e.actor_name || 'System' }} @if (e.actor_role) { <span class="pill">{{ e.actor_role }}</span> }</td>
+            <td>{{ e.action }}</td>
+            <td>{{ e.target || '—' }}</td>
+            <td>{{ e.details || '—' }}</td>
           </tr>
         } @empty {
-          <tr><td colspan="4" class="empty">No log entries.</td></tr>
+          <tr><td colspan="5" class="empty">{{ loading() ? 'Loading…' : 'No log entries.' }}</td></tr>
         }
       </tbody>
     </table>

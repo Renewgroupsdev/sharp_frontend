@@ -96,11 +96,25 @@ export class AuthService {
     this.token.set(res.token);
     // GET /enums needs the token, and the role name comes from it - so load it before the session counts as signed in.
     await this.enums.load();
+    await this.perms.load(true);
     this.session.set(res.user);
     if (!this.enums.loaded()) return this.discardSession('Could not load the portal settings. Please try again.');
     if (!this.role()) return this.discardSession('This portal does not support Trainer accounts. Please sign in from the SHARP mobile app instead.');
     return null;
   }
+
+  /** Takes a saved profile into the session (name and initials show in the top bar) and refreshes the user list (for the picture). */
+  applyProfile(user: { name: string; initials: string }): void {
+    const cur = this.session();
+    if (!cur) return;
+    const next: ApiUser = { ...cur, name: user.name, initials: user.initials };
+    this.session.set(next);
+    try { localStorage.setItem(USER_KEY, JSON.stringify(next)); } catch { /* storage blocked */ }
+    void this.users.refresh();
+  }
+
+  /** A tab of a page, from the Roles & Permissions tree (e.g. `a_certs.tab.templates`). */
+  hasTab(slug: string): boolean { return this.perms.hasTab(slug); }
 
   accessToken(): string | null {
     return this.token();
@@ -139,6 +153,7 @@ export class AuthService {
     this.session.set(null);
     this.token.set(null);
     this.enums.reset();
+    this.perms.clear();
     try { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(USER_KEY); } catch { /* storage blocked */ }
   }
 
@@ -149,7 +164,7 @@ export class AuthService {
   /** Permission letter check for the current role on an admin module, e.g. can('a_orgs', 'c'). */
   can(moduleKey: string, letter: 'v' | 'c' | 'u' | 'd'): boolean {
     const r = this.role();
-    return !!r && this.perms.has(r, moduleKey, letter);
+    return !!r && this.perms.can(moduleKey, letter);
   }
 
   /**

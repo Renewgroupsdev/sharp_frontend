@@ -7,7 +7,7 @@ import { CommonFilterCard } from '../../../shared/components/common-filter-card/
 import { CommonTableCard } from '../../../shared/components/common-table-card/common-table-card';
 import { messageTime } from '../../../shared/components/group-chat/group-chat';
 import { LocalListBase } from '../../../shared/components/local-list-base';
-import { DetailCardData, QuickAction, TableColumn, TableRow } from '../../../shared/models/common-components.model';
+import { QuickAction, RibbonItem, TableColumn, TableRow } from '../../../shared/models/common-components.model';
 import { CommunityGroup, GroupKind } from '../../../shared/models/community.model';
 import { AddMembers } from '../add-members/add-members';
 import { CommunityGroupForm } from '../community-group-form/community-group-form';
@@ -49,14 +49,14 @@ export class GroupList extends LocalListBase implements OnInit {
   override sortDirection: 'asc' | 'desc' = 'asc';
 
   /** Cards: how many groups of this kind, how many follow a course, how many are custom, and who is signed in now. */
-  readonly stats = computed<DetailCardData[]>(() => {
+  readonly stats = computed<RibbonItem[]>(() => {
     const groups = this.store.byKind(this.kind);
     const o = this.store.overview();
     const label = this.kind === 'Chat' ? 'Chat' : 'Announcement';
     return [
       { label: `${label} groups`, value: groups.length, icon: 'bi-chat-dots', iconVariant: 'blue' },
-      { label: 'Course groups (auto)', value: groups.filter(g => g.source === 'course').length, icon: 'bi-journal-bookmark', iconVariant: 'green' },
-      { label: 'Custom groups', value: groups.filter(g => g.source === 'custom').length, icon: 'bi-people', iconVariant: 'purple' },
+      { label: 'Course groups (auto)', value: groups.filter(g => g.source === 'course').length, icon: 'bi-journal-bookmark', iconVariant: 'green', filter: { key: 'status', value: TYPE_LABEL['course'] } },
+      { label: 'Custom groups', value: groups.filter(g => g.source === 'custom').length, icon: 'bi-people', iconVariant: 'purple', filter: { key: 'status', value: TYPE_LABEL['custom'] } },
       { label: `Online now (last ${o?.online_window_minutes ?? 5} min)`, value: o ? `${o.users_online} / ${o.users_total}` : '—', icon: 'bi-person-check', iconVariant: 'orange' },
     ];
   });

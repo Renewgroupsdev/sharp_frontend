@@ -104,10 +104,8 @@ export class AnalyticsDashboard implements OnInit {
     label: w.label,
     cells: w.cells.map((v, i) => ({ v, date: new Date(new Date(`${w.start}T00:00:00`).getTime() + i * 86_400_000).toLocaleDateString('en-CA'), level: v === null ? 0 : v >= 90 ? 4 : v >= 80 ? 3 : v >= 70 ? 2 : 1 })),
   })));
-  protected readonly batchAttendance = computed(() => (this.data()?.attendance.batches ?? []).map(b => {
-    const total = b.present + b.late + b.absent;
-    return { name: b.name, total, present: pct(b.present, total), late: pct(b.late, total), absent: pct(b.absent, total), counts: b };
-  }));
+  /** Course attendance per batch (days attended out of the working days of the course dates). */
+  protected readonly batchAttendance = computed(() => (this.data()?.attendance.batches ?? []).map(b => ({ name: b.name, rate: b.rate, students: b.students, tone: b.rate >= 75 ? 'good' : b.rate >= 50 ? 'mid' : 'low' })));
 
   /* ---------- users ---------- */
   protected readonly roleSlices = computed(() => {

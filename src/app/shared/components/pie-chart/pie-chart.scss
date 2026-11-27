@@ -43,3 +43,9 @@
 .pc-name small { display: block; font-size: 10.5px; color: var(--text-muted, #6b7280); }
 .pc-legend b { font-size: 14px; }
 .pc-legend em { text-align: right; font-style: normal; font-size: 11.5px; color: var(--text-muted, #6b7280); }
+
+/* tilted (3D) pie */
+.pc-fig svg.tilted { width: 190px; height: auto; overflow: visible; }
+.pc-wall { filter: brightness(.68); }
+.pc-shadow { fill: rgba(16, 24, 40, .12); }
+.pc-fig svg.tilted .pc-wedge { stroke-width: 1.5; }

@@ -1,6 +1,7 @@
+import { AuthService } from '../../core/auth/auth.service';
 import { Component, computed, inject } from '@angular/core';
 import { MatDialogModule } from '@angular/material/dialog';
-import { ROLES, SharpUser } from '../../core/data/models';
+import { SharpUser } from '../../core/data/models';
 import { InstitutesService } from '../../shared/common-services/institutes.service';
 import { EnumsService } from '../../shared/common-services/enums.service';
 import { ToastService } from '../../shared/common-services/toast.service';
@@ -54,6 +55,9 @@ function actionsFor(u: SharpUser): QuickAction[] {
 })
 export class Users extends LocalListBase {
   private readonly store = inject(UsersService);
+  private readonly auth = inject(AuthService);
+  /** A mentor or an institution sees only the Mentor and Student roles (the students they are limited to, and those students' mentors). */
+  private readonly isMentor = this.auth.role() === 'Mentor' || this.auth.role() === 'Institution';
   private readonly institutes = inject(InstitutesService);
   private readonly actions = inject(UserActionsService);
   private readonly toast = inject(ToastService);
@@ -86,7 +90,8 @@ export class Users extends LocalListBase {
   /** One ribbon item per role (no all-users total); hovering lists that role's users. */
   readonly stats = computed<RibbonItem[]>(() => {
     const items = this.store.items();
-    return ROLES.map(r => {
+    // The roles come from the backend enum (GET /enums), so a new role shows up here without a code change.
+    return this.enums.allRoles().filter(r => !this.isMentor || r === 'Mentor' || r === 'Student').map(r => {
       const users = items.filter(u => u.r === r);
       return { key: r, label: r, value: users.length, filter: { key: 'source' as const, value: r }, hoverItems: users.map(u => ({ name: u.n, sub: u.id })) };
     });
@@ -102,9 +107,10 @@ export class Users extends LocalListBase {
     delete: (_, id) => this.actions.remove(id),
   };
 
-  /** Roles to filter by; "Trainer" is offered only when such accounts exist. */
+  /** Roles to filter by: every role the backend lists. */
   private roleOptions(): string[] {
-    return [...this.enums.roles(), ...(this.store.items().some(u => u.r === 'Trainer') ? ['Trainer'] : [])];
+    const all = this.enums.allRoles();
+    return this.isMentor ? all.filter(r => r === 'Mentor' || r === 'Student') : all;
   }
 
   protected allRows(): TableRow[] {

@@ -1,80 +1,130 @@
 @if (loading()) {
   <p class="muted">Loading settings…</p>
 } @else {
-  <form class="settings-card" (ngSubmit)="save()" (input)="touch()" (change)="touch()" novalidate>
-    <h3>Certificate settings</h3>
-    <p class="muted">Used for every certificate. A certificate that is already issued keeps the design and marks it was issued with.</p>
+  <form class="cs" (ngSubmit)="save()" (input)="touch()" (change)="touch()" novalidate>
+    <div class="cs-left">
+      <section class="cs-sec">
+        <header>
+          <h4><span class="n">1</span> Design</h4>
+          <p>The default look of every certificate. Issued certificates keep the design they were issued with.</p>
+        </header>
 
-    <div class="form-grid">
-      <div class="form-field">
-        <label for="cs-template">Template</label>
-        <div class="input-wrap"><i class="bi bi-layout-text-window"></i>
-          <select id="cs-template" name="template" [(ngModel)]="model.template">@for (t of templates; track t) { <option [value]="t">{{ t }}</option> }</select>
-          <i class="bi bi-chevron-down select-arrow"></i>
+        <div class="cs-start">
+          <label for="cs-from">Start from a saved template</label>
+          <div class="cs-start-row">
+            <div class="input-wrap"><i class="bi bi-palette"></i>
+              <select id="cs-from" name="from" #from (change)="applyTemplate(+from.value); from.value = '0'">
+                <option value="0">Choose a template to copy its design…</option>
+                @for (t of saved(); track t.id) { <option [value]="t.id">{{ t.name }}</option> }
+              </select>
+              <i class="bi bi-chevron-down select-arrow"></i>
+            </div>
+            <button type="button" class="cs-link" (click)="openTemplates.emit()"><i class="bi bi-plus-circle"></i> New template</button>
+          </div>
         </div>
-      </div>
-      <div class="form-field">
-        <label for="cs-type">Certificate type</label>
-        <div class="input-wrap"><i class="bi bi-tag"></i>
-          <select id="cs-type" name="type" [(ngModel)]="model.type">@for (t of types; track t) { <option [value]="t">{{ t }}</option> }</select>
-          <i class="bi bi-chevron-down select-arrow"></i>
+
+        <div class="cs-layouts" role="radiogroup" aria-label="Layout">
+          @for (l of layouts; track l) {
+            <button type="button" role="radio" class="cs-layout" [class.on]="model.template === l" [attr.aria-checked]="model.template === l" (click)="pick('template', l)">
+              <span class="mini" [attr.data-l]="l" [style.--ca]="model.accent || '#0E7A4E'"><i></i><i></i><i></i></span>
+              <b>{{ l }}</b>
+            </button>
+          }
         </div>
-      </div>
-      <div class="form-field full-width">
-        <label for="cs-title">Title <span>*</span></label>
-        <div class="input-wrap"><i class="bi bi-fonts"></i><input id="cs-title" name="title" required maxlength="120" [(ngModel)]="model.title" /></div>
-      </div>
-      <div class="form-field full-width">
-        <label for="cs-body">Wording</label>
-        <div class="input-wrap textarea-wrap"><i class="bi bi-text-paragraph"></i><textarea id="cs-body" name="body" rows="3" maxlength="1000" [(ngModel)]="model.body"></textarea></div>
-        <small class="hint">Placeholders: {{ '{student} {course} {score} {date} {no}' }}</small>
-      </div>
+        <div class="cs-colors">
+          <span class="lbl">Accent colour</span>
+          @for (c of accents; track c) {
+            <button type="button" class="sw" [class.on]="(model.accent || '#0E7A4E').toLowerCase() === c.toLowerCase()" [style.background]="c" [attr.aria-label]="'Colour ' + c" (click)="pick('accent', c)"></button>
+          }
+          <label class="sw custom" title="Any colour"><input type="color" name="accent" [ngModel]="model.accent || '#0E7A4E'" (ngModelChange)="model.accent = $event" /><i class="bi bi-eyedropper"></i></label>
+        </div>
+      </section>
 
-      <div class="form-field">
-        <label for="cs-prefix">Number prefix</label>
-        <div class="input-wrap"><i class="bi bi-hash"></i><input id="cs-prefix" name="prefix" required maxlength="12" [(ngModel)]="model.prefix" /></div>
-        <small class="hint">Numbers look like {{ (model.prefix || 'SHARP').toUpperCase() }}-2026-00001</small>
-      </div>
-      <div class="form-field">
-        <label for="cs-att">Minimum attendance %</label>
-        <div class="input-wrap"><i class="bi bi-calendar-check"></i><input id="cs-att" type="number" name="min_attendance" min="0" max="100" [(ngModel)]="model.min_attendance" /></div>
-        <small class="hint">Students below this need an override to be issued a certificate.</small>
-      </div>
-      <div class="form-field">
-        <label for="cs-score">Minimum score %</label>
-        <div class="input-wrap"><i class="bi bi-percent"></i><input id="cs-score" type="number" name="min_score" min="0" max="100" [(ngModel)]="model.min_score" /></div>
-        <small class="hint">Average quiz result for the course. 0 means no minimum.</small>
-      </div>
+      <section class="cs-sec">
+        <header>
+          <h4><span class="n">2</span> Wording</h4>
+        </header>
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="cs-type">Certificate type</label>
+            <div class="input-wrap"><i class="bi bi-tag"></i>
+              <select id="cs-type" name="type" [(ngModel)]="model.type">@for (t of types; track t) { <option [value]="t">{{ t }}</option> }</select>
+              <i class="bi bi-chevron-down select-arrow"></i>
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="cs-title">Title <span>*</span></label>
+            <div class="input-wrap"><i class="bi bi-fonts"></i><input id="cs-title" name="title" required maxlength="120" [(ngModel)]="model.title" /></div>
+          </div>
+          <div class="form-field full-width">
+            <label for="cs-body">Wording</label>
+            <div class="input-wrap textarea-wrap"><i class="bi bi-text-paragraph"></i><textarea id="cs-body" name="body" rows="3" maxlength="1000" [(ngModel)]="model.body"></textarea></div>
+            <small class="hint">Placeholders: {{ '{student} {course} {score} {date} {no}' }}</small>
+          </div>
+        </div>
+      </section>
 
-      <div class="form-field">
-        <label for="cs-signame">Signature name</label>
-        <div class="input-wrap"><i class="bi bi-pen"></i><input id="cs-signame" name="signature_name" maxlength="80" [(ngModel)]="model.signature_name" /></div>
-      </div>
-      <div class="form-field">
-        <label for="cs-sigrole">Signature designation</label>
-        <div class="input-wrap"><i class="bi bi-person-badge"></i><input id="cs-sigrole" name="signature_role" maxlength="80" [(ngModel)]="model.signature_role" /></div>
-      </div>
-      <div class="form-field full-width">
-        <label for="cs-sigimg">Signature image</label>
-        @if (model.signature_image && !removeSignature()) {
-          <div class="sig-row"><img class="sig-img" [src]="model.signature_image" alt="Current signature" /><button type="button" class="link-btn" (click)="clearSignature()">Remove</button></div>
-        }
-        <input id="cs-sigimg" class="file-input" type="file" accept="image/png,image/jpeg" (change)="onSignature($event)" />
-        <small class="hint">Optional. PNG or JPEG, 150 KB or smaller.</small>
-      </div>
+      <section class="cs-sec">
+        <header>
+          <h4><span class="n">3</span> Signature &amp; extras</h4>
+        </header>
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="cs-signame">Signature name</label>
+            <div class="input-wrap"><i class="bi bi-pen"></i><input id="cs-signame" name="signature_name" maxlength="80" [(ngModel)]="model.signature_name" /></div>
+          </div>
+          <div class="form-field">
+            <label for="cs-sigrole">Signature designation</label>
+            <div class="input-wrap"><i class="bi bi-person-badge"></i><input id="cs-sigrole" name="signature_role" maxlength="80" [(ngModel)]="model.signature_role" /></div>
+          </div>
+          <div class="form-field full-width">
+            <label for="cs-sigimg">Signature image</label>
+            @if (model.signature_image && !removeSignature()) {
+              <div class="sig-row"><img class="sig-img" [src]="model.signature_image" alt="Current signature" /><button type="button" class="link-btn" (click)="clearSignature()">Remove</button></div>
+            }
+            <input id="cs-sigimg" class="file-input" type="file" accept="image/png,image/jpeg" (change)="onSignature($event)" />
+            <small class="hint">Optional. PNG or JPEG, 150 KB or smaller.</small>
+          </div>
+          <div class="form-field full-width checks">
+            <label class="check-row"><input type="checkbox" name="show_profile" [(ngModel)]="model.show_profile" /> <span>Show the student's photo</span></label>
+            <label class="check-row"><input type="checkbox" name="show_qr" [(ngModel)]="model.show_qr" /> <span>Show the verification QR code</span></label>
+          </div>
+        </div>
+      </section>
 
-      <div class="form-field full-width checks">
-        <label class="check-row"><input type="checkbox" name="show_profile" [(ngModel)]="model.show_profile" /> <span>Show the student's initials</span></label>
-        <label class="check-row"><input type="checkbox" name="show_qr" [(ngModel)]="model.show_qr" /> <span>Show the verification QR code</span></label>
+      <section class="cs-sec">
+        <header>
+          <h4><span class="n">4</span> Numbering &amp; eligibility</h4>
+        </header>
+        <div class="form-grid three">
+          <div class="form-field">
+            <label for="cs-prefix">Number prefix</label>
+            <div class="input-wrap"><i class="bi bi-hash"></i><input id="cs-prefix" name="prefix" required maxlength="12" [(ngModel)]="model.prefix" /></div>
+            <small class="hint">Looks like {{ (model.prefix || 'SHARP').toUpperCase() }}-2026-00001</small>
+          </div>
+          <div class="form-field">
+            <label for="cs-att">Minimum attendance %</label>
+            <div class="input-wrap"><i class="bi bi-calendar-check"></i><input id="cs-att" type="number" name="min_attendance" min="0" max="100" [(ngModel)]="model.min_attendance" /></div>
+            <small class="hint">Below this needs an override.</small>
+          </div>
+          <div class="form-field">
+            <label for="cs-score">Minimum score %</label>
+            <div class="input-wrap"><i class="bi bi-percent"></i><input id="cs-score" type="number" name="min_score" min="0" max="100" [(ngModel)]="model.min_score" /></div>
+            <small class="hint">0 means no minimum.</small>
+          </div>
+        </div>
+      </section>
+
+      @if (serverError(); as err) { <p class="error-text" role="alert">{{ err }}</p> }
+      <div class="cs-actions">
+        <button *appCan="'a_certs.edit'" type="submit" class="save-btn" [disabled]="saving()"><i class="bi bi-floppy"></i> {{ saving() ? 'Saving…' : 'Save settings' }}</button>
       </div>
     </div>
 
-    @if (serverError(); as err) { <p class="error-text" role="alert">{{ err }}</p> }
-    <div class="actions">
-      <button *appCan="'a_certs.edit'" type="submit" class="save-btn" [disabled]="saving()"><i class="bi bi-floppy"></i> {{ saving() ? 'Saving…' : 'Save settings' }}</button>
-    </div>
+    <aside class="cs-right">
+      <h4>Live preview</h4>
+      <app-certificate-view [cert]="preview()" />
+      <p class="hint">A sample student and course are shown.</p>
+    </aside>
   </form>
-
-  <h4 class="preview-title">Preview</h4>
-  <app-certificate-view [cert]="preview()" />
 }

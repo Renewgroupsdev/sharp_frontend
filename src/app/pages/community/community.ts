@@ -5,18 +5,17 @@ import { ToastService } from '../../shared/common-services/toast.service';
 import { CanActionDirective } from '../../shared/directives/can-action.directive';
 import { DmList } from './dm-list/dm-list';
 import { GroupList } from './group-list/group-list';
-import { PersonView } from './person-view/person-view';
 
-type Tab = 'Chat' | 'Announcement' | 'dm' | 'people';
+type Tab = 'Chat' | 'Announcement' | 'dm';
 
 /**
- * SHARP Community (admin): chat groups, announcement groups, personal messages and one person's conversations.
+ * SHARP Community (admin): chat groups, announcement groups, personal messages and every personal chat.
  * Groups, people and messages all come from the API; the Common Floor chat is the same one the mobile app uses.
  */
 @Component({
   selector: 'app-community',
   standalone: true,
-  imports: [GroupList, DmList, PersonView, CanActionDirective],
+  imports: [GroupList, DmList, CanActionDirective],
   templateUrl: './community.html',
   styleUrls: ['../../shared/styles/erp-page.scss', '../assessments/assessments.scss', './community.scss'],
 })

@@ -11,7 +11,7 @@ export interface NavLink {
 }
 
 /** Modules that are reached through another menu entry (Course Management → ...), so they get no top-level link. */
-const NESTED_MODULES = new Set(['a_assess', 'a_attempts']);
+const NESTED_MODULES = new Set(['a_assess', 'a_attempts', 'a_dmchat']);
 
 /** Modules switched off from every role's menu (Enrollment, Learning). */
 const HIDDEN_MODULES = new Set(['a_enroll', 'a_learn']);
@@ -23,32 +23,22 @@ const ADMIN_SUBMENUS: Record<string, NavLink[]> = {
     { path: '/app/courses/assignments', label: 'Assignments', icon: 'bi-file-earmark-text', moduleKey: 'a_assess' },
     { path: '/app/courses/assessments', label: 'Assessments', icon: 'bi-patch-check', moduleKey: 'a_assess' },
     { path: '/app/courses/quiz', label: 'Quiz', icon: 'bi-patch-question', moduleKey: 'a_assess' },
-    { path: '/app/submissions', label: 'Assignment Submissions', icon: 'bi-inbox', moduleKey: 'a_assess' },
+    { path: '/app/submissions', label: 'Submissions', icon: 'bi-inbox', moduleKey: 'a_assess' },
+    { path: '/app/unlock-module', label: 'Unlock Module', icon: 'bi-unlock', moduleKey: 'a_learn' },
   ],
 };
 
-export const MENTOR_NAV: NavLink[] = [
-  { path: '/app/dashboard', label: 'Dashboard', icon: 'bi-grid-fill' },
-  { path: '/app/group-progress', label: 'Group Progress', icon: 'bi-bar-chart-line' },
-  { path: '/app/manual-attendance', label: 'Manual Attendance', icon: 'bi-clock-history' },
-  { path: '/app/unlock-module', label: 'Unlock Module', icon: 'bi-unlock' },
-  { path: '/app/certificate-review', label: 'Certificate Review', icon: 'bi-award' },
-  { path: '/app/submissions', label: 'Assignment Submissions', icon: 'bi-inbox' },
-  { path: '/app/quiz-attempts', label: 'Quiz Attempts', icon: 'bi-clipboard-data' },
-  { path: '/app/community', label: 'SHARP Community', icon: 'bi-chat-dots' },
-  { path: '/app/more', label: 'More', icon: 'bi-three-dots' },
-];
-
 export const STUDENT_NAV: NavLink[] = [
   { path: '/app/dashboard', label: 'Dashboard', icon: 'bi-grid-fill' },
-  { path: '/app/attendance', label: 'Attendance', icon: 'bi-clock-history' },
-  { path: '/app/assessments', label: 'Assessments', icon: 'bi-patch-check' },
-  { path: '/app/certificates', label: 'Certificates', icon: 'bi-award' },
-  { path: '/app/community', label: 'SHARP Community', icon: 'bi-chat-dots' },
+  { path: '/app/learning', label: 'My Learning', icon: 'bi-journal-richtext', moduleKey: 'a_learn' },
+  { path: '/app/attendance', label: 'Attendance', icon: 'bi-clock-history', moduleKey: 'a_attend' },
+  { path: '/app/assessments', label: 'Assessments', icon: 'bi-patch-check', moduleKey: 'a_assess' },
+  { path: '/app/certificates', label: 'Certificates', icon: 'bi-award', moduleKey: 'a_certs' },
+  { path: '/app/community', label: 'SHARP Community', icon: 'bi-chat-dots', moduleKey: 'a_comms' },
   { path: '/app/profile', label: 'My Profile & More', icon: 'bi-person-circle' },
 ];
 
-/** Admin workspace: Dashboard, then every module the role may view; Settings for the two admin roles. */
+/** Menu for every role except Student: Dashboard, then every module the role may View on Roles & Permissions; Settings for the two admin roles. */
 export function adminNav(role: Role | null, can: (moduleKey: string) => boolean): NavLink[] {
   const links: NavLink[] = [{ path: '/app/dashboard', label: 'Dashboard', icon: 'bi-grid-fill' }];
   // Assessment Library is no longer a top-level module: its pages sit under Course Management.
@@ -63,7 +53,6 @@ export function adminNav(role: Role | null, can: (moduleKey: string) => boolean)
 
 /** The role-aware menu for a shell: used by the sidebar and by the header's breadcrumb / quick search. */
 export function navForShell(shell: 'admin' | 'mentor' | 'student', role: Role | null, can: (moduleKey: string) => boolean): NavLink[] {
-  if (shell === 'mentor') return MENTOR_NAV;
-  if (shell === 'student') return STUDENT_NAV;
+  if (shell === 'student') return STUDENT_NAV.filter(l => !l.moduleKey || can(l.moduleKey));
   return adminNav(role, can);
 }

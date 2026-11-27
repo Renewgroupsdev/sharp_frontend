@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { apiErrorMessage } from '../../../core/http/api.interceptor';
+import { AttendanceApi, AttendanceCourseRow } from '../../../shared/common-services/attendance-api.service';
 import { MyLearningService } from '../../../shared/common-services/my-learning.service';
 
 /** Student "My Learning": the courses mapped to the student's batch, with progress and a Start / Continue button. */
@@ -17,6 +18,10 @@ export class MyLearning implements OnInit {
   readonly courses = this.store.courses;
   readonly loaded = this.store.loaded;
   readonly error = signal<string | null>(null);
+  private readonly attendanceApi = inject(AttendanceApi);
+  /** Attendance of each course (days attended out of the course's working days), by course id. */
+  readonly attendance = signal<ReadonlyMap<number, AttendanceCourseRow>>(new Map());
+  protected tone(pct: number): string { return pct >= 75 ? 'good' : pct >= 50 ? 'mid' : 'low'; }
 
   readonly summary = computed(() => {
     const list = this.courses();

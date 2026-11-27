@@ -2,7 +2,7 @@
   <div class="page-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
     <div>
       <h6 class="page-title"><i class="bi bi-chat-dots"></i> SHARP Community</h6>
-      <p class="page-subtitle">Common Floor, course and custom chat groups, announcement groups, personal messages and every user's conversations.</p>
+      <p class="page-subtitle">Common Floor, course and custom chat groups, announcement groups and every personal message between users.</p>
     </div>
     <div class="d-flex gap-2">
       @if (tab() === 'Chat' || tab() === 'Announcement') {
@@ -23,9 +23,6 @@
     <button type="button" role="tab" class="tab-btn" [class.active]="tab() === 'dm'" [attr.aria-selected]="tab() === 'dm'" (click)="tab.set('dm')">
       <i class="bi bi-envelope"></i> Personal messages <b class="tab-count">{{ store.dms().length }}</b>
     </button>
-    <button type="button" role="tab" class="tab-btn" [class.active]="tab() === 'people'" [attr.aria-selected]="tab() === 'people'" (click)="tab.set('people')">
-      <i class="bi bi-person-lines-fill"></i> Conversations by person
-    </button>
   </div>
 
   <div class="tab-panel">
@@ -33,7 +30,6 @@
       @case ('Chat') { <app-group-list kind="Chat" /> }
       @case ('Announcement') { <app-group-list kind="Announcement" /> }
       @case ('dm') { <app-dm-list /> }
-      @case ('people') { <app-person-view /> }
     }
   </div>
 </div>

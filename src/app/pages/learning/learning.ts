@@ -6,6 +6,7 @@ import { ActivityLogService } from '../../shared/common-services/activity-log.se
 import { CoursesService } from '../../shared/common-services/courses.service';
 import { LearningService } from '../../shared/common-services/learning.service';
 import { ToastService } from '../../shared/common-services/toast.service';
+import { UserDetailService } from '../../shared/common-services/user-detail.service';
 import { UsersService } from '../../shared/common-services/users.service';
 import { CountRibbon } from '../../shared/components/count-ribbon/count-ribbon';
 import { CommonFilterCard } from '../../shared/components/common-filter-card/common-filter-card';
@@ -79,11 +80,17 @@ export class Learning extends LocalListBase implements OnInit {
     ];
   });
 
+  private readonly userDetail = inject(UserDetailService);
+
+  /** A student's name opens their details, as in User Management. */
+  openProfile(row: TableRow): void { this.userDetail.open(String(row['sid']), 'learning'); }
+
   protected allRows(): TableRow[] {
     return this.store.items().map(r => {
       return {
         id: r.id,
-        student: { name: r.name, subtitle: r.sid },
+        sid: r.sid,
+        student: { name: r.name, subtitle: r.sid, photo: this.users.photoOf(r.sid) },
         __student: r.name,
         searchText: `${r.name} ${r.sid}`,
         org: r.org,

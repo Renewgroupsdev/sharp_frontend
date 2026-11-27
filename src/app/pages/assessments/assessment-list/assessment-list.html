@@ -1,8 +1,8 @@
 <div class="purchase-page container-fluid px-0">
   @if (type) {
-    <div class="d-flex justify-content-end header-actions">
+    <ng-template appHeaderActions>
       <button *appCan="'a_assess.create'" type="button" class="add-lead-btn" (click)="add()"><i class="bi bi-plus-lg"></i> Create {{ label }}</button>
-    </div>
+    </ng-template>
   }
 
   <app-count-ribbon class="d-block mb-2" [items]="stats()" [activeKeys]="activeRibbonKeys" (select)="onRibbonSelect($event)" />

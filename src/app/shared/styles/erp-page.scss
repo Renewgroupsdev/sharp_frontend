@@ -16,6 +16,9 @@
   height: 100%;
 }
 
+/* Only the table area may shrink to fit the screen. The header, tabs, ribbon and filters keep their height, so a tall page scrolls instead of squeezing its title. */
+.purchase-page > :not(.table-col) { flex-shrink: 0; }
+
 app-common-filter-card,
 app-common-table-card {
   display: block;

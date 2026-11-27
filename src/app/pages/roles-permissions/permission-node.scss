@@ -1,0 +1,32 @@
+:host { display: block; }
+
+.pn { border: 1px solid #E4E7EC; border-radius: 10px; background: #fff; overflow: hidden;
+  &.sub { margin-top: 10px; background: #FCFCFD; border-radius: 8px; }
+  &.on { border-color: #CBD0F0; } }
+.pn-row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+.pn-icon { display: grid; place-items: center; flex: 0 0 36px; width: 36px; height: 36px; border-radius: 9px; background: #ECECF6; color: #080536; font-size: 17px; }
+.pn.sub .pn-icon { width: 30px; height: 30px; flex-basis: 30px; font-size: 15px; }
+.pn-title { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.pn-name { font-size: 14.5px; color: #101828; }
+.pn-meta { font-size: 11.5px; color: #98A2B3; }
+.pn-caret { display: grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 6px; background: none; color: #667085; cursor: pointer; transition: transform .15s ease;
+  &:hover { background: #F2F4F7; } &.open { transform: rotate(90deg); } }
+
+/* on / off switch for a whole module (a half-lit track means only part of it is on) */
+.pn-switch { appearance: none; position: relative; flex: 0 0 40px; width: 40px; height: 22px; margin: 0; border-radius: 99px; background: #D0D5DD; cursor: pointer; transition: background .15s ease;
+  &::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(16, 24, 40, .3); transition: transform .15s ease; }
+  &:checked { background: #080536; &::after { transform: translateX(18px); } }
+  &:indeterminate { background: #8B8FB5; &::after { transform: translateX(9px); } }
+  &:disabled { opacity: .5; cursor: not-allowed; } }
+
+.pn-body { padding: 0 16px 16px 64px; display: flex; flex-direction: column; gap: 12px; border-top: 1px solid #F2F4F7; padding-top: 12px; }
+.pn.sub .pn-body { padding-left: 56px; }
+.pn-group { display: flex; flex-direction: column; gap: 6px; }
+.pn-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #667085; i { margin-right: 5px; } }
+.pn-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.pn-chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px 5px 9px; border: 1px solid #E4E7EC; border-radius: 99px; background: #fff; font-size: 12.5px; color: #475467; cursor: pointer; user-select: none;
+  input { appearance: none; width: 14px; height: 14px; margin: 0; border: 1.5px solid #98A2B3; border-radius: 4px; background: #fff; cursor: pointer;
+    &:checked { background: #080536 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='white' stroke-width='2.4' d='M3.5 8.5l3 3 6-7'/%3E%3C/svg%3E") center/11px no-repeat; border-color: #080536; }
+    &:disabled { cursor: not-allowed; } }
+  &.on { border-color: #080536; background: #F4F4FA; color: #080536; font-weight: 600; }
+  &:hover { border-color: #98A2B3; } }

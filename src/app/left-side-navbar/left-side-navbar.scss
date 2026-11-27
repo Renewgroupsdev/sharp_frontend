@@ -285,3 +285,7 @@
     }
   }
 }
+
+.nav-link { position: relative; }
+.nav-badge { margin-left: auto; min-width: 20px; padding: 1px 6px; border-radius: 99px; background: #E5484D; color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; }
+.side-navbar:not(.expanded) .nav-badge { position: absolute; top: 2px; right: 6px; margin: 0; min-width: 16px; padding: 0 4px; font-size: 10px; line-height: 16px; }

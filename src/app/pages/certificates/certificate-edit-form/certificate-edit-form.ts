@@ -47,6 +47,7 @@ export class CertificateEditForm {
     type: this.cert.design.type,
     title: this.cert.design.title,
     body: this.cert.design.body,
+    accent: this.cert.design.accent ?? null,
     score: this.cert.score === null ? '' : String(this.cert.score),
     minAttendance: String(this.cert.eligibility?.min_attendance ?? this.store.settings().min_attendance),
     signatureName: this.cert.design.signature_name ?? '',
@@ -80,13 +81,14 @@ export class CertificateEditForm {
     const m = this.model;
     return {
       name: this.cert.name,
+      photo: this.cert.photo ?? null,
       course: this.cert.course,
       score: m.score === '' ? null : Number(m.score),
       number: this.cert.number,
       issued_at: this.cert.issued_at,
       issue_date: m.issueDate || null,
       design: {
-        template: m.template, type: m.type, title: m.title, body: m.body,
+        template: m.template, type: m.type, title: m.title, body: m.body, accent: m.accent,
         show_profile: m.showProfile, show_qr: m.showQr,
         signature_name: m.signatureName, signature_role: m.signatureRole, signature_image: m.signatureImage,
       },
@@ -150,7 +152,7 @@ export class CertificateEditForm {
         score: m.score === '' ? null : Number(m.score),
         min_attendance: m.minAttendance === '' ? null : Number(m.minAttendance),
         design: {
-          template: m.template, type: m.type, title: m.title.trim(), body: m.body,
+          template: m.template, type: m.type, title: m.title.trim(), body: m.body, accent: m.accent,
           signature_name: m.signatureName.trim() || null, signature_role: m.signatureRole.trim() || null,
           signature_image: m.signatureImage, show_profile: m.showProfile, show_qr: m.showQr,
         },

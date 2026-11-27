@@ -1,3 +1,6 @@
+import { CertificateActionsService } from '../../../shared/common-services/certificate-actions.service';
+import { AttendanceSummary } from '../../../shared/components/attendance-summary/attendance-summary';
+import { AuthService } from '../../../core/auth/auth.service';
 import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -31,13 +34,13 @@ interface Course extends LearningApiResource { status: string }
 @Component({
   selector: 'app-user-view',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, CanActionDirective],
+  imports: [CommonModule, MatDialogModule, CanActionDirective, AttendanceSummary],
   templateUrl: './user-view.html',
   styleUrls: ['./user-view.scss'],
 })
 export class UserView {
   private readonly dialogRef = inject(MatDialogRef<UserView, 'edit'>);
-  private readonly data = inject<{ userId: string }>(MAT_DIALOG_DATA);
+  private readonly data = inject<{ userId: string; focus?: string }>(MAT_DIALOG_DATA);
   private readonly users = inject(UsersService);
   private readonly batches = inject(BatchesService);
   private readonly actions = inject(UserActionsService);
@@ -46,32 +49,54 @@ export class UserView {
   private readonly certificatesApi = inject(CertificatesApi);
   private readonly auditApi = inject(AuditLogsApi);
   private readonly toast = inject(ToastService);
+  private readonly auth = inject(AuthService);
 
-  readonly tab = signal<TabKey>('details');
+  readonly tab = signal<TabKey>((this.data.focus as TabKey | undefined) ?? 'details');
   readonly user = computed(() => this.users.get(this.data.userId));
   readonly isStudent = computed(() => this.user()?.r === 'Student');
   readonly access = computed(() => ROLE_ACCESS[this.user()?.r as keyof typeof ROLE_ACCESS] ?? '');
   readonly canChangeBatch = computed(() => BATCH_ROLES.includes(this.user()?.r ?? ''));
   readonly batchNames = computed(() => this.batches.names());
 
-  /** The ribbon: students get learning, attendance and certificates; everyone gets the activity log. */
-  readonly tabs = computed<{ key: TabKey; label: string; icon: string }[]>(() => [
+  /** The ribbon: students get learning, attendance and certificates; the activity log shows only for roles that may view Logs Management. */
+  /** Opened from another module (`focus`): Details plus that module's tab only. From User Management: every tab. */
+  private readonly allTabs = computed<{ key: TabKey; label: string; icon: string }[]>(() => [
     { key: 'details', label: 'Details', icon: 'bi-person-vcard' },
     ...(this.isStudent() ? [] : [{ key: 'biography' as const, label: 'Biography', icon: 'bi-journal-text' }]),
-    ...(this.isStudent() ? [
-      { key: 'learning' as const, label: 'Learning', icon: 'bi-play-circle' },
-      { key: 'attendance' as const, label: 'Attendance', icon: 'bi-calendar-check' },
-      { key: 'certificates' as const, label: 'Certificates', icon: 'bi-award' },
-    ] : []),
-    { key: 'logs', label: 'Activity logs', icon: 'bi-list-check' },
+    // A student's learning, attendance and certificates show only to roles that hold those modules.
+    ...(this.isStudent() && this.auth.can('a_learn', 'v') ? [{ key: 'learning' as const, label: 'Learning', icon: 'bi-play-circle' }] : []),
+    ...(this.isStudent() && this.auth.can('a_attend', 'v') ? [{ key: 'attendance' as const, label: 'Attendance', icon: 'bi-calendar-check' }] : []),
+    ...(this.isStudent() && this.auth.can('a_certs', 'v') ? [{ key: 'certificates' as const, label: 'Certificates', icon: 'bi-award' }] : []),
+    // The log is read from the server, which only gives it to roles that hold Logs Management.
+    ...(this.auth.can('a_logs', 'v') ? [{ key: 'logs' as const, label: 'Activity logs', icon: 'bi-list-check' }] : []),
   ]);
+  readonly tabs = computed(() => (this.data.focus ? this.allTabs().filter(t => t.key === 'details' || t.key === this.data.focus) : this.allTabs()));
 
   readonly courses = signal<Course[]>([]);
   readonly records = signal<AttendanceRecord[]>([]);
   readonly certs = signal<Certificate[]>([]);
+  private readonly certActions = inject(CertificateActionsService);
   /** The student's certificate QR codes, one per enrolled course. */
   readonly qrCards = signal<CertQrCard[]>([]);
   protected readonly qrLabel = qrStatusLabel;
+
+  /** One card per course: the certificate (if any) and the course QR together, as on the student's own page. */
+  readonly certRows = computed(() => {
+    const certs = this.certs();
+    const pick = (courseId: number) => certs.find(c => c.course_id === courseId && c.status === 'Issued') ?? certs.find(c => c.course_id === courseId);
+    const rows = this.qrCards().map(q => ({ key: 'q' + q.course_id, course: q.course, courseId: q.course_id, cert: pick(q.course_id), qr: q as CertQrCard | undefined, progress: q.progress, done: q.status !== 'in_progress' }));
+    const seen = new Set(rows.map(x => x.courseId));
+    const extra = certs.filter(c => !seen.has(c.course_id) && pick(c.course_id) === c)
+      .map(c => ({ key: 'c' + c.id, course: c.course, courseId: c.course_id, cert: c as Certificate | undefined, qr: undefined as CertQrCard | undefined, progress: 100, done: true }));
+    return [...rows, ...extra];
+  });
+  protected certStatus(c?: Certificate): { text: string; tone: string } {
+    return c ? { text: c.status, tone: c.status === 'Issued' ? 'g' : c.status === 'Pending' ? 'w' : 'd' } : { text: 'Not issued', tone: '' };
+  }
+  protected viewCert(c: Certificate): void { this.certActions.preview(c); }
+  protected day(iso: string | null | undefined): string {
+    return iso ? new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+  }
   protected qrTone(c: CertQrCard): string { return c.status === 'issued' ? 'ok' : c.status === 'completed' ? 'ok' : c.status === 'in_progress' ? 'wait' : 'bad'; }
   readonly logs = signal<AuditEntry[]>([]);
   readonly busy = signal<Partial<Record<TabKey, boolean>>>({});

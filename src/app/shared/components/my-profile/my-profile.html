@@ -1,0 +1,120 @@
+<div class="lead-modal mp">
+  <div class="mp-cover">
+    <button type="button" class="mp-x" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+    <div class="mp-id">
+      <div class="mp-avatar">
+        @if (preview(); as pic) { <img [src]="pic" alt="Profile picture" /> } @else { <span [style.background]="me().col">{{ me().i }}</span> }
+        @if (tab() === 'profile') {
+          <label class="mp-cam" for="mp-pic" title="Change picture" aria-label="Change picture"><i class="bi bi-camera-fill"></i></label>
+          <input id="mp-pic" type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onPicture($event)" />
+        }
+      </div>
+      <div class="mp-who">
+        <h2>{{ model.name || me().n }}</h2>
+        <div class="mp-meta">
+          <span class="mp-role"><i class="bi bi-shield-check"></i> {{ account().role }}</span>
+          <span><i class="bi bi-at"></i> {{ account().username || '—' }}</span>
+        </div>
+        @if (tab() === 'profile' && preview()) { <button type="button" class="mp-link" (click)="removePicture()">Remove picture</button> }
+      </div>
+    </div>
+  </div>
+
+  <div class="mp-seg" role="tablist">
+    <button type="button" role="tab" [class.on]="tab() === 'profile'" [attr.aria-selected]="tab() === 'profile'" (click)="tab.set('profile'); serverError.set(null)"><i class="bi bi-person-vcard"></i> Profile</button>
+    <button type="button" role="tab" [class.on]="tab() === 'password'" [attr.aria-selected]="tab() === 'password'" (click)="tab.set('password'); serverError.set(null)"><i class="bi bi-shield-lock"></i> Password</button>
+  </div>
+
+  @if (loading()) { <p class="mp-loading">Loading your profile…</p> }
+
+  @if (tab() === 'profile') {
+    <form (ngSubmit)="save()" novalidate>
+      <div class="mp-body">
+        <section class="mp-card">
+          <h3><i class="bi bi-person"></i> Personal details</h3>
+          <div class="form-grid">
+            <div class="form-field full-width">
+              <label for="mp-name">Full name <span>*</span></label>
+              <div class="input-wrap"><i class="bi bi-person"></i><input id="mp-name" name="name" maxlength="150" [(ngModel)]="model.name" [class.is-invalid]="submitted() && !model.name.trim()" /></div>
+              @if (submitted() && !model.name.trim()) { <small class="error-text">Enter your name.</small> }
+            </div>
+            <div class="form-field">
+              <label for="mp-mobile">Mobile</label>
+              <div class="input-wrap"><i class="bi bi-telephone"></i><input id="mp-mobile" name="mobile" maxlength="20" [(ngModel)]="model.mobile" /></div>
+            </div>
+            <div class="form-field">
+              <label for="mp-email">Email</label>
+              <div class="input-wrap"><i class="bi bi-envelope"></i><input id="mp-email" type="email" name="email" maxlength="150" [(ngModel)]="model.email" /></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mp-card">
+          <h3><i class="bi bi-journal-text"></i> About you</h3>
+          <div class="form-grid">
+            <div class="form-field full-width">
+              <label for="mp-sd">Short description</label>
+              <div class="input-wrap"><i class="bi bi-card-text"></i><input id="mp-sd" name="sd" maxlength="255" placeholder="One line about you" [(ngModel)]="model.shortDescription" /></div>
+            </div>
+            <div class="form-field full-width">
+              <label for="mp-bio">Biography</label>
+              <div class="input-wrap textarea-wrap"><i class="bi bi-chat-left-text"></i><textarea id="mp-bio" name="bio" rows="4" maxlength="5000" [(ngModel)]="model.biography"></textarea></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mp-card mp-ro">
+          <h3><i class="bi bi-lock"></i> Set by your administrator</h3>
+          <div class="mp-facts">
+            <div><span>Username</span><b>{{ account().username || '—' }}</b></div>
+            <div><span>Institute</span><b>{{ account().org || '—' }}</b></div>
+            <div><span>Batch</span><b>{{ account().batch || '—' }}</b></div>
+          </div>
+        </section>
+
+        @if (serverError(); as err) { <p class="error-text" role="alert">{{ err }}</p> }
+      </div>
+
+      <div class="modal-footer-custom">
+        <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+        <button type="submit" class="save-btn" [disabled]="saving()"><i class="bi bi-floppy"></i> {{ saving() ? 'Saving…' : 'Save profile' }}</button>
+      </div>
+    </form>
+  } @else {
+    <form (ngSubmit)="changePassword()" novalidate>
+      <div class="mp-body">
+        <section class="mp-card">
+          <h3><i class="bi bi-key"></i> Change your password</h3>
+          <div class="form-grid">
+            <div class="form-field full-width">
+              <label for="mp-cur">Current password</label>
+              <div class="input-wrap"><i class="bi bi-lock"></i><input id="mp-cur" [type]="show() ? 'text' : 'password'" name="cur" autocomplete="current-password" [(ngModel)]="pwd.current" /></div>
+            </div>
+            <div class="form-field">
+              <label for="mp-new">New password</label>
+              <div class="input-wrap"><i class="bi bi-key"></i><input id="mp-new" [type]="show() ? 'text' : 'password'" name="next" autocomplete="new-password" minlength="8" [(ngModel)]="pwd.next" /></div>
+            </div>
+            <div class="form-field">
+              <label for="mp-again">Confirm new password</label>
+              <div class="input-wrap"><i class="bi bi-key-fill"></i><input id="mp-again" [type]="show() ? 'text' : 'password'" name="again" autocomplete="new-password" [(ngModel)]="pwd.again" /></div>
+            </div>
+          </div>
+          <div class="mp-strength" [attr.data-level]="strength().level" aria-live="polite">
+            <div class="bars"><i></i><i></i><i></i><i></i></div>
+            <span>{{ strength().label }}</span>
+            <label class="mp-show"><input type="checkbox" [checked]="show()" (change)="show.set($any($event.target).checked)" /> Show passwords</label>
+          </div>
+          <ul class="mp-rules">
+            <li [class.ok]="pwd.next.length >= 8"><i class="bi" [class]="pwd.next.length >= 8 ? 'bi-check-circle-fill' : 'bi-circle'"></i> At least 8 characters</li>
+            <li [class.ok]="pwd.next.length > 0 && pwd.next === pwd.again"><i class="bi" [class]="pwd.next.length > 0 && pwd.next === pwd.again ? 'bi-check-circle-fill' : 'bi-circle'"></i> Both new passwords match</li>
+          </ul>
+        </section>
+        @if (serverError(); as err) { <p class="error-text" role="alert">{{ err }}</p> }
+      </div>
+      <div class="modal-footer-custom">
+        <button type="button" class="cancel-btn" (click)="close()">Close</button>
+        <button type="submit" class="save-btn" [disabled]="saving()"><i class="bi bi-check2-circle"></i> {{ saving() ? 'Saving…' : 'Change password' }}</button>
+      </div>
+    </form>
+  }
+</div>

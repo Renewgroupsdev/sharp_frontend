@@ -7,6 +7,8 @@ import { AssessmentList } from './assessment-list/assessment-list';
 import { QuestionBank } from './question-bank/question-bank';
 import { QuestionGroups } from './question-groups/question-groups';
 import { QuizAttempts } from './quiz-attempts/quiz-attempts';
+import { HeaderActions } from '../../shared/directives/header-actions.directive';
+import { NgTemplateOutlet } from '@angular/common';
 import { QuizReport } from './quiz-report/quiz-report';
 import { QuizSetup } from './quiz-setup/quiz-setup';
 
@@ -15,10 +17,8 @@ type SubKey = 'list' | 'groups' | 'bank' | 'report' | 'attempts' | 'setup';
 
 const QUESTION_SUBS = [
   { key: 'list' as SubKey, label: 'List', icon: 'bi-list-ul' },
-  { key: 'groups' as SubKey, label: 'Question groups', icon: 'bi-collection' },
-  { key: 'bank' as SubKey, label: 'Question bank', icon: 'bi-patch-question' },
-  { key: 'report' as SubKey, label: 'Report', icon: 'bi-bar-chart-line' },
-  { key: 'attempts' as SubKey, label: 'Attempts', icon: 'bi-clipboard-data' },
+  { key: 'groups' as SubKey, label: 'Assessment groups', icon: 'bi-collection' },
+  { key: 'bank' as SubKey, label: 'Assessment bank', icon: 'bi-patch-question' },
   { key: 'setup' as SubKey, label: 'Settings', icon: 'bi-sliders' },
 ] as const;
 
@@ -36,8 +36,6 @@ const KINDS: { key: Kind; label: string; icon: string; subs: readonly { key: Sub
       { key: 'list', label: 'Quizzes', icon: 'bi-list-ul' },
       { key: 'groups', label: 'Question groups', icon: 'bi-collection' },
       { key: 'bank', label: 'Question bank', icon: 'bi-patch-question' },
-      { key: 'report', label: 'Quiz report', icon: 'bi-bar-chart-line' },
-      { key: 'attempts', label: 'Attempts', icon: 'bi-clipboard-data' },
       { key: 'setup', label: 'Settings', icon: 'bi-sliders' },
     ],
   },
@@ -52,11 +50,12 @@ const KINDS: { key: Kind; label: string; icon: string; subs: readonly { key: Sub
 @Component({
   selector: 'app-assessments',
   standalone: true,
-  imports: [AssessmentList, QuestionGroups, QuestionBank, QuizReport, QuizAttempts, QuizSetup],
+  imports: [NgTemplateOutlet, AssessmentList, QuestionGroups, QuestionBank, QuizReport, QuizAttempts, QuizSetup],
   templateUrl: './assessments.html',
   styleUrls: ['../../shared/styles/erp-page.scss', './assessments.scss'],
 })
 export class Assessments {
+  protected readonly actions = inject(HeaderActions);
   private readonly store = inject(AssessmentsService);
   private readonly route = inject(ActivatedRoute);
   private readonly auth = inject(AuthService);
@@ -68,14 +67,14 @@ export class Assessments {
   readonly subtitles: Record<string, string> = {
     Assignment: 'Work learners submit by a date, with marks and an optional document.',
     Assessment: 'Question-based assessments: shuffled per student, auto-marked, with long answers marked by a mentor.',
-    Quiz: 'Quizzes built from question groups, with banks, reports and settings.',
+    Quiz: 'Quizzes built from question groups, with banks and settings.',
   };
   readonly kinds = KINDS;
   readonly kind = signal<Kind>(this.pinned ?? 'all');
   readonly sub = signal<SubKey>('list');
   /** The sub-tabs of the current kind. Attempts needs its own permission (a_attempts.view). */
   readonly subs = computed<readonly { key: SubKey; label: string; icon: string }[]>(() =>
-    (KINDS.find(k => k.key === this.kind())?.subs ?? []).filter(s => s.key !== 'attempts' || this.auth.can('a_attempts', 'v')));
+    (KINDS.find(k => k.key === this.kind())?.subs ?? []).filter(s => this.auth.hasTab('a_assess.tab.' + s.key)));
   /** The type a tab is pinned to; undefined on "All". */
   readonly type = computed(() => (this.kind() === 'all' ? undefined : (this.kind() as AssessType)));
 

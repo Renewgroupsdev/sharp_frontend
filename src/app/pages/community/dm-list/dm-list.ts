@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { apiErrorMessage } from '../../../core/http/api.interceptor';
 import { CommunityService } from '../../../shared/common-services/community.service';
 import { ToastService } from '../../../shared/common-services/toast.service';
@@ -23,6 +23,9 @@ export class DmList extends LocalListBase implements OnInit {
   private readonly store = inject(CommunityService);
   private readonly toast = inject(ToastService);
   private readonly dock = inject(ChatDockService);
+
+  /** Inside another page: no explanation line of its own. */
+  @Input() embedded = false;
 
   protected readonly noun = 'conversations';
   protected override filterFields = { status: 'title', source: 'title', branch: ['title'] };

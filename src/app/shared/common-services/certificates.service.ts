@@ -39,8 +39,8 @@ export class CertificatesService {
     this.settings.set(await this.api.getSettings());
   }
 
-  async create(studentId: string, courseId: number): Promise<Certificate> {
-    const rec = await this.api.createFor(studentId, courseId);
+  async create(studentId: string, courseId: number, templateId?: number | null): Promise<Certificate> {
+    const rec = await this.api.createFor(studentId, courseId, templateId);
     this.items.update(list => [rec, ...list]);
     this.log.record(MODULE_NAME, `Created certificate for ${rec.name} — ${rec.course}`);
     return rec;

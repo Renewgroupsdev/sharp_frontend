@@ -10,38 +10,67 @@
     <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
   </div>
 
-  <form (ngSubmit)="save()" novalidate>
-    <div class="modal-body-custom">
-      <div class="form-grid">
-        <div class="form-field full-width">
-          <label for="cf-student">Student <span>*</span></label>
-          <div class="input-wrap"><i class="bi bi-person"></i>
-            <select id="cf-student" name="studentId" [(ngModel)]="model.studentId" [class.is-invalid]="submitted() && !model.studentId">
-              <option value="">Select a student</option>
-              @for (s of students; track s.id) { <option [value]="s.id">{{ s.n }} ({{ s.id }})</option> }
-            </select>
-            <i class="bi bi-chevron-down select-arrow"></i>
+  <form (ngSubmit)="save()" (change)="touch()" novalidate>
+    <div class="modal-body-custom cf-body">
+      <div class="cf-left">
+        <section class="cf-sec">
+          <h4><span class="n">1</span> Who and what</h4>
+          <div class="form-field">
+            <label for="cf-student">Student <span>*</span></label>
+            <div class="input-wrap"><i class="bi bi-person"></i>
+              <select id="cf-student" name="studentId" [(ngModel)]="model.studentId" [class.is-invalid]="submitted() && !model.studentId">
+                <option value="">Select a student</option>
+                @for (s of students; track s.id) { <option [value]="s.id">{{ s.n }} ({{ s.id }})</option> }
+              </select>
+              <i class="bi bi-chevron-down select-arrow"></i>
+            </div>
+            @if (submitted() && !model.studentId) { <small class="error-text">Choose a student.</small> }
           </div>
-          @if (submitted() && !model.studentId) { <small class="error-text">Choose a student.</small> }
-        </div>
-        <div class="form-field full-width">
-          <label for="cf-course">Course <span>*</span></label>
-          <div class="input-wrap"><i class="bi bi-journal-bookmark"></i>
-            <select id="cf-course" name="courseId" [(ngModel)]="model.courseId" [class.is-invalid]="submitted() && !model.courseId">
-              <option value="">Select a course</option>
-              @for (c of courses; track c.id) { <option [value]="c.id">{{ c.title }}</option> }
-            </select>
-            <i class="bi bi-chevron-down select-arrow"></i>
+          <div class="form-field">
+            <label for="cf-course">Course <span>*</span></label>
+            <div class="input-wrap"><i class="bi bi-journal-bookmark"></i>
+              <select id="cf-course" name="courseId" [(ngModel)]="model.courseId" [class.is-invalid]="submitted() && !model.courseId">
+                <option value="">Select a course</option>
+                @for (c of courses; track c.id) { <option [value]="c.id">{{ c.title }}</option> }
+              </select>
+              <i class="bi bi-chevron-down select-arrow"></i>
+            </div>
+            @if (submitted() && !model.courseId) { <small class="error-text">Choose a course.</small> }
           </div>
-          @if (submitted() && !model.courseId) { <small class="error-text">Choose a course.</small> }
-        </div>
+        </section>
+
+        <section class="cf-sec">
+          <h4><span class="n">2</span> Choose a template</h4>
+          <div class="cf-tpls" role="radiogroup" aria-label="Certificate template">
+            <button type="button" role="radio" class="cf-tpl" [class.on]="templateId() === 0" [attr.aria-checked]="templateId() === 0" (click)="templateId.set(0)">
+              <span class="sw" style="background:#475467"></span>
+              <span class="tx"><b>Programme default</b><small>From Certificate settings</small></span>
+              <i class="bi bi-check-circle-fill ok"></i>
+            </button>
+            @for (t of templates(); track t.id) {
+              <button type="button" role="radio" class="cf-tpl" [class.on]="templateId() === t.id" [attr.aria-checked]="templateId() === t.id" (click)="templateId.set(t.id)">
+                <span class="sw" [style.background]="accentOf(t.design)"></span>
+                <span class="tx"><b>{{ t.name }}</b><small>{{ t.design.template }} · {{ t.design.type }}</small></span>
+                <i class="bi bi-check-circle-fill ok"></i>
+              </button>
+            }
+          </div>
+          @if (!templates().length) { <small class="hint">No templates yet. Add them under Certificate Management → Templates.</small> }
+        </section>
+
+        @if (serverError(); as err) { <p class="error-text" role="alert">{{ err }}</p> }
       </div>
-      @if (serverError(); as err) { <p class="error-text" role="alert">{{ err }}</p> }
+
+      <aside class="cf-right">
+        <h4>Preview</h4>
+        <app-certificate-view [cert]="preview()" />
+        <p class="hint">The certificate is created as Pending and issued from the list once reviewed. You can still edit its wording before then.</p>
+      </aside>
     </div>
 
     <div class="modal-footer-custom">
       <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
-      <button type="submit" class="save-btn" [disabled]="saving()"><i class="bi bi-floppy"></i> {{ saving() ? 'Saving…' : 'Create' }}</button>
+      <button type="submit" class="save-btn" [disabled]="saving()"><i class="bi bi-floppy"></i> {{ saving() ? 'Saving…' : 'Create certificate' }}</button>
     </div>
   </form>
 </div>

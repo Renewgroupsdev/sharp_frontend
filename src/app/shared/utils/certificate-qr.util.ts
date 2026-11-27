@@ -11,4 +11,4 @@ export const withQrImages = (codes: CertQrCode[]): Promise<CertQrCard[]> =>
   }));
 
 export const qrStatusLabel = (c: CertQrCode): string =>
-  ({ issued: 'Certificate issued', completed: 'Course completed', in_progress: `In progress · ${c.progress}%`, cancelled: 'Certificate cancelled' })[c.status];
+  ({ issued: 'Certificate issued', completed: 'Completed · awaiting verification', in_progress: `In progress · ${c.progress}%`, cancelled: 'Certificate cancelled' })[c.status];

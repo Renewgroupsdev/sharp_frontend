@@ -1,7 +1,7 @@
 <div class="purchase-page container-fluid px-0">
-  <div class="d-flex justify-content-end header-actions">
+  <ng-template appHeaderActions>
     <button *appCan="'a_assess.create'" type="button" class="add-lead-btn" (click)="add()"><i class="bi bi-plus-lg"></i> Add question</button>
-  </div>
+  </ng-template>
 
   <app-common-filter-card
     searchPlaceholder="Search questions"
@@ -13,7 +13,7 @@
 
   <div class="table-col">
     <app-common-table-card
-      title="Question bank"
+      [title]="type === 'Assessment' ? 'Assessment bank' : 'Question bank'"
       [recordCountText]="recordCountText"
       [columns]="columns"
       [rows]="rows"

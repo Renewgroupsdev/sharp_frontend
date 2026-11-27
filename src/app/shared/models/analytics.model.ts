@@ -11,7 +11,7 @@ export interface AnalyticsKpis {
 }
 
 export interface AttendanceWeek { label: string; start: string; cells: (number | null)[] }
-export interface BatchAttendance { name: string; present: number; late: number; absent: number }
+export interface BatchAttendance { name: string; rate: number; students: number }
 export interface BatchAssignments { name: string; submitted: number; pending: number; evaluated: number; overdue: number }
 export interface TrendPoint { label: string; pass: number; fail: number; avg: number | null }
 export interface FeedItem { text: string; at: string; tone: 'green' | 'amber' | 'red' }

@@ -1,17 +1,30 @@
-.role-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.role-chip {
-  border: 1px solid var(--primary-border-strong); border-radius: 99px; padding: 4px 14px;
-  background: var(--app-surface-solid); color: var(--text-dark); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
-  &.active { background: var(--primary); border-color: var(--primary); color: #fff; }
-}
-.alert-banner strong { display: inline; margin-right: 6px; }
-.matrix-wrap { overflow: auto; border: 1px solid var(--border-soft); border-radius: 12px; background: var(--app-surface-solid); }
-.matrix {
-  width: 100%; border-collapse: collapse; font-size: 12px;
-  th { background: var(--primary-soft); color: var(--primary-dark); text-align: center; padding: 8px; font-size: 11px; }
-  th:first-child, td:first-child { text-align: left; padding-left: 12px; }
-  td { padding: 8px; text-align: center; border-top: 1px solid var(--border-soft); color: var(--text-dark); }
-  td i { color: var(--primary); margin-right: 4px; }
-  input { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
-  input:disabled { cursor: not-allowed; }
-}
+.rp-alert { margin: 6px 0; padding: 10px 14px; border-radius: 8px; background: #fdecea; color: #b42318; font-size: 13px; }
+
+.rp-layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 16px; align-items: start; margin-top: 10px; }
+
+/* roles list */
+.rp-roles { position: sticky; top: 8px; display: flex; flex-direction: column; gap: 8px; padding: 14px; border: 1px solid #E4E7EC; border-radius: 10px; background: #fff;
+  h3 { margin: 0 0 4px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #667085; } }
+.rp-role { position: relative; display: grid; grid-template-columns: 34px 1fr; gap: 0 10px; align-items: center; padding: 10px 12px 14px; border: 1px solid #E4E7EC; border-radius: 8px; background: #fff; font: inherit; text-align: left; cursor: pointer;
+  .av { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #ECECF6; color: #080536; font-weight: 700; }
+  .tx { display: flex; flex-direction: column; min-width: 0; b { font-size: 13.5px; color: #101828; } small { font-size: 11.5px; color: #667085; } }
+  .bar { position: absolute; left: 12px; right: 12px; bottom: 6px; height: 3px; border-radius: 2px; background: #F2F4F7; overflow: hidden; i { display: block; height: 100%; background: #080536; } }
+  &:hover { border-color: #98A2B3; }
+  &.active { border-color: #080536; background: #080536; .av { background: rgba(255, 255, 255, .16); color: #fff; } .tx b { color: #fff; } .tx small { color: rgba(255, 255, 255, .7); } .bar { background: rgba(255, 255, 255, .2); i { background: #F3B34A; } } } }
+
+/* right side */
+.rp-main { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+.rp-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 14px 16px; border: 1px solid #E4E7EC; border-radius: 10px; background: #fff;
+  .rp-who { display: flex; flex-direction: column; b { font-size: 16px; color: #101828; } span { font-size: 12px; color: #667085; } }
+  em { padding: 2px 10px; border-radius: 6px; background: #fdf1dc; color: #a86a0a; font-size: 11.5px; font-style: normal; font-weight: 600; }
+  .rp-tools { margin-left: auto; display: flex; align-items: center; gap: 12px; } }
+.rp-search { position: relative; display: flex; align-items: center; min-width: 240px;
+  i { position: absolute; left: 11px; color: #98A2B3; }
+  input { width: 100%; height: 36px; padding: 0 12px 0 32px; border: 1px solid #D0D5DD; border-radius: 6px; font: inherit; font-size: 13px; background: #fff;
+    &:focus { outline: none; border-color: #080536; box-shadow: 0 0 0 3px rgba(8, 5, 54, .1); } } }
+.rp-link { border: 0; background: none; padding: 0; color: #080536; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; &:hover { text-decoration: underline; } }
+
+.rp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 12px; align-items: start; }
+.rp-note { margin: 14px 0; font-size: 13px; color: #667085; }
+
+@media (max-width: 900px) { .rp-layout { grid-template-columns: 1fr; } .rp-roles { position: static; flex-direction: row; flex-wrap: wrap; } .rp-roles h3 { width: 100%; } .rp-role { flex: 1 1 160px; } }

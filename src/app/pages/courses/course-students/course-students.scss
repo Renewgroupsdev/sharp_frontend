@@ -34,3 +34,8 @@
   border-top: 1px solid var(--border-soft);
   font-size: 12px;
 }
+
+.mod-prog { display: flex; flex-direction: column; gap: 8px; margin: 10px 0 14px; }
+.mod-prog .mp { display: grid; grid-template-columns: minmax(120px, 1fr) 2fr 48px; align-items: center; gap: 10px; font-size: 12px; }
+.mod-prog .mp .progress { height: 7px; border-radius: 4px; background: #F2F4F7; overflow: hidden; i { display: block; height: 100%; background: #080536; } }
+.mod-prog .mp b { text-align: right; }

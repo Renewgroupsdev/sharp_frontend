@@ -79,7 +79,8 @@
             <button class="st-btn" type="button" [disabled]="saving() || (!content().trim() && !files().length)" (click)="submit()"><i class="bi bi-send"></i> {{ saving() ? 'Submitting…' : 'Submit assignment' }}</button>
           </div>
         } @else {
-          <div class="ad-closed"><i class="bi bi-lock-fill"></i> The submission deadline has passed. New submissions are closed.</div>
+          @if (isGraded()) { <div class="ad-closed done"><i class="bi bi-patch-check-fill"></i> This assignment has been graded. No further versions can be submitted.</div> }
+          @else { <div class="ad-closed"><i class="bi bi-lock-fill"></i> The submission deadline has passed. New submissions are closed.</div> }
         }
       </div>
 

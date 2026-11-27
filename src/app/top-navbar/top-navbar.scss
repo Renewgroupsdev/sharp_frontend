@@ -170,3 +170,7 @@
 @media (max-width: 640px) {
   .topbar { gap: 10px; padding: 0 12px; }
 }
+
+.avatar-img { object-fit: cover; }
+
+.profile-btn { display: flex; align-items: center; gap: 10px; padding: 0; border: 0; background: none; font: inherit; text-align: left; cursor: pointer; &:hover .who strong { text-decoration: underline; } }

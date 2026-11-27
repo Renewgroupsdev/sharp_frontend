@@ -89,3 +89,6 @@
 .sb-edit { width: 100%; padding: 8px 10px; border: 1px solid #d9e7f0; border-radius: 10px; font: inherit; font-size: 13px; resize: vertical; }
 .sb-admin { display: flex; gap: 8px; margin-top: 8px; }
 .sb-abtn { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border: 1px solid #cfe3ef; border-radius: 8px; background: #fff; color: var(--primary); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; &:hover { background: #eef5f9; } &.danger { color: #b91c1c; border-color: #f3c4c4; &:hover { background: #fef2f2; } } &:disabled { opacity: .6; cursor: default; } }
+
+.sb-ro { margin: 0 0 12px; padding: 8px 12px; border-radius: 8px; background: #F2F4F7; color: #475467; font-size: 12.5px; i { margin-right: 6px; } }
+.sb-grade.ro { opacity: .6; pointer-events: none; }

@@ -35,6 +35,11 @@ export interface LearnState {
 
 /** A quiz inside a module: finishing the module needs it passed. */
 export interface ModuleQuiz {
+  /** 'quiz' or 'assessment'. */
+  type?: string;
+  /** False until the lesson (or every lesson of the module) it follows is completed. */
+  available?: boolean;
+  reason?: string | null;
   id: number;
   title: string;
   best_percent: number | null;

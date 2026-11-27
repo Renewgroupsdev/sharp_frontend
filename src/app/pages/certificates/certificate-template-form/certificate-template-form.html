@@ -1,0 +1,108 @@
+<div class="lead-modal">
+  <div class="modal-header-custom">
+    <div class="modal-title-wrap">
+      <div class="title-icon"><i class="bi bi-palette"></i></div>
+      <div class="title-content">
+        <h2>{{ existing ? 'Edit template' : 'New certificate template' }}</h2>
+        <p>Design once, then pick it when you create a certificate.</p>
+      </div>
+    </div>
+    <button type="button" class="modal-close-btn" aria-label="Close" (click)="close()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <form (ngSubmit)="save()" (input)="touch()" (change)="touch()" novalidate>
+    <div class="modal-body-custom tf-body">
+      <div class="tf-left">
+        <section class="tf-sec">
+          <h4>1 · Name</h4>
+          <div class="form-field">
+            <label for="tf-name">Template name <span>*</span></label>
+            <div class="input-wrap"><i class="bi bi-bookmark-star"></i><input id="tf-name" name="name" maxlength="80" placeholder="e.g. Merit – navy" [(ngModel)]="model.name" [class.is-invalid]="submitted() && !model.name.trim()" /></div>
+            @if (submitted() && !model.name.trim()) { <small class="error-text">Give the template a name.</small> }
+          </div>
+          <div class="form-field">
+            <label for="tf-desc">Short note</label>
+            <div class="input-wrap"><i class="bi bi-card-text"></i><input id="tf-desc" name="description" maxlength="200" placeholder="When to use it" [(ngModel)]="model.description" /></div>
+          </div>
+        </section>
+
+        <section class="tf-sec">
+          <h4>2 · Layout &amp; colour</h4>
+          <div class="tf-layouts" role="radiogroup" aria-label="Layout">
+            @for (l of layouts; track l) {
+              <button type="button" role="radio" class="tf-layout" [class.on]="model.template === l" [attr.aria-checked]="model.template === l" (click)="pick('template', l)">
+                <span class="mini" [attr.data-l]="l" [style.--ca]="model.accent"><i></i><i></i><i></i></span>
+                <b>{{ l }}</b>
+              </button>
+            }
+          </div>
+          <div class="tf-colors">
+            @for (c of accents; track c) {
+              <button type="button" class="sw" [class.on]="model.accent.toLowerCase() === c.toLowerCase()" [style.background]="c" [attr.aria-label]="'Colour ' + c" (click)="pick('accent', c)"></button>
+            }
+            <label class="sw custom" title="Any colour"><input type="color" name="accent" [(ngModel)]="model.accent" /><i class="bi bi-eyedropper"></i></label>
+          </div>
+        </section>
+
+        <section class="tf-sec">
+          <h4>3 · Wording</h4>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="tf-type">Certificate type</label>
+              <div class="input-wrap"><i class="bi bi-tag"></i>
+                <select id="tf-type" name="type" [(ngModel)]="model.type">@for (t of types; track t) { <option [value]="t">{{ t }}</option> }</select>
+                <i class="bi bi-chevron-down select-arrow"></i>
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="tf-title">Title <span>*</span></label>
+              <div class="input-wrap"><i class="bi bi-fonts"></i><input id="tf-title" name="title" maxlength="120" [(ngModel)]="model.title" [class.is-invalid]="submitted() && !model.title.trim()" /></div>
+            </div>
+            <div class="form-field full-width">
+              <label for="tf-body">Wording <span>*</span></label>
+              <div class="input-wrap textarea-wrap"><i class="bi bi-text-paragraph"></i><textarea id="tf-body" name="body" rows="3" maxlength="1000" [(ngModel)]="model.body" [class.is-invalid]="submitted() && !model.body.trim()"></textarea></div>
+              <small class="hint">Placeholders: {{ '{student} {course} {score} {date} {no}' }}</small>
+            </div>
+          </div>
+        </section>
+
+        <section class="tf-sec">
+          <h4>4 · Signature &amp; extras</h4>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="tf-sn">Signature name</label>
+              <div class="input-wrap"><i class="bi bi-pen"></i><input id="tf-sn" name="signatureName" maxlength="80" [(ngModel)]="model.signatureName" /></div>
+            </div>
+            <div class="form-field">
+              <label for="tf-sr">Designation</label>
+              <div class="input-wrap"><i class="bi bi-person-badge"></i><input id="tf-sr" name="signatureRole" maxlength="80" [(ngModel)]="model.signatureRole" /></div>
+            </div>
+            <div class="form-field full-width">
+              <label for="tf-si">Signature image</label>
+              @if (model.signatureImage) { <div class="sig-row"><img class="sig-img" [src]="model.signatureImage" alt="Signature" /><button type="button" class="link-btn" (click)="clearSignature()">Remove</button></div> }
+              <input id="tf-si" class="file-input" type="file" accept="image/png,image/jpeg" (change)="onSignature($event)" />
+              <small class="hint">Optional. PNG or JPEG, 150 KB or smaller.</small>
+            </div>
+            <div class="form-field full-width checks">
+              <label class="check-row"><input type="checkbox" name="showProfile" [(ngModel)]="model.showProfile" /> <span>Show the student's photo</span></label>
+              <label class="check-row"><input type="checkbox" name="showQr" [(ngModel)]="model.showQr" /> <span>Show the verification QR code</span></label>
+            </div>
+          </div>
+        </section>
+
+        @if (serverError(); as err) { <p class="error-text" role="alert">{{ err }}</p> }
+      </div>
+
+      <aside class="tf-right">
+        <h4>Live preview</h4>
+        <app-certificate-view [cert]="preview()" />
+        <p class="hint">Sample student and course shown.</p>
+      </aside>
+    </div>
+
+    <div class="modal-footer-custom">
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+      <button type="submit" class="save-btn" [disabled]="saving()"><i class="bi bi-floppy"></i> {{ saving() ? 'Saving…' : existing ? 'Save template' : 'Create template' }}</button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,30 @@
+<ng-template appHeaderActions>
+  <button *appCan="'a_certs.create'" type="button" class="add-lead-btn" (click)="open(null)"><i class="bi bi-plus-lg"></i> New template</button>
+</ng-template>
+<p class="muted ct-head">Build different certificate designs, then pick one when you create a certificate.</p>
+
+@if (error(); as err) { <p class="ct-err" role="alert">{{ err }}</p> }
+
+<div class="ct-grid">
+  @for (t of items(); track t.id) {
+    <article class="ct-card">
+      <div class="ct-thumb"><div class="ct-scale"><app-certificate-view [cert]="sample(t)" /></div></div>
+      <div class="ct-info">
+        <b>{{ t.name }}</b>
+        <span class="muted">{{ t.description || 'No note' }}</span>
+        <div class="ct-tags">
+          <span class="ct-tag"><i class="dot" [style.background]="t.design.accent || '#0E7A4E'"></i>{{ t.design.template }}</span>
+          <span class="ct-tag">{{ t.design.type }}</span>
+        </div>
+      </div>
+      <div class="ct-acts">
+        <button *appCan="'a_certs.edit'" type="button" (click)="open(t)"><i class="bi bi-pencil-square"></i> Edit</button>
+        <button *appCan="'a_certs.delete'" type="button" class="danger" (click)="remove(t)"><i class="bi bi-trash3"></i> Delete</button>
+      </div>
+    </article>
+  } @empty {
+    @if (loaded()) {
+      <div class="ct-empty"><i class="bi bi-palette"></i><b>No templates yet</b><span>Create one to offer a choice of designs when you issue certificates. Until then, the programme default design is used.</span></div>
+    }
+  }
+</div>

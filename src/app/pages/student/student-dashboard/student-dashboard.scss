@@ -65,3 +65,8 @@
 .st-btn.wide { border-radius: 8px; background: #080536; }
 .prog circle.fg { stroke: #080536; } .prog circle.bg { stroke: #ECECF6; }
 .date { border-radius: 8px; background: #ECECF6; color: #080536; }
+
+.ca { padding: 8px 0; border-top: 1px solid #F2F4F7; &:first-of-type { border-top: 0; } }
+.ca-top { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; color: #344054; b { font-size: 13px; color: #101828; &[data-tone='good'] { color: #1c7d52; } &[data-tone='mid'] { color: #a86a0a; } &[data-tone='low'] { color: #b42318; } } }
+.ca-bar { height: 6px; margin: 6px 0 4px; border-radius: 3px; background: #F2F4F7; overflow: hidden; i { display: block; height: 100%; background: #080536; &[data-tone='good'] { background: #1aa05c; } &[data-tone='mid'] { background: #F3B34A; } &[data-tone='low'] { background: #E56B6F; } } }
+.ca small { font-size: 11px; color: #98A2B3; }

@@ -23,11 +23,8 @@ export class UnlockModule implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly log = inject(ActivityLogService);
 
-  /** The mentor's students (their batch). */
-  readonly students = computed(() => {
-    const batch = this.auth.actor().b;
-    return this.users.students().filter(u => u.b === batch && u.st !== 'Suspended');
-  });
+  /** The mentor's assigned students (the API limits the list to them). */
+  readonly students = computed(() => this.users.students().filter(u => u.st !== 'Suspended'));
 
   readonly studentId = signal('');
   readonly overview = signal<CourseModules[]>([]);

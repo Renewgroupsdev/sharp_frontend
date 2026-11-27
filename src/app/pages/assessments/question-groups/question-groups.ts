@@ -5,6 +5,7 @@ import { ToastService } from '../../../shared/common-services/toast.service';
 import { CommonFilterCard } from '../../../shared/components/common-filter-card/common-filter-card';
 import { CommonTableCard } from '../../../shared/components/common-table-card/common-table-card';
 import { LocalListBase } from '../../../shared/components/local-list-base';
+import { HeaderActionsDirective } from '../../../shared/directives/header-actions.directive';
 import { CanActionDirective } from '../../../shared/directives/can-action.directive';
 import { AssessType } from '../../../shared/models/assessment.model';
 import { TableColumn, TableRow } from '../../../shared/models/common-components.model';
@@ -14,7 +15,7 @@ import { GroupForm } from '../group-form/group-form';
 @Component({
   selector: 'app-question-groups',
   standalone: true,
-  imports: [CommonFilterCard, CommonTableCard, CanActionDirective],
+  imports: [CommonFilterCard, CommonTableCard, CanActionDirective, HeaderActionsDirective],
   templateUrl: './question-groups.html',
   styleUrls: ['../../../shared/styles/erp-page.scss'],
 })

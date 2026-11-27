@@ -1,5 +1,8 @@
-export const CERT_TEMPLATES = ['Classic', 'Modern', 'Minimal'] as const;
+export const CERT_TEMPLATES = ['Classic', 'Modern', 'Minimal', 'Elegant', 'Corporate', 'Royal'] as const;
 export const CERT_TYPES = ['Completion', 'Participation', 'Achievement', 'Merit'] as const;
+/** Colours offered for a template; the picker also takes any colour. */
+export const CERT_ACCENTS = ['#0E7A4E', '#080536', '#1868B0', '#7B3FA0', '#B42318', '#C4620A', '#0E7490', '#475467'] as const;
+export const CERT_DEFAULT_ACCENT = '#0E7A4E';
 export const CERT_STATUSES = ['Pending', 'Issued', 'Rejected', 'Cancelled'] as const;
 
 export type CertStatus = (typeof CERT_STATUSES)[number];
@@ -10,6 +13,8 @@ export interface CertDesign {
   type: string;
   title: string;
   body: string;
+  /** Main colour of the border, bar and title (#RRGGBB); the green default when unset. */
+  accent?: string | null;
   show_profile: boolean;
   show_qr: boolean;
   signature_name: string | null;
@@ -31,6 +36,15 @@ export const defaultCertSettings = (): CertSettings => ({
   show_profile: true, show_qr: true, signature_name: '', signature_role: '', signature_image: null,
   prefix: 'SHARP', min_attendance: 75, min_score: 0,
 });
+
+/** A saved design staff can pick when they create a certificate. */
+export interface CertTemplate {
+  id: number;
+  name: string;
+  description: string | null;
+  design: CertDesign;
+  updated_at?: string;
+}
 
 export interface MentorReview {
   decision: 'approved' | 'returned' | null;

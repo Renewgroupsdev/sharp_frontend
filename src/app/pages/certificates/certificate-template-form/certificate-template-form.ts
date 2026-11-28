@@ -1,4 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { CertLogosEditor } from '../../../shared/components/cert-logos-editor/cert-logos-editor';
+import { CertLogo } from '../../../shared/models/certificate.model';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { apiErrorMessage } from '../../../core/http/api.interceptor';
@@ -14,7 +16,7 @@ const MAX_SIGNATURE_BYTES = 150 * 1024;
 @Component({
   selector: 'app-certificate-template-form',
   standalone: true,
-  imports: [FormsModule, MatDialogModule, CertificateView],
+  imports: [FormsModule, MatDialogModule, CertificateView, CertLogosEditor],
   templateUrl: './certificate-template-form.html',
   styleUrls: ['../../../shared/styles/erp-dialog.scss', './certificate-template-form.scss'],
 })
@@ -46,6 +48,10 @@ export class CertificateTemplateForm {
     signatureImage: this.base.signature_image as string | null,
     showProfile: this.base.show_profile,
     showQr: this.base.show_qr,
+    showLogo: this.base.show_logo !== false,
+    logoPosition: (this.base.logo_position ?? 'center') as string,
+    logoImage: (this.base.logo_image ?? null) as string | null,
+    logos: [...(this.base.logos ?? [])] as CertLogo[],
   };
 
   /** Bumped on every edit so the preview is rebuilt from the typed values. */
@@ -69,7 +75,7 @@ export class CertificateTemplateForm {
     const m = this.model;
     return {
       template: m.template, type: m.type, title: m.title.trim(), body: m.body, accent: m.accent,
-      show_profile: m.showProfile, show_qr: m.showQr,
+      show_profile: m.showProfile, show_qr: m.showQr, show_logo: m.showLogo, logo_position: m.logoPosition as 'left' | 'center' | 'right', logos: m.logos, logo_image: m.logoImage,
       signature_name: m.signatureName.trim() || null, signature_role: m.signatureRole.trim() || null, signature_image: m.signatureImage,
     };
   }

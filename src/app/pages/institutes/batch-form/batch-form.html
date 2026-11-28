@@ -69,6 +69,7 @@
       <div class="section-title"><i class="bi bi-bank"></i> Participating institutes</div>
       <div class="muted">Leave all unticked to include every institute.</div>
       <div class="chips">
+        @if (instituteNames().length) { <label class="chip"><input type="checkbox" [checked]="allInstitutes" (change)="toggleAllInstitutes($any($event.target).checked)" /> <b>Select all</b></label> }
         @for (o of instituteNames(); track o) {
           <label class="chip"><input type="checkbox" [checked]="isPicked(o)" (change)="toggleInstitute(o, $any($event.target).checked)" /> {{ o }}</label>
         }
@@ -77,6 +78,7 @@
       <div class="section-title"><i class="bi bi-journal-bookmark"></i> Courses</div>
       <div class="muted">Every student in this batch is enrolled in the ticked courses automatically.</div>
       <div class="chips">
+        @if (courseTitles().length) { <label class="chip"><input type="checkbox" [checked]="allCourses" (change)="toggleAllCourses($any($event.target).checked)" /> <b>Select all</b></label> }
         @for (t of courseTitles(); track t) {
           <label class="chip"><input type="checkbox" [checked]="model.courses.includes(t)" (change)="toggleCourse(t, $any($event.target).checked)" /> {{ t }}</label>
         } @empty {

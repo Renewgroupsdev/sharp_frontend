@@ -24,9 +24,7 @@
                   <span class="chip" [title]="m.name + ' · ' + m.role">
                     <i class="dot" [class.off]="!m.online" [title]="presence(m)"></i>{{ m.name }} <em>{{ m.role }}</em>
                   </span>
-                  @if (g.source !== 'dm') {
-                    <button type="button" class="chip-btn" [title]="'Send ' + m.name + ' a personal message'" [attr.aria-label]="'Message ' + m.name" (click)="message(m)"><i class="bi bi-envelope"></i></button>
-                  }
+
                   @if (m.removable && canManage()) {
                     <button type="button" class="chip-btn x" [title]="'Remove ' + m.name" [attr.aria-label]="'Remove ' + m.name" (click)="remove(m)"><i class="bi bi-x-lg"></i></button>
                   }

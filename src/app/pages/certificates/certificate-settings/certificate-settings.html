@@ -5,8 +5,8 @@
     <div class="cs-left">
       <section class="cs-sec">
         <header>
-          <h4><span class="n">1</span> Design</h4>
-          <p>The default look of every certificate. Issued certificates keep the design they were issued with.</p>
+          <span class="ico"><i class="bi bi-palette2"></i></span>
+          <div><h4>Design</h4><p>The default look of every certificate. Issued certificates keep the design they were issued with.</p></div>
         </header>
 
         <div class="cs-start">
@@ -42,7 +42,8 @@
 
       <section class="cs-sec">
         <header>
-          <h4><span class="n">2</span> Wording</h4>
+          <span class="ico"><i class="bi bi-fonts"></i></span>
+          <div><h4>Wording</h4><p>What the certificate says.</p></div>
         </header>
         <div class="form-grid">
           <div class="form-field">
@@ -66,7 +67,16 @@
 
       <section class="cs-sec">
         <header>
-          <h4><span class="n">3</span> Signature &amp; extras</h4>
+          <span class="ico"><i class="bi bi-images"></i></span>
+          <div><h4>Logos</h4><p>The SHARP logo can be replaced by your own, and more logos can be added. Each one has its own position.</p></div>
+        </header>
+        <app-cert-logos-editor [showSharp]="model.show_logo !== false" (showSharpChange)="model.show_logo = $event" [sharpPosition]="model.logo_position ?? 'center'" (sharpPositionChange)="model.logo_position = $any($event)" [sharpImage]="model.logo_image ?? null" (sharpImageChange)="model.logo_image = $event" [logos]="model.logos ?? []" (logosChange)="model.logos = $event" (changed)="touch()" />
+      </section>
+
+      <section class="cs-sec">
+        <header>
+          <span class="ico"><i class="bi bi-pen"></i></span>
+          <div><h4>Signature</h4><p>Shown at the bottom right of the certificate.</p></div>
         </header>
         <div class="form-grid">
           <div class="form-field">
@@ -74,27 +84,38 @@
             <div class="input-wrap"><i class="bi bi-pen"></i><input id="cs-signame" name="signature_name" maxlength="80" [(ngModel)]="model.signature_name" /></div>
           </div>
           <div class="form-field">
-            <label for="cs-sigrole">Signature designation</label>
+            <label for="cs-sigrole">Designation</label>
             <div class="input-wrap"><i class="bi bi-person-badge"></i><input id="cs-sigrole" name="signature_role" maxlength="80" [(ngModel)]="model.signature_role" /></div>
           </div>
           <div class="form-field full-width">
             <label for="cs-sigimg">Signature image</label>
-            @if (model.signature_image && !removeSignature()) {
-              <div class="sig-row"><img class="sig-img" [src]="model.signature_image" alt="Current signature" /><button type="button" class="link-btn" (click)="clearSignature()">Remove</button></div>
-            }
-            <input id="cs-sigimg" class="file-input" type="file" accept="image/png,image/jpeg" (change)="onSignature($event)" />
+            <div class="sig-box">
+              @if (model.signature_image && !removeSignature()) {
+                <img class="sig-img" [src]="model.signature_image" alt="Current signature" />
+                <button type="button" class="link-btn" (click)="clearSignature()"><i class="bi bi-trash3"></i> Remove</button>
+              } @else { <span class="sig-none">No signature image</span> }
+              <label class="cs-up"><i class="bi bi-upload"></i> {{ model.signature_image && !removeSignature() ? 'Replace' : 'Upload' }}<input id="cs-sigimg" type="file" hidden accept="image/png,image/jpeg" (change)="onSignature($event)" /></label>
+            </div>
             <small class="hint">Optional. PNG or JPEG, 150 KB or smaller.</small>
-          </div>
-          <div class="form-field full-width checks">
-            <label class="check-row"><input type="checkbox" name="show_profile" [(ngModel)]="model.show_profile" /> <span>Show the student's photo</span></label>
-            <label class="check-row"><input type="checkbox" name="show_qr" [(ngModel)]="model.show_qr" /> <span>Show the verification QR code</span></label>
           </div>
         </div>
       </section>
 
       <section class="cs-sec">
         <header>
-          <h4><span class="n">4</span> Numbering &amp; eligibility</h4>
+          <span class="ico"><i class="bi bi-toggles"></i></span>
+          <div><h4>Show on the certificate</h4><p>Extras drawn on every certificate.</p></div>
+        </header>
+        <div class="cs-switches">
+          <label class="cs-switch"><input type="checkbox" name="show_profile" [(ngModel)]="model.show_profile" /><span class="track"></span><span class="txt"><b>Student's photo</b><small>Their picture, or initials when there is none.</small></span></label>
+          <label class="cs-switch"><input type="checkbox" name="show_qr" [(ngModel)]="model.show_qr" /><span class="track"></span><span class="txt"><b>Verification QR code</b><small>Scanning it opens the public verification page.</small></span></label>
+        </div>
+      </section>
+
+      <section class="cs-sec">
+        <header>
+          <span class="ico"><i class="bi bi-hash"></i></span>
+          <div><h4>Numbering &amp; eligibility</h4><p>How certificates are numbered and who can receive one.</p></div>
         </header>
         <div class="form-grid three">
           <div class="form-field">
@@ -116,15 +137,15 @@
       </section>
 
       @if (serverError(); as err) { <p class="error-text" role="alert">{{ err }}</p> }
-      <div class="cs-actions">
-        <button *appCan="'a_certs.edit'" type="submit" class="save-btn" [disabled]="saving()"><i class="bi bi-floppy"></i> {{ saving() ? 'Saving…' : 'Save settings' }}</button>
-      </div>
     </div>
 
     <aside class="cs-right">
-      <h4>Live preview</h4>
+      <h4><i class="bi bi-eye"></i> Live preview</h4>
       <app-certificate-view [cert]="preview()" />
       <p class="hint">A sample student and course are shown.</p>
+      <div class="cs-actions">
+        <button *appCan="'a_certs.edit'" type="submit" class="save-btn" [disabled]="saving()"><i class="bi bi-floppy"></i> {{ saving() ? 'Saving…' : 'Save settings' }}</button>
+      </div>
     </aside>
   </form>
 }

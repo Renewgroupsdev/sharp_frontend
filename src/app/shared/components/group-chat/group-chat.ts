@@ -5,7 +5,7 @@ import { apiErrorMessage } from '../../../core/http/api.interceptor';
 import { CommunityApi } from '../../common-services/community-api.service';
 import { RealtimeService } from '../../common-services/realtime.service';
 import { ToastService } from '../../common-services/toast.service';
-import { CommunityMessage } from '../../models/community.model';
+import { CommunityMember, CommunityMessage } from '../../models/community.model';
 
 const MAX_LENGTH = 1000;
 
@@ -50,6 +50,20 @@ export class GroupChat implements AfterViewChecked {
   protected readonly messages = signal<CommunityMessage[]>([]);
   protected readonly draft = signal('');
   protected readonly sending = signal(false);
+
+  /** The file waiting to be sent with the next message. */
+  protected readonly picked = signal<File | null>(null);
+  /** Picture URLs of messages that carry an image, filled in as they scroll in. */
+  protected readonly images = signal<Record<number, string>>({});
+  private readonly imageAsked = new Set<number>();
+  /** The people of this chat, for @ mentions. */
+  private readonly people = signal<CommunityMember[]>([]);
+  protected readonly mentionQuery = signal<string | null>(null);
+  protected readonly suggestions = computed(() => {
+    const q = this.mentionQuery();
+    if (q === null) return [];
+    return this.people().filter(p => p.user_id !== this.myId() && p.name.toLowerCase().includes(q.toLowerCase())).slice(0, 6);
+  });
   protected readonly error = signal<string | null>(null);
   protected readonly maxLength = MAX_LENGTH;
   protected readonly when = messageTime;
@@ -90,6 +104,10 @@ export class GroupChat implements AfterViewChecked {
       this.loadedOnce = false;
       this.lastMarked = 0;
       void this.refresh(id);
+      this.people.set([]);
+      this.images.set({});
+      this.imageAsked.clear();
+      this.api.group(id).then(r => { if (id === this.groupId()) this.people.set(r.members); }).catch(() => undefined);
       const stop = this.realtime.listenGroup(id, {
         posted: m => { this.messages.update(list => (list.some(x => x.id === m.id) ? list : [...list, m])); this.markRead(id); },
         removed: mid => this.messages.update(list => list.filter(x => x.id !== mid)),
@@ -122,12 +140,81 @@ export class GroupChat implements AfterViewChecked {
     }
   }
 
+  protected onPick(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const f = input.files?.[0] ?? null;
+    input.value = '';
+    if (f && f.size > 5 * 1024 * 1024) return void this.toast.error('File too large', 'A file must be 5 MB or smaller.');
+    this.picked.set(f);
+  }
+
+  /** Typing: shows the member list when the cursor sits in an "@name" word. */
+  protected onType(value: string): void {
+    this.draft.set(value);
+    const m = /(?:^|\s)@([^@\n]{0,30})$/.exec(value);
+    this.mentionQuery.set(m ? m[1] : null);
+  }
+
+  protected mention(p: CommunityMember): void {
+    this.draft.set(this.draft().replace(/@([^@\n]{0,30})$/, '@' + p.name + ' '));
+    this.mentionQuery.set(null);
+  }
+
+  /** The message split into plain text and @mentions of people in this chat, so the mentions can be highlighted. */
+  protected parts(body: string): { t: string; at: boolean }[] {
+    const names = this.people().map(p => p.name).sort((a, b) => b.length - a.length);
+    const out: { t: string; at: boolean }[] = [];
+    let rest = body;
+    while (rest) {
+      const i = rest.indexOf('@');
+      if (i < 0) { out.push({ t: rest, at: false }); break; }
+      const hit = names.find(n => rest.slice(i + 1, i + 1 + n.length).toLowerCase() === n.toLowerCase());
+      if (!hit) { out.push({ t: rest.slice(0, i + 1), at: false }); rest = rest.slice(i + 1); continue; }
+      if (i) out.push({ t: rest.slice(0, i), at: false });
+      out.push({ t: '@' + rest.slice(i + 1, i + 1 + hit.length), at: true });
+      rest = rest.slice(i + 1 + hit.length);
+    }
+    return out;
+  }
+
+  protected isImage(m: CommunityMessage): boolean { return !!m.attachment?.mime?.startsWith('image/'); }
+
+  /** The picture of a message, fetched once (and only for image messages). */
+  protected imageOf(m: CommunityMessage): string | null {
+    if (!this.isImage(m)) return null;
+    const url = this.images()[m.id];
+    if (!url && !this.imageAsked.has(m.id)) {
+      this.imageAsked.add(m.id);
+      this.api.messageFile(this.groupId(), m.id).then(b => this.images.update(x => ({ ...x, [m.id]: URL.createObjectURL(b) }))).catch(() => undefined);
+    }
+    return url ?? null;
+  }
+
+  protected async openFile(m: CommunityMessage): Promise<void> {
+    try {
+      const blob = await this.api.messageFile(this.groupId(), m.id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = m.attachment?.name ?? 'file';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10_000);
+    } catch (e) {
+      this.toast.error('Could not open the file', apiErrorMessage(e));
+    }
+  }
+
+  protected size(n: number): string { return n < 1048576 ? Math.max(1, Math.round(n / 1024)) + ' KB' : (n / 1048576).toFixed(1) + ' MB'; }
+
   protected async send(): Promise<void> {
     const body = this.draft().trim().slice(0, MAX_LENGTH);
-    if (!body || this.sending()) return;
+    const file = this.picked();
+    if ((!body && !file) || this.sending()) return;
     this.sending.set(true);
     try {
-      const sent = await this.api.postMessage(this.groupId(), body);
+      const sent = await this.api.postMessage(this.groupId(), body, file);
+      this.picked.set(null);
+      this.mentionQuery.set(null);
       this.messages.update(list => (list.some(x => x.id === sent.id) ? list : [...list, sent]));
       this.firstUnreadId.set(null); // answering means the person has read what came before
       this.unreadCount.set(0);

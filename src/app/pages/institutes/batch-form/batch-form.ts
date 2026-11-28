@@ -66,6 +66,15 @@ export class BatchForm {
     this.model.orgs = on ? [...this.model.orgs, name] : this.model.orgs.filter(x => x !== name);
   }
 
+  get allInstitutes(): boolean { const n = this.instituteNames(); return n.length > 0 && n.every(x => this.model.orgs.includes(x)); }
+  get allCourses(): boolean { const t = this.courseTitles(); return t.length > 0 && t.every(x => this.model.courses.includes(x)); }
+
+  /** Ticks or clears every institute. */
+  toggleAllInstitutes(on: boolean): void { this.model.orgs = on ? [...this.instituteNames()] : []; }
+
+  /** Ticks or clears every course. */
+  toggleAllCourses(on: boolean): void { this.model.courses = on ? [...this.courseTitles()] : []; }
+
   toggleCourse(title: string, on: boolean): void {
     this.model.courses = on ? [...this.model.courses, title] : this.model.courses.filter(x => x !== title);
   }

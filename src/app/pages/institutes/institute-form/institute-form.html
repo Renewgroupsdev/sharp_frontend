@@ -65,31 +65,6 @@
           @if (submitted() && email.invalid) { <small class="error-text">Enter a valid email.</small> }
         </div>
       </div>
-
-      <div class="section-title"><i class="bi bi-geo"></i> Attendance geofence</div>
-      <div class="form-grid">
-        <div class="form-field">
-          <label for="o-lat">Latitude</label>
-          <div class="input-wrap"><i class="bi bi-crosshair"></i>
-            <input id="o-lat" type="number" name="lat" min="-90" max="90" step="0.0000001" [(ngModel)]="model.lat" #lat="ngModel" [class.is-invalid]="submitted() && lat.invalid" />
-          </div>
-          @if (submitted() && lat.invalid) { <small class="error-text">Latitude must be between -90 and 90.</small> }
-        </div>
-        <div class="form-field">
-          <label for="o-lng">Longitude</label>
-          <div class="input-wrap"><i class="bi bi-crosshair"></i>
-            <input id="o-lng" type="number" name="lng" min="-180" max="180" step="0.0000001" [(ngModel)]="model.lng" #lng="ngModel" [class.is-invalid]="submitted() && lng.invalid" />
-          </div>
-          @if (submitted() && lng.invalid) { <small class="error-text">Longitude must be between -180 and 180.</small> }
-        </div>
-        <div class="form-field">
-          <label for="o-radius">Geofence radius (metres)</label>
-          <div class="input-wrap"><i class="bi bi-broadcast-pin"></i>
-            <input id="o-radius" type="number" name="geofenceRadiusM" min="1" max="65535" step="1" [(ngModel)]="model.geofenceRadiusM" #radius="ngModel" [class.is-invalid]="submitted() && radius.invalid" />
-          </div>
-          @if (submitted() && radius.invalid) { <small class="error-text">Enter a radius between 1 and 65535 metres.</small> }
-        </div>
-      </div>
     </div>
 
     <div class="modal-footer-custom">

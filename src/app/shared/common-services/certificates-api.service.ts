@@ -22,6 +22,10 @@ export interface CertificateDesignEdit {
   accent?: string | null;
   show_profile: boolean;
   show_qr: boolean;
+  show_logo?: boolean;
+  logo_position?: string;
+  logo_image?: string | null;
+  logos?: { image: string; position: string }[];
 }
 
 export interface CertificateEdit { issue_date?: string | null; score?: number | null; min_attendance?: number | null; design?: CertificateDesignEdit | null }

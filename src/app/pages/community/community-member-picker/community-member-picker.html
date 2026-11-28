@@ -1,9 +1,12 @@
 <div class="picker">
   <input class="picker-search" type="search" placeholder="Search by name, role, ID or institute" [value]="query()" (input)="query.set($any($event.target).value)" aria-label="Search people" />
+  <div class="picker-filters">
+    <select aria-label="Filter by role" [value]="role()" (change)="role.set($any($event.target).value)"><option value="">All roles</option>@for (r of roles(); track r) { <option [value]="r">{{ r }}</option> }</select>
+    <select aria-label="Filter by institute" [value]="org()" (change)="org.set($any($event.target).value)"><option value="">All institutes</option>@for (o of orgs(); track o) { <option [value]="o">{{ o }}</option> }</select>
+    <select aria-label="Filter by batch" [value]="batch()" (change)="batch.set($any($event.target).value)"><option value="">All batches</option>@for (b of batches(); track b) { <option [value]="b">{{ b }}</option> }</select>
+  </div>
   <div class="picker-chips">
-    @for (r of roles(); track r) {
-      <button type="button" class="picker-chip" (click)="addRole(r)">+ All {{ r }}s</button>
-    }
+    <button type="button" class="picker-chip" (click)="addShown()">+ Select all shown ({{ shown().length }})</button>
     @if (selected().length) {
       <button type="button" class="picker-chip clear" (click)="clear()">Clear ({{ selected().length }})</button>
     }

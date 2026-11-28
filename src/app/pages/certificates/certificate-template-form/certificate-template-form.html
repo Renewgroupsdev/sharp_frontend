@@ -83,6 +83,10 @@
               <input id="tf-si" class="file-input" type="file" accept="image/png,image/jpeg" (change)="onSignature($event)" />
               <small class="hint">Optional. PNG or JPEG, 150 KB or smaller.</small>
             </div>
+            <div class="form-field full-width">
+              <label>Logos</label>
+              <app-cert-logos-editor [(showSharp)]="model.showLogo" [(sharpPosition)]="model.logoPosition" [(sharpImage)]="model.logoImage" [(logos)]="model.logos" (changed)="touch()" />
+            </div>
             <div class="form-field full-width checks">
               <label class="check-row"><input type="checkbox" name="showProfile" [(ngModel)]="model.showProfile" /> <span>Show the student's photo</span></label>
               <label class="check-row"><input type="checkbox" name="showQr" [(ngModel)]="model.showQr" /> <span>Show the verification QR code</span></label>

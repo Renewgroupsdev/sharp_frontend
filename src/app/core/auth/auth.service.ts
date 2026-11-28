@@ -39,6 +39,10 @@ export class AuthService {
     return (ROLES as readonly string[]).includes(name ?? '') ? (name as Role) : null;
   });
   readonly isAuthenticated = computed(() => this.role() !== null && !!this.token());
+  /** True until the account has set its own password (first sign-in, or after an administrator's reset). */
+  readonly mustChangePassword = computed(() => !!this.session()?.must_change_password);
+  readonly displayName = computed(() => this.session()?.name ?? '');
+
   /** The signed-in person's id straight from the session (the API's public id); unlike `actor()` it never waits for the user list. */
   readonly userId = computed(() => this.session()?.id ?? '');
 
@@ -136,9 +140,9 @@ export class AuthService {
     return this.isAuthenticated();
   }
 
-  logout(): void {
+  logout(to = '/login'): void {
     this.clearSession();
-    void this.router.navigateByUrl('/login');
+    void this.router.navigateByUrl(to);
   }
 
   /** Revokes the token and forgets the session without navigating; returns `message` for the login form. */
@@ -158,7 +162,7 @@ export class AuthService {
   }
 
   homeUrl(): string {
-    return '/app/dashboard';
+    return this.mustChangePassword() ? '/change-password' : '/app/dashboard';
   }
 
   /** Permission letter check for the current role on an admin module, e.g. can('a_orgs', 'c'). */

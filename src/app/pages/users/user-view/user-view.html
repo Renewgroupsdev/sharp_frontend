@@ -65,6 +65,19 @@
       }
 
       @if (tab() === 'learning') {
+        @if (canEnroll()) {
+          <section class="pp-card pp-enroll">
+            <label for="pp-enroll"><i class="bi bi-plus-circle"></i> Enroll in a course</label>
+            <div class="pp-enroll-row">
+              <select id="pp-enroll" [value]="pickCourse() ?? ''" (change)="pickCourse.set(+$any($event.target).value || null)">
+                <option value="">Choose a course…</option>
+                @for (c of enrollable().available; track c.id) { <option [value]="c.id">{{ c.title }}</option> }
+              </select>
+              <button type="button" class="pp-btn" [disabled]="!pickCourse() || enrolling()" (click)="enrollNow()">{{ enrolling() ? 'Enrolling…' : 'Enroll' }}</button>
+            </div>
+            @if (!enrollable().available.length) { <small class="pp-note">This student already has every live course.</small> }
+          </section>
+        }
         <div class="pp-stats three">
           <div><b>{{ courses().length }}</b><span>Courses</span></div>
           <div class="ok"><b>{{ learningAvg() }}%</b><span>Average progress</span></div>
@@ -75,6 +88,7 @@
           <section class="pp-card pp-course">
             <div class="pp-course-head">
               <div><b>{{ c.course }}</b><small>{{ c.materials }} material{{ c.materials === 1 ? '' : 's' }} completed · last accessed {{ c.last_accessed ? ago(c.last_accessed) : 'never' }}</small></div>
+              @if (canEnroll() && isDirect(c.course_id)) { <button type="button" class="pp-link" (click)="unenroll(c.course_id)" title="Remove the course given directly to this student"><i class="bi bi-x-circle"></i> Remove</button> }
               <span class="pp-pill" [ngClass]="c.status === 'Completed' ? 'ok' : c.status === 'In progress' ? 'info' : 'wait'">{{ c.status }}</span>
             </div>
             <div class="pp-prog"><i [style.width.%]="c.progress"></i><b>{{ c.progress }}%</b></div>
@@ -154,6 +168,8 @@
               @if (r.qr; as q) {
                 <div class="ct-qr">
                   <img class="qr-img" [src]="q.image" [alt]="'QR code for ' + r.course" width="132" height="132" />
+            <span class="tag st qr-st" [class]="qrTone(q)">{{ qrLabel(q) }}</span>
+            <a class="sa-link" [href]="q.url" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right"></i> QR link</a>
                 </div>
               }
             </article>

@@ -17,7 +17,14 @@
         <div class="gc-bub" [attr.data-mid]="m.id" [class.mine]="m.author?.user_id === myId()">
           @if (pinnedIds().has(m.id)) { <i class="bi bi-pin-angle-fill gc-pinmark" title="Pinned"></i> }
           @if (m.author?.user_id !== myId()) { <b class="gc-bub-name" [style.color]="m.author?.color || '#0E7A4E'">{{ m.author?.name || 'Former user' }}</b> }
-          <span class="gc-bub-text">{{ m.body }}</span>
+          @if (m.attachment; as a) {
+            @if (isImage(m)) {
+              @if (imageOf(m); as src) { <img class="gc-img" [src]="src" [alt]="a.name" (click)="openFile(m)" /> } @else { <span class="gc-file"><i class="bi bi-image"></i> {{ a.name }}</span> }
+            } @else {
+              <button type="button" class="gc-file" (click)="openFile(m)"><i class="bi bi-file-earmark-text"></i> <span>{{ a.name }}</span> <small>{{ size(a.size) }}</small></button>
+            }
+          }
+          @if (m.body) { <span class="gc-bub-text">@for (p of parts(m.body); track $index) { @if (p.at) { <b class="gc-at">{{ p.t }}</b> } @else { {{ p.t }} } }</span> }
           <span class="gc-bub-time">{{ clock(m.at) }}</span>
           @if (canRemove() || canPin()) {
             <span class="gc-acts">
@@ -31,7 +38,15 @@
         <span class="gc-av" [style.background]="m.author?.color || '#0E7A4E'">{{ m.author?.initials || '?' }}</span>
         <div class="gc-body">
           <div class="gc-name">{{ m.author?.name || 'Former user' }} <span>{{ m.author?.role }} · {{ when(m.at) }}</span></div>
-          <p>@if (pinnedIds().has(m.id)) { <i class="bi bi-pin-angle-fill gc-pinmark" title="Pinned"></i> } {{ m.body }}</p>
+          <p>@if (pinnedIds().has(m.id)) { <i class="bi bi-pin-angle-fill gc-pinmark" title="Pinned"></i> } @for (p of parts(m.body); track $index) { @if (p.at) { <b class="gc-at">{{ p.t }}</b> } @else { {{ p.t }} } }</p>
+          @if (m.attachment; as a) {
+            @if (isImage(m)) {
+              @if (imageOf(m); as src) { <img class="gc-img" [src]="src" [alt]="a.name" (click)="openFile(m)" /> } @else { <span class="gc-file"><i class="bi bi-image"></i> {{ a.name }}</span> }
+            } @else {
+              <button type="button" class="gc-file" (click)="openFile(m)"><i class="bi bi-file-earmark-text"></i> <span>{{ a.name }}</span> <small>{{ size(a.size) }}</small></button>
+            }
+          }
+
           @if (canPin()) { <button type="button" class="gc-pin gc-pin-text" (click)="togglePin(m)"><i class="bi" [class]="pinnedIds().has(m.id) ? 'bi-pin-angle-fill' : 'bi-pin-angle'"></i> {{ pinnedIds().has(m.id) ? 'Unpin' : 'Pin' }}</button> }
           @if (canRemove()) { <button type="button" class="gc-rm" (click)="remove(m)"><i class="bi bi-trash3"></i> Remove</button> }
         </div>
@@ -43,9 +58,18 @@
   </div>
 
   @if (canPost()) {
+    @if (picked(); as f) {
+      <div class="gc-picked"><i class="bi bi-paperclip"></i> <span>{{ f.name }}</span> <small>{{ size(f.size) }}</small><button type="button" (click)="picked.set(null)" aria-label="Remove file"><i class="bi bi-x-lg"></i></button></div>
+    }
+    @if (suggestions().length) {
+      <ul class="gc-mentions" role="listbox" aria-label="Mention a member">
+        @for (p of suggestions(); track p.user_id) { <li><button type="button" (click)="mention(p)"><b>{{ p.name }}</b> <em>{{ p.role }}</em></button></li> }
+      </ul>
+    }
     <form class="gc-composer" (ngSubmit)="send()">
-      <input name="message" [maxlength]="maxLength" [placeholder]="placeholder()" [ngModel]="draft()" (ngModelChange)="draft.set($event)" autocomplete="off" />
-      <button type="submit" class="gc-send" [disabled]="!draft().trim() || sending()">
+      <label class="gc-attach" title="Attach an image or document" aria-label="Attach a file"><i class="bi bi-paperclip"></i><input type="file" hidden accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip" (change)="onPick($event)" /></label>
+      <input name="message" [maxlength]="maxLength" [placeholder]="placeholder() + ' (@ to mention)'" [ngModel]="draft()" (ngModelChange)="onType($event)" autocomplete="off" />
+      <button type="submit" class="gc-send" [disabled]="(!draft().trim() && !picked()) || sending()">
         <i class="bi bi-send"></i> {{ announcement() ? 'Announce' : 'Send' }}
       </button>
     </form>

@@ -5,6 +5,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../core/http/api.interceptor';
 import { ToastService } from '../../common-services/toast.service';
 import { UsersApi } from '../../common-services/users-api.service';
+import { generatePassword } from '../../utils/password.util';
 import { UsersService } from '../../common-services/users.service';
 
 const MAX_PIC = 300 * 1024;
@@ -64,6 +65,16 @@ export class MyProfile {
   protected readonly account = signal<{ username: string; org: string; batch: string; role: string }>({ username: this.start.username ?? '', org: this.start.org, batch: this.start.b, role: this.start.r });
   protected pwd = { current: '', next: '', again: '' };
   protected readonly show = signal(false);
+
+  /** Fills both new-password boxes with a strong random password and reveals it so it can be noted down. */
+  protected generate(): void {
+    this.pwd.next = this.pwd.again = generatePassword();
+    this.show.set(true);
+  }
+
+  protected async copyPassword(): Promise<void> {
+    try { await navigator.clipboard.writeText(this.pwd.next); this.toast.success('Password copied'); } catch { /* clipboard blocked */ }
+  }
 
   /** A rough strength for the new password: length, upper and lower case, digits and symbols. */
   protected strength(): { level: number; label: string } {

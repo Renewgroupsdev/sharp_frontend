@@ -133,7 +133,7 @@ export class CourseStudents {
     this.dialog.open(CourseInvite, { data: { courseId: this.data.courseId }, width: '560px', maxWidth: '96vw', autoFocus: false });
   }
 
-  /** Sends the message to the student as a personal message in SHARP Community. */
+  /** Posts the message in the course's chat group (SHARP Community), addressed to the student. */
   async sendNotification(): Promise<void> {
     this.submitted.set(true);
     const s = this.student();
@@ -141,10 +141,12 @@ export class CourseStudents {
     if (!s || !text || this.sending()) return;
     this.sending.set(true);
     try {
-      const chat = await this.communityApi.openDm(s.sid);
-      await this.communityApi.postMessage(chat.id, text);
-      this.log.record('Course Management', `Personal message sent to ${s.name} (${s.sid}) for ${this.course()?.title}`);
-      this.toast.success('Message sent', `${s.name} will see it in SHARP Community.`);
+      const courseId = Number(this.data.courseId);
+      const chat = (await this.communityApi.groups({ source: 'course', kind: 'Chat' })).find(g => g.course_id === courseId);
+      if (!chat) throw new Error('This course has no chat group yet. It is created once a batch takes the course.');
+      await this.communityApi.postMessage(chat.id, `@${s.name}: ${text}`);
+      this.log.record('Course Management', `Message to ${s.name} (${s.sid}) posted in the ${this.course()?.title} chat group`);
+      this.toast.success('Message sent', `Posted in the ${this.course()?.title} chat group.`);
       this.go('list');
     } catch (e) {
       this.toast.error('Could not send the message', apiErrorMessage(e));

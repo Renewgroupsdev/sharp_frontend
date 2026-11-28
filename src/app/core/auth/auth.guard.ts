@@ -10,8 +10,17 @@ export const authGuard: CanActivateFn = async () => {
   const router = inject(Router);
   const perms = inject(PermissionsService); // inject before any await
   if (!auth.isAuthenticated() || !(await auth.refreshProfile())) return router.createUrlTree(['/login']);
+  if (auth.mustChangePassword()) return router.createUrlTree(['/change-password']);
   await perms.load(); // the menu and the route guards read it
   return true;
+};
+
+/** The forced first-password page: only for a signed-in account that still has to set its own password. */
+export const changePasswordGuard: CanActivateFn = async () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  if (!auth.isAuthenticated() || !(await auth.refreshProfile())) return router.createUrlTree(['/login']);
+  return auth.mustChangePassword() ? true : router.createUrlTree(['/app/dashboard']);
 };
 
 /** Skip the login page when a role is already chosen. */

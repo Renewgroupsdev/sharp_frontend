@@ -11,13 +11,17 @@ export interface NavLink {
 }
 
 /** Modules that are reached through another menu entry (Course Management → ...), so they get no top-level link. */
-const NESTED_MODULES = new Set(['a_assess', 'a_attempts', 'a_dmchat']);
+const NESTED_MODULES = new Set(['a_assess', 'a_attempts']);
 
 /** Modules switched off from every role's menu (Enrollment, Learning). */
 const HIDDEN_MODULES = new Set(['a_enroll', 'a_learn']);
 
 /** Sub-menus per admin module key. */
 const ADMIN_SUBMENUS: Record<string, NavLink[]> = {
+  a_orgs: [
+    { path: '/app/institutes', label: 'College / Institute', icon: 'bi-bank', moduleKey: 'a_orgs' },
+    { path: '/app/institutes/batches', label: 'Batches', icon: 'bi-calendar-range', moduleKey: 'a_orgs' },
+  ],
   a_courses: [
     { path: '/app/courses', label: 'Courses', icon: 'bi-journal-bookmark', moduleKey: 'a_courses' },
     { path: '/app/courses/assignments', label: 'Assignments', icon: 'bi-file-earmark-text', moduleKey: 'a_assess' },
@@ -35,6 +39,7 @@ export const STUDENT_NAV: NavLink[] = [
   { path: '/app/assessments', label: 'Assessments', icon: 'bi-patch-check', moduleKey: 'a_assess' },
   { path: '/app/certificates', label: 'Certificates', icon: 'bi-award', moduleKey: 'a_certs' },
   { path: '/app/community', label: 'SHARP Community', icon: 'bi-chat-dots', moduleKey: 'a_comms' },
+  { path: '/app/gallery', label: 'Gallery', icon: 'bi-images', moduleKey: 'a_gallery' },
   { path: '/app/profile', label: 'My Profile & More', icon: 'bi-person-circle' },
 ];
 

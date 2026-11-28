@@ -92,3 +92,10 @@
 .ct-go { border-radius: 8px; box-shadow: none; }
 .tag { border-radius: 6px; }
 .ct-item .qr-img { border-color: #E4E7EC; }
+
+.pp-enroll { display: flex; flex-direction: column; gap: 8px; label { font-size: 12.5px; font-weight: 700; color: #344054; i { margin-right: 6px; } } }
+.pp-enroll-row { display: flex; gap: 8px; select { flex: 1; min-width: 0; padding: 8px 10px; border: 1px solid #D0D5DD; border-radius: 8px; font: inherit; background: #fff; } }
+.pp-btn { padding: 8px 16px; border: 0; border-radius: 8px; background: #080536; color: #fff; font: inherit; font-weight: 600; cursor: pointer; &:disabled { opacity: .5; cursor: default; } }
+
+.qr-st { margin-top: 0; }
+.qr-url { display: flex; flex-direction: column; align-items: center; gap: 4px; max-width: 190px; font-size: 11px; word-break: break-all; text-align: center; a { color: #080536; text-decoration: underline; } }

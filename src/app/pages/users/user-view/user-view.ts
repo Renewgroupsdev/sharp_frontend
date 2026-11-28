@@ -13,6 +13,7 @@ import { CertificatesApi } from '../../../shared/common-services/certificates-ap
 import { LearningApi, LearningApiResource } from '../../../shared/common-services/learning-api.service';
 import { ToastService } from '../../../shared/common-services/toast.service';
 import { UserActionsService } from '../../../shared/common-services/user-actions.service';
+import { StudentCourses, UsersApi } from '../../../shared/common-services/users-api.service';
 import { UsersService } from '../../../shared/common-services/users.service';
 import { CanActionDirective } from '../../../shared/directives/can-action.directive';
 import { AttendanceRecord } from '../../../shared/models/attendance.model';
@@ -50,6 +51,46 @@ export class UserView {
   private readonly auditApi = inject(AuditLogsApi);
   private readonly toast = inject(ToastService);
   private readonly auth = inject(AuthService);
+  private readonly usersApi = inject(UsersApi);
+
+  /** Courses this student could be enrolled in, and which of their courses were given to them directly. */
+  readonly enrollable = signal<StudentCourses>({ enrolled: [], available: [] });
+  readonly pickCourse = signal<number | null>(null);
+  readonly enrolling = signal(false);
+  protected readonly canEnroll = computed(() => this.isStudent() && this.auth.can('a_users', 'u'));
+  protected isDirect(courseId: number): boolean { return this.enrollable().enrolled.some(c => c.id === courseId && c.direct); }
+
+  async enrollNow(): Promise<void> {
+    const id = this.pickCourse();
+    if (!id || this.enrolling()) return;
+    this.enrolling.set(true);
+    try {
+      this.enrollable.set(await this.usersApi.enrollInCourse(this.data.userId, id));
+      this.pickCourse.set(null);
+      this.toast.success('Student enrolled in the course');
+      await this.reloadLearning();
+    } catch (e) {
+      this.toast.error('Could not enroll', apiErrorMessage(e));
+    } finally {
+      this.enrolling.set(false);
+    }
+  }
+
+  async unenroll(courseId: number): Promise<void> {
+    try {
+      this.enrollable.set(await this.usersApi.unenrollFromCourse(this.data.userId, courseId));
+      this.toast.success('Course removed from the student');
+      await this.reloadLearning();
+    } catch (e) {
+      this.toast.error('Could not remove the course', apiErrorMessage(e));
+    }
+  }
+
+  private async reloadLearning(): Promise<void> {
+    const sid = this.data.userId;
+    this.courses.set((await this.learningApi.list({ q: sid })).filter(r => r.student_id === sid).map(r => ({ ...r, status: learningStatusOf(r.progress) })));
+    this.loaded.delete('certificates');
+  }
 
   readonly tab = signal<TabKey>((this.data.focus as TabKey | undefined) ?? 'details');
   readonly user = computed(() => this.users.get(this.data.userId));
@@ -97,7 +138,11 @@ export class UserView {
   protected day(iso: string | null | undefined): string {
     return iso ? new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
   }
-  protected qrTone(c: CertQrCard): string { return c.status === 'issued' ? 'ok' : c.status === 'completed' ? 'ok' : c.status === 'in_progress' ? 'wait' : 'bad'; }
+  protected qrTone(c: CertQrCard): string { return c.status === 'issued' ? 'g' : c.status === 'in_progress' ? 'w' : c.status === 'completed' ? 'b' : 'd'; }
+  readonly shownQr = signal<number | null>(null);
+  protected async copyQr(url: string): Promise<void> {
+    try { await navigator.clipboard.writeText(url); this.toast.success('QR link copied'); } catch { /* clipboard blocked */ }
+  }
   readonly logs = signal<AuditEntry[]>([]);
   readonly busy = signal<Partial<Record<TabKey, boolean>>>({});
   private readonly loaded = new Set<TabKey>();
@@ -131,6 +176,7 @@ export class UserView {
     this.busy.update(b => ({ ...b, [tab]: true }));
     try {
       if (tab === 'learning') {
+        if (this.canEnroll()) this.usersApi.studentCourses(sid).then(r => this.enrollable.set(r)).catch(() => undefined);
         this.courses.set((await this.learningApi.list({ q: sid })).filter(r => r.student_id === sid).map(r => ({ ...r, status: learningStatusOf(r.progress) })));
       } else if (tab === 'attendance') {
         const from = new Date(Date.now() - 180 * 86_400_000).toLocaleDateString('en-CA');

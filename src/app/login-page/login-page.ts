@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../core/auth/auth.service';
 
 /** Username / password sign-in for every role, checked against the SHARP backend API. */
@@ -15,6 +15,7 @@ export class LoginPage {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
+  protected readonly changed = inject(ActivatedRoute).snapshot.queryParamMap.get('changed') === '1';
   protected username = '';
   protected password = '';
   protected readonly error = signal('');

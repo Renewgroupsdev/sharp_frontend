@@ -13,19 +13,29 @@ export class CommunityMemberPicker {
   readonly selected = model<string[]>([]);
   readonly query = signal('');
 
-  readonly roles = computed(() => [...new Set(this.users().map(u => u.r))]);
+  readonly role = signal('');
+  readonly org = signal('');
+  readonly batch = signal('');
+
+  private readonly uniq = (xs: (string | undefined | null)[]): string[] => [...new Set(xs.filter((x): x is string => !!x))].sort();
+  readonly roles = computed(() => this.uniq(this.users().map(u => u.r)));
+  readonly orgs = computed(() => this.uniq(this.users().map(u => u.org)));
+  readonly batches = computed(() => this.uniq(this.users().map(u => u.b)));
 
   readonly shown = computed(() => {
     const q = this.query().trim().toLowerCase();
-    return q ? this.users().filter(u => `${u.n} ${u.r} ${u.id} ${u.org ?? ''}`.toLowerCase().includes(q)) : this.users();
+    const role = this.role(), org = this.org(), batch = this.batch();
+    return this.users().filter(u => (!role || u.r === role) && (!org || u.org === org) && (!batch || u.b === batch)
+      && (!q || `${u.n} ${u.r} ${u.id} ${u.org ?? ''}`.toLowerCase().includes(q)));
   });
 
   toggle(id: string): void {
     this.selected.update(list => (list.includes(id) ? list.filter(x => x !== id) : [...list, id]));
   }
 
-  addRole(role: string): void {
-    const ids = this.users().filter(u => u.r === role).map(u => u.id);
+  /** Adds everyone the filters currently show. */
+  addShown(): void {
+    const ids = this.shown().map(u => u.id);
     this.selected.update(list => [...new Set([...list, ...ids])]);
   }
 

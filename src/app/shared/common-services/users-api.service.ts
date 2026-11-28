@@ -4,6 +4,8 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiOk, ApiUserResource, CreateUserBody, UpdateUserBody, UserListFilters } from '../models/api.model';
 
+export interface StudentCourses { enrolled: { id: number; title: string; direct: boolean }[]; available: { id: number; title: string }[] }
+
 /** Typed calls to sharp-api `/api/web` users + me. Public ids contain slashes, so they go into the path as-is. */
 @Injectable({ providedIn: 'root' })
 export class UsersApi {
@@ -22,6 +24,20 @@ export class UsersApi {
   /** Change your own password; the current one is checked. */
   changePassword(body: { current_password: string; new_password: string }) {
     return firstValueFrom(this.http.post<ApiOk<{ message: string }>>(`${this.base}/auth/change-password`, body));
+  }
+
+  /** A student's courses (batch + direct) and the live courses they could still be given. */
+  studentCourses(id: string) {
+    return firstValueFrom(this.http.get<ApiOk<StudentCourses>>(this.userUrl(id, '/courses')));
+  }
+
+  enrollInCourse(id: string, courseId: number) {
+    return firstValueFrom(this.http.post<ApiOk<StudentCourses>>(this.userUrl(id, '/courses'), { course_id: courseId }));
+  }
+
+  /** Takes back a course that was given to the student directly. */
+  unenrollFromCourse(id: string, courseId: number) {
+    return firstValueFrom(this.http.post<ApiOk<StudentCourses>>(this.userUrl(id, '/courses/remove'), { course_id: courseId }));
   }
 
   me() {

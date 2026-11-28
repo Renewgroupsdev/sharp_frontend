@@ -39,6 +39,8 @@
         @if (r.qr; as q) {
           <div class="ct-qr">
             <img class="qr-img" [src]="q.image" [alt]="'QR code for the ' + r.course + ' certificate'" width="132" height="132" />
+            <span class="tag st qr-st" [class]="qrTone(q)">{{ qrLabel(q) }}</span>
+            <a class="sa-link" [href]="q.url" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right"></i> QR link</a>
             <button type="button" class="sa-link" (click)="copyLink(q)"><i class="bi" [class]="copied() === q.course_id ? 'bi-check2' : 'bi-link-45deg'"></i> {{ copied() === q.course_id ? 'Copied' : 'Copy link' }}</button>
           </div>
         }

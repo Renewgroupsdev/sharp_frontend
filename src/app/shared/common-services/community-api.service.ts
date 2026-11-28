@@ -45,7 +45,18 @@ export class CommunityApi {
   }
   async markRead(groupId: number, messageId?: number): Promise<void> { await this.post(`groups/${groupId}/read`, messageId ? { message_id: messageId } : {}); }
   async pin(groupId: number, pinned: boolean): Promise<void> { await this.post(`groups/${groupId}/pin`, { pinned }); }
-  async postMessage(groupId: number, body: string): Promise<CommunityMessage> { return (await this.post<{ message: CommunityMessage }>(`groups/${groupId}/messages`, { body })).message; }
+  async postMessage(groupId: number, body: string, file?: File | null): Promise<CommunityMessage> {
+    if (!file) return (await this.post<{ message: CommunityMessage }>(`groups/${groupId}/messages`, { body })).message;
+    const form = new FormData();
+    if (body) form.append('body', body);
+    form.append('file', file);
+    return (await firstValueFrom(this.http.post<{ ok: boolean; message: CommunityMessage }>(`${this.base}/groups/${groupId}/messages`, form))).message;
+  }
+
+  /** The file of a message, as a blob (the request carries the sign-in token, so a plain link would not work). */
+  messageFile(groupId: number, messageId: number): Promise<Blob> {
+    return firstValueFrom(this.http.get(`${this.base}/groups/${groupId}/messages/${messageId}/file`, { responseType: 'blob' }));
+  }
   async removeMessage(groupId: number, messageId: number): Promise<void> { await firstValueFrom(this.http.delete(`${this.base}/groups/${groupId}/messages/${messageId}`)); }
 
   /** Starts, or finds, the personal chat with another person (a public id). */

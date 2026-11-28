@@ -1,4 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { CertLogosEditor } from '../../../shared/components/cert-logos-editor/cert-logos-editor';
+import { CertLogo } from '../../../shared/models/certificate.model';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { apiErrorMessage } from '../../../core/http/api.interceptor';
@@ -20,7 +22,7 @@ const MAX_SIGNATURE_BYTES = 150 * 1024;
 @Component({
   selector: 'app-certificate-edit-form',
   standalone: true,
-  imports: [FormsModule, MatDialogModule, CertificateView],
+  imports: [FormsModule, MatDialogModule, CertificateView, CertLogosEditor],
   templateUrl: './certificate-edit-form.html',
   styleUrls: ['../../../shared/styles/erp-dialog.scss', './certificate-edit-form.scss'],
 })
@@ -55,6 +57,10 @@ export class CertificateEditForm {
     signatureImage: this.cert.design.signature_image as string | null,
     showProfile: this.cert.design.show_profile,
     showQr: this.cert.design.show_qr,
+    showLogo: this.cert.design.show_logo !== false,
+    logoPosition: (this.cert.design.logo_position ?? 'center') as string,
+    logoImage: (this.cert.design.logo_image ?? null) as string | null,
+    logos: [...(this.cert.design.logos ?? [])] as CertLogo[],
     override: false,
     status: this.cert.status as string,
     issueDate: this.cert.issue_date ?? '',
@@ -89,7 +95,7 @@ export class CertificateEditForm {
       issue_date: m.issueDate || null,
       design: {
         template: m.template, type: m.type, title: m.title, body: m.body, accent: m.accent,
-        show_profile: m.showProfile, show_qr: m.showQr,
+        show_profile: m.showProfile, show_qr: m.showQr, show_logo: m.showLogo, logo_position: m.logoPosition as 'left' | 'center' | 'right', logos: m.logos, logo_image: m.logoImage,
         signature_name: m.signatureName, signature_role: m.signatureRole, signature_image: m.signatureImage,
       },
     };
@@ -132,7 +138,7 @@ export class CertificateEditForm {
     Object.assign(this.model, {
       template: s.template, type: s.type, title: s.title, body: s.body,
       signatureName: s.signature_name ?? '', signatureRole: s.signature_role ?? '', signatureImage: s.signature_image,
-      showProfile: s.show_profile, showQr: s.show_qr, minAttendance: String(s.min_attendance),
+      showProfile: s.show_profile, showQr: s.show_qr, showLogo: s.show_logo !== false, logoPosition: s.logo_position ?? 'center', logoImage: s.logo_image ?? null, logos: [...(s.logos ?? [])], minAttendance: String(s.min_attendance),
       score: this.cert.score_live === null || this.cert.score_live === undefined ? '' : String(this.cert.score_live),
     });
     this.touch();
@@ -154,7 +160,7 @@ export class CertificateEditForm {
         design: {
           template: m.template, type: m.type, title: m.title.trim(), body: m.body, accent: m.accent,
           signature_name: m.signatureName.trim() || null, signature_role: m.signatureRole.trim() || null,
-          signature_image: m.signatureImage, show_profile: m.showProfile, show_qr: m.showQr,
+          signature_image: m.signatureImage, show_profile: m.showProfile, show_qr: m.showQr, show_logo: m.showLogo, logo_position: m.logoPosition, logos: m.logos, logo_image: m.logoImage,
         },
       });
       await this.applyStatus(saved);

@@ -29,6 +29,7 @@ export class StudentCertificates implements OnInit {
   protected readonly qrCodes = signal<CertQrCard[]>([]);
   protected readonly qrLoaded = signal(false);
   protected readonly copied = signal<number | null>(null);
+  protected readonly shownQr = signal<number | null>(null);
 
   protected readonly loaded = this.store.loaded;
   protected readonly error = signal<string | null>(null);

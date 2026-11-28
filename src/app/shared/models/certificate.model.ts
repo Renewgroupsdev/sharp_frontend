@@ -3,6 +3,10 @@ export const CERT_TYPES = ['Completion', 'Participation', 'Achievement', 'Merit'
 /** Colours offered for a template; the picker also takes any colour. */
 export const CERT_ACCENTS = ['#0E7A4E', '#080536', '#1868B0', '#7B3FA0', '#B42318', '#C4620A', '#0E7490', '#475467'] as const;
 export const CERT_DEFAULT_ACCENT = '#0E7A4E';
+/** An uploaded logo (PNG / JPEG data URL) and the side of the header it sits on. */
+export interface CertLogo { image: string; position: 'left' | 'center' | 'right' }
+export const LOGO_POSITIONS = ['left', 'center', 'right'] as const;
+export type LogoPosition = (typeof LOGO_POSITIONS)[number];
 export const CERT_STATUSES = ['Pending', 'Issued', 'Rejected', 'Cancelled'] as const;
 
 export type CertStatus = (typeof CERT_STATUSES)[number];
@@ -17,6 +21,13 @@ export interface CertDesign {
   accent?: string | null;
   show_profile: boolean;
   show_qr: boolean;
+  /** The SHARP logo, and the side of the header it sits on. */
+  show_logo?: boolean;
+  logo_position?: LogoPosition;
+  /** Replaces the built-in SHARP logo (PNG / JPEG data URL). */
+  logo_image?: string | null;
+  /** Extra uploaded logos, each with its own position. */
+  logos?: CertLogo[];
   signature_name: string | null;
   signature_role: string | null;
   /** A small PNG / JPEG data URL, or null. */
@@ -33,7 +44,7 @@ export interface CertSettings extends CertDesign {
 export const defaultCertSettings = (): CertSettings => ({
   template: 'Classic', type: 'Completion', title: 'Certificate of Completion',
   body: 'This is to certify that {student} has successfully completed the course “{course}” with a score of {score}% on {date}.',
-  show_profile: true, show_qr: true, signature_name: '', signature_role: '', signature_image: null,
+  show_profile: true, show_qr: true, show_logo: true, logo_position: 'center', signature_name: '', signature_role: '', signature_image: null,
   prefix: 'SHARP', min_attendance: 75, min_score: 0,
 });
 

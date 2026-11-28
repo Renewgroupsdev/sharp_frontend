@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, output, signal } from '@angular/core';
+import { CertLogosEditor } from '../../../shared/components/cert-logos-editor/cert-logos-editor';
 import { FormsModule } from '@angular/forms';
 import { apiErrorMessage } from '../../../core/http/api.interceptor';
 import { CertificatesService } from '../../../shared/common-services/certificates.service';
@@ -17,7 +18,7 @@ const MAX_SIGNATURE_BYTES = 150 * 1024;
 @Component({
   selector: 'app-certificate-settings',
   standalone: true,
-  imports: [FormsModule, CertificateView, CanActionDirective],
+  imports: [FormsModule, CertificateView, CanActionDirective, CertLogosEditor],
   templateUrl: './certificate-settings.html',
   styleUrls: ['../../../shared/styles/erp-dialog.scss', '../../../shared/styles/erp-page.scss', './certificate-settings.scss'],
 })
@@ -84,7 +85,7 @@ export class CertificateSettings implements OnInit {
     const d = t.design;
     this.model = {
       ...this.model, template: d.template, type: d.type, title: d.title, body: d.body, accent: d.accent ?? null,
-      show_profile: d.show_profile, show_qr: d.show_qr, signature_name: d.signature_name, signature_role: d.signature_role,
+      show_profile: d.show_profile, show_qr: d.show_qr, show_logo: d.show_logo !== false, logo_position: d.logo_position ?? 'center', logo_image: d.logo_image ?? null, logos: [...(d.logos ?? [])], signature_name: d.signature_name, signature_role: d.signature_role,
       signature_image: d.signature_image,
     };
     this.removeSignature.set(!d.signature_image);

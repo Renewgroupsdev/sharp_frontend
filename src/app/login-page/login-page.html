@@ -64,6 +64,7 @@
       </div>
 
       <form (ngSubmit)="submit()">
+        @if (changed) { <div class="error" role="status" style="background:#ECFDF3;color:#067647;border-color:#ABEFC6"><i class="bi bi-check-circle-fill"></i> Password saved. Sign in with your new password.</div> }
         @if (error()) { <div class="error" role="alert"><i class="bi bi-exclamation-circle-fill"></i> {{ error() }}</div> }
 
         <label class="fld">

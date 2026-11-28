@@ -1,3 +1,4 @@
+import { ActivatedRoute } from '@angular/router';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { AuthService } from '../../core/auth/auth.service';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -88,7 +89,11 @@ export class Institutes extends LocalListBase implements OnInit {
   /** Rows are rebuilt from the active tab's store, so counts in the footer use the matching noun. */
   protected get noun(): string { return this.tab() === 'inst' ? 'institutes' : 'batches'; }
 
+  private readonly route = inject(ActivatedRoute);
+
   ngOnInit(): void {
+    // The sidebar sub-menu picks the view: College / Institute, or Batches (route data).
+    if (this.route.snapshot.data['tab'] === 'batch') this.setTab('batch');
     // Batches reference institutes by name, so load institutes first.
     void this.institutes.loadInstitutes()
       .catch(error => this.toast.error('Unable to load institutes', apiErrorMessage(error)))

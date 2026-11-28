@@ -92,9 +92,9 @@ export const ADMIN_MODULES: { key: string; label: string; icon: string; route: s
   // Read-only view of every quiz attempt (student, outcome, questions served). Not a menu entry of its own: it is a tab under Course Management → Quiz, and a page for mentors.
   { key: 'a_attempts', label: 'Quiz Attempts', icon: 'bi-clipboard-data', route: 'courses/quiz' },
   // Read access to students' personal chats. A page for mentors (their assigned students); inside Community for staff.
-  { key: 'a_dmchat', label: 'Student Chats', icon: 'bi-chat-left-text', route: 'student-chats' },
   { key: 'a_certs', label: 'Certificate Management', icon: 'bi-award', route: 'certificates' },
   { key: 'a_comms', label: 'SHARP Community', icon: 'bi-chat-dots', route: 'community' },
+  { key: 'a_gallery', label: 'Gallery', icon: 'bi-images', route: 'gallery' },
   { key: 'a_notif', label: 'Notification Management', icon: 'bi-bell', route: 'notifications' },
   { key: 'a_roles', label: 'Roles & Permissions', icon: 'bi-shield-lock', route: 'roles-permissions' },
   { key: 'a_logs', label: 'Logs Management', icon: 'bi-list-check', route: 'logs' },

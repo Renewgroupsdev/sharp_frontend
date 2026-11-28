@@ -1,5 +1,5 @@
 import { Route, Routes } from '@angular/router';
-import { authGuard, forShell, loginRedirectGuard, moduleRoute } from './core/auth/auth.guard';
+import { authGuard, changePasswordGuard, forShell, loginRedirectGuard, moduleRoute } from './core/auth/auth.guard';
 
 /**
  * Role pages share one flat URL space (no role in the path): forShell() scopes each set to a role, so a path used by
@@ -16,6 +16,7 @@ const adminRoutes: Route[] = [
   { path: 'dashboard', loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard) },
   ...moduleRoute('a_users', { path: 'users', loadComponent: () => import('./pages/users/users').then(m => m.Users) }),
   ...moduleRoute('a_orgs', { path: 'institutes', loadComponent: () => import('./pages/institutes/institutes').then(m => m.Institutes) }),
+  ...moduleRoute('a_orgs', { path: 'institutes/batches', data: { tab: 'batch' }, loadComponent: () => import('./pages/institutes/institutes').then(m => m.Institutes) }),
   ...moduleRoute('a_courses', { path: 'courses', loadComponent: () => import('./pages/courses/courses').then(m => m.Courses) }),
   ...moduleRoute('a_enroll', { path: 'enrollment', loadComponent: () => import('./pages/enrollment/enrollment').then(m => m.Enrollment) }),
   ...moduleRoute('a_enroll', { path: 'enrollment/:id', loadComponent: () => import('./pages/enrollment/enrollment-detail/enrollment-detail').then(m => m.EnrollmentDetailPage) }),
@@ -26,6 +27,7 @@ const adminRoutes: Route[] = [
   ...moduleRoute('a_assess', { path: 'courses/quiz', loadComponent: assessmentsPage, data: { kind: 'Quiz' } }),
   ...moduleRoute('a_assess', { path: 'submissions', loadComponent: () => import('./pages/submissions-hub/submissions-hub').then(m => m.SubmissionsHub) }),
   ...moduleRoute('a_certs', { path: 'certificates', loadComponent: () => import('./pages/certificates/certificates').then(m => m.Certificates) }),
+  ...moduleRoute('a_gallery', { path: 'gallery', loadComponent: () => import('./pages/gallery/gallery').then(m => m.Gallery) }),
   ...moduleRoute('a_comms', { path: 'community', loadComponent: () => import('./pages/community/community').then(m => m.Community) }),
   ...moduleRoute('a_attempts', { path: 'quiz-attempts', loadComponent: () => import('./pages/assessments/quiz-attempts/quiz-attempts').then(m => m.QuizAttempts) }),
   ...moduleRoute('a_learn', { path: 'unlock-module', loadComponent: () => import('./pages/mentor/unlock-module/unlock-module').then(m => m.UnlockModule) }),
@@ -48,6 +50,7 @@ const mentorRoutes: Route[] = [
   ...moduleRoute('a_certs', { path: 'certificates', loadComponent: () => import('./pages/certificates/certificates').then(m => m.Certificates) }),
   ...moduleRoute('a_notif', { path: 'notifications', loadComponent: () => import('./pages/notifications/notifications').then(m => m.Notifications) }),
   ...moduleRoute('a_orgs', { path: 'institutes', loadComponent: () => import('./pages/institutes/institutes').then(m => m.Institutes) }),
+  ...moduleRoute('a_orgs', { path: 'institutes/batches', data: { tab: 'batch' }, loadComponent: () => import('./pages/institutes/institutes').then(m => m.Institutes) }),
   ...moduleRoute('a_enroll', { path: 'enrollment', loadComponent: () => import('./pages/enrollment/enrollment').then(m => m.Enrollment) }),
   ...moduleRoute('a_enroll', { path: 'enrollment/:id', loadComponent: () => import('./pages/enrollment/enrollment-detail/enrollment-detail').then(m => m.EnrollmentDetailPage) }),
   ...moduleRoute('a_learn', { path: 'learning', loadComponent: () => import('./pages/learning/learning').then(m => m.Learning) }),
@@ -60,6 +63,7 @@ const mentorRoutes: Route[] = [
   { path: 'certificate-review', loadComponent: () => import('./pages/mentor/certificate-review/certificate-review').then(m => m.CertificateReview) },
   { path: 'submissions', loadComponent: () => import('./pages/submissions-hub/submissions-hub').then(m => m.SubmissionsHub) },
   ...moduleRoute('a_attempts', { path: 'quiz-attempts', loadComponent: () => import('./pages/assessments/quiz-attempts/quiz-attempts').then(m => m.QuizAttempts) }),
+  ...moduleRoute('a_gallery', { path: 'gallery', loadComponent: () => import('./pages/gallery/gallery').then(m => m.Gallery) }),
   { path: 'community', loadComponent: () => import('./pages/chats/chats').then(m => m.Chats) },
   { path: 'more', loadComponent: () => import('./pages/mentor/mentor-more/mentor-more').then(m => m.MentorMore) },
 ];
@@ -74,6 +78,7 @@ const studentRoutes: Route[] = [
   { path: 'assessments/:id/attempt', loadComponent: () => import('./pages/student/student-assessments/quiz-attempt/quiz-attempt').then(m => m.QuizAttempt) },
   { path: 'assessments/:id/review', loadComponent: () => import('./pages/student/student-assessments/quiz-review/quiz-review').then(m => m.QuizReviewPage) },
   ...moduleRoute('a_certs', { path: 'certificates', loadComponent: () => import('./pages/student/student-certificates/student-certificates').then(m => m.StudentCertificates) }),
+  ...moduleRoute('a_gallery', { path: 'gallery', loadComponent: () => import('./pages/gallery/gallery').then(m => m.Gallery) }),
   ...moduleRoute('a_comms', { path: 'community', loadComponent: () => import('./pages/chats/chats').then(m => m.Chats) }),
   { path: 'profile', loadComponent: () => import('./pages/student/student-profile/student-profile').then(m => m.StudentProfile) },
 ];
@@ -88,6 +93,7 @@ export const routes: Routes = [
     canActivate: [loginRedirectGuard],
     loadComponent: () => import('./login-page/login-page').then(m => m.LoginPage),
   },
+  { path: 'change-password', canActivate: [changePasswordGuard], loadComponent: () => import('./pages/change-password/change-password').then(m => m.ChangePassword) },
   {
     path: 'app',
     canActivate: [authGuard],

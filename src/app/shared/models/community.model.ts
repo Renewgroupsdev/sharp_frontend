@@ -57,6 +57,8 @@ export interface CommunityMessage {
   body: string;
   at: string;
   author: MessageAuthor | null;
+  /** One image or document sent with the message. */
+  attachment?: { name: string; mime: string; size: number } | null;
 }
 
 export interface CommunityOverview {

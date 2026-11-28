@@ -91,6 +91,7 @@
 
         <div class="form-field full-width checks">
           <label class="check-row"><input type="checkbox" name="showProfile" [(ngModel)]="model.showProfile" /> <span>Show student profile</span></label>
+          <div class="check-row" style="display:block;width:100%"><b>Logos</b><app-cert-logos-editor [(showSharp)]="model.showLogo" [(sharpPosition)]="model.logoPosition" [(sharpImage)]="model.logoImage" [(logos)]="model.logos" (changed)="touch()" /></div>
           <label class="check-row"><input type="checkbox" name="showQr" [(ngModel)]="model.showQr" /> <span>Show verification QR code</span></label>
           <label class="check-row"><input type="checkbox" name="override" [(ngModel)]="model.override" /> <span>Override attendance requirement</span></label>
         </div>

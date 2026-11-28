@@ -15,12 +15,6 @@
     </div>
   </div>
 
-  <div class="segment" role="tablist" aria-label="Institute views">
-    @for (t of tabs; track t.key) {
-      <button type="button" role="tab" [class.active]="tab() === t.key" [attr.aria-selected]="tab() === t.key" (click)="setTab(t.key)">{{ t.label }}</button>
-    }
-  </div>
-
   <app-count-ribbon class="d-block mb-2" [items]="stats()" />
 
   <!-- Re-created per tab so the filter card's own search / filter state starts clean. -->
